@@ -8,6 +8,6 @@ public class TelegramTeamApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(TelegramTeamApplication.class, args);
+        System.out.println("Hello!");
     }
-
 }
