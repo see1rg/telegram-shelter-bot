@@ -16,6 +16,7 @@ public class TelegramBotConfiguration {
     public TelegramBot telegramBot() {
         TelegramBot bot = new TelegramBot(token);
         bot.execute(new DeleteMyCommands());
+//       DeleteMyCommands() используется для очистки ранее установленных команд бота перед добавлением новых
         return bot;
     }
 }
