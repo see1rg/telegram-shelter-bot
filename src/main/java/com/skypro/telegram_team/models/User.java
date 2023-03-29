@@ -6,7 +6,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.Arrays;
 import java.util.Objects;
 
 @Entity
@@ -26,25 +25,19 @@ public class User {
     private String phone;
     private String animal;
     private String email;
-    @Lob
-    private byte[] photo;
+    private long telegramId;
+    private long reportId;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id && Objects.equals(name, user.name)
-                && Objects.equals(surname, user.surname)
-                && Objects.equals(phone, user.phone)
-                && Objects.equals(animal, user.animal)
-                && Objects.equals(email, user.email);
+        return id == user.id;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, name, surname, phone, animal, email);
-        result = 31 * result;
-        return result;
+        return Objects.hash(id);
     }
 }

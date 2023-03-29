@@ -37,7 +37,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 Long chatId = message.chat().id();
                 String text = message.text();
 
-                if ("/start".equals(text)){
+                if ("/start".equals(text)) {
                     //service
                 }
             });
