@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -23,6 +24,7 @@ public class Animal {
     private String name;
     private String breed;
     private String description;
+    private Date startTest;
     private int daysForTest;
     private long userId;
     private String status;
