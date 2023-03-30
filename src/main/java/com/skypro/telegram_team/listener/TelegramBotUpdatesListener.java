@@ -20,7 +20,7 @@ import java.util.List;
 
 @Component
 public class TelegramBotUpdatesListener implements UpdatesListener {
-    Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
+   final private Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     @Value("${telegram.bot.token}")
     @Autowired
@@ -88,11 +88,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     SendResponse sendResponse = telegramBot.execute(sendMessage);
                 } else if ("Получить форму ежедневного отчета".equals(update.message().text())) {
                     SendMessage sendMessage = new SendMessage(update.message().chat().id(),
-                            "В ежедневный отчет входит следующая информация:\n" +
-                                    "- Фото животного.\n" +
-                                    "- Рацион животного.\n" +
-                                    "- Общее самочувствие и привыкание к новому месту.\n" +
-                                    "- Изменение в поведении: отказ от старых привычек, приобретение новых.");
+                            """
+                                    В ежедневный отчет входит следующая информация:
+                                    - Фото животного.
+                                    - Рацион животного.
+                                    - Общее самочувствие и привыкание к новому месту.
+                                    - Изменение в поведении: отказ от старых привычек, приобретение новых.""");
                     SendResponse sendResponse = telegramBot.execute(sendMessage);
                 }
             });
