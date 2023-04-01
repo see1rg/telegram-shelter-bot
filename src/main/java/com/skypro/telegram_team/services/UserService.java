@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 @Log4j
@@ -17,19 +18,27 @@ public class UserService {
         this.userRepository = userRepository;
     }
     @Transactional
-    public void save(User user) {
+    public User save(User user) {
         log.info("Saving user: " + user);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
+
+//    @Transactional
+//    public User update(User user) {
+//        log.info("Updating user: " + user);
+//        return userRepository.updateUserById(user.getId(), user);
+//    }
 
     public User findById(Long id) {
         log.info("Finding user by id: " + id);
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
     @Transactional
-    public void deleteById(Long id) {
+    public User deleteById(Long id) {
         log.info("Deleting user by id: " + id);
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        userRepository.delete(user);
+        return user;
     }
 
     public List<User> findAll() {

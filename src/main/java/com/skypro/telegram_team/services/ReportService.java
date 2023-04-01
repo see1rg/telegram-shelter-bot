@@ -6,6 +6,7 @@ import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 @Log4j
@@ -17,19 +18,27 @@ public class ReportService {
         this.reportRepository = reportRepository;
     }
     @Transactional
-    public void save(Report report) {
+    public Report save(Report report) {
         log.info("Saving report: " + report);
-        reportRepository.save(report);
+        return reportRepository.save(report);
     }
+
+//    @Transactional
+//    public Report update(Report report) {
+//        log.info("Updating report: " + report);
+//        return reportRepository.updateReportById(report.getId(), report);
+//    }
 
     public Report findById(Long id) {
         log.info("Finding report by id: " + id);
-        return reportRepository.findById(id).orElse(null);
+        return reportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Report not found"));
     }
     @Transactional
-    public void deleteById(Long id) {
+    public Report deleteById(Long id) {
         log.info("Deleting report by id: " + id);
-        reportRepository.deleteById(id);
+        Report report = reportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Report not found"));
+        reportRepository.delete(report);
+        return report;
     }
 
     public List<Report> findAll() {
