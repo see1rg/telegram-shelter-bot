@@ -5,6 +5,7 @@ import com.skypro.telegram_team.repositories.AnimalRepository;
 import lombok.extern.log4j.Log4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,7 @@ public class AnimalService {
     public AnimalService(AnimalRepository animalRepository) {
         this.animalRepository = animalRepository;
     }
-
+    @Transactional
     public void save(Animal animal) {
         log.info("Saving animal: " + animal);
         animalRepository.save(animal);
@@ -27,7 +28,7 @@ public class AnimalService {
         log.info("Finding animal by id: " + id);
         return animalRepository.findById(id).orElse(null);
     }
-
+    @Transactional
     public void deleteById(Long id) {
         log.info("Deleting animal by id: " + id);
         animalRepository.deleteById(id);

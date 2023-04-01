@@ -4,6 +4,7 @@ import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.UserRepository;
 import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
+    @Transactional
     public void save(User user) {
         log.info("Saving user: " + user);
         userRepository.save(user);
@@ -25,7 +26,7 @@ public class UserService {
         log.info("Finding user by id: " + id);
         return userRepository.findById(id).orElse(null);
     }
-
+    @Transactional
     public void deleteById(Long id) {
         log.info("Deleting user by id: " + id);
         userRepository.deleteById(id);

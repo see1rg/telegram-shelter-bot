@@ -4,6 +4,7 @@ import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.repositories.ReportRepository;
 import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class ReportService {
     public ReportService(ReportRepository reportRepository) {
         this.reportRepository = reportRepository;
     }
-
+    @Transactional
     public void save(Report report) {
         log.info("Saving report: " + report);
         reportRepository.save(report);
@@ -25,7 +26,7 @@ public class ReportService {
         log.info("Finding report by id: " + id);
         return reportRepository.findById(id).orElse(null);
     }
-
+    @Transactional
     public void deleteById(Long id) {
         log.info("Deleting report by id: " + id);
         reportRepository.deleteById(id);
