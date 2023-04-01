@@ -3,7 +3,11 @@ package com.skypro.telegram_team.services;
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import lombok.extern.log4j.Log4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Log4j
 @Service
@@ -34,5 +38,14 @@ public class AnimalService {
         return animalRepository.findByName(name).orElse(null);
     }
 
+    public List<Animal> findAll() {
+        log.info("Finding all animals");
+        return animalRepository.findAll(Sort.by("name"));
+    }
+
+    public Optional<Animal> findByUserId(Long userId) {
+        log.info("Finding animals by user id: " + userId);
+        return animalRepository.findAnimalsByUserId(userId);
+    }
 
 }

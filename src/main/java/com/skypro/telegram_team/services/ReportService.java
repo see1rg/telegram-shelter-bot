@@ -5,6 +5,8 @@ import com.skypro.telegram_team.repositories.ReportRepository;
 import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Log4j
 @Service
 public class ReportService {
@@ -27,6 +29,11 @@ public class ReportService {
     public void deleteById(Long id) {
         log.info("Deleting report by id: " + id);
         reportRepository.deleteById(id);
+    }
+
+    public List<Report> findAll() {
+        log.info("Finding all reports");
+        return reportRepository.findAll();
     }
 
 }

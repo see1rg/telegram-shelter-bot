@@ -5,6 +5,8 @@ import com.skypro.telegram_team.repositories.UserRepository;
 import lombok.extern.log4j.Log4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Log4j
 @Service
 public class UserService {
@@ -27,5 +29,10 @@ public class UserService {
     public void deleteById(Long id) {
         log.info("Deleting user by id: " + id);
         userRepository.deleteById(id);
+    }
+
+    public List<User> findAll() {
+        log.info("Finding all users");
+        return userRepository.findAll();
     }
 }
