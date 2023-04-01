@@ -5,6 +5,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.skypro.telegram_team.KeyboardService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Component
 public class TelegramBotUpdatesListener implements UpdatesListener {
+
     @Value("${telegram.bot.token}")
     @Autowired
     private TelegramBot telegramBot;
@@ -28,6 +30,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
         KeyboardService keyboardService = new KeyboardService();
         keyboardService.getResponse(updates, telegramBot);
+
         return CONFIRMED_UPDATES_ALL;
     }
 }

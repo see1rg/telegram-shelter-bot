@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users
     surname     VARCHAR(50),
     phone       VARCHAR(50),
     email       VARCHAR(50)
-    );
+);
 
 CREATE TABLE IF NOT EXISTS animals
 (
@@ -22,14 +22,14 @@ CREATE TABLE IF NOT EXISTS animals
     status        VARCHAR(10),
     start_test    TIMESTAMP,
     days_for_test INT
-    );
+);
 
 CREATE TABLE IF NOT EXISTS volunteers
 (
     id          BIGSERIAL PRIMARY KEY NOT NULL,
     telegram_id BIGINT                NOT NULL,
     name        VARCHAR(50)
-    );
+);
 
 CREATE TABLE IF NOT EXISTS reports
 (

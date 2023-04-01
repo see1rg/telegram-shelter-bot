@@ -13,8 +13,8 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@Table(name = "users")
-public class User {
+@Table(name = "volunteers")
+public class Volunteer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
@@ -22,16 +22,13 @@ public class User {
     @Column(nullable = false)
     private long telegramId;
     private String name;
-    private String surname;
-    private String phone;
-    private String email;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return id == user.id;
+        Volunteer volunteer = (Volunteer) o;
+        return id == volunteer.id;
     }
 
     @Override

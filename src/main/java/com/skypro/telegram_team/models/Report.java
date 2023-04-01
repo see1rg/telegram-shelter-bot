@@ -28,6 +28,8 @@ public class Report {
     private long animalId;
     @Column(nullable = false)
     private long userId;
+    @Column(nullable = false)
+    private long volunteerId;
     @Lob
     @Column(nullable = false)
     private byte[] photo;
