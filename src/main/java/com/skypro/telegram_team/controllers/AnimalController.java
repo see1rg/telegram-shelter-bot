@@ -70,6 +70,12 @@ public class AnimalController {
         return animalService.findById(id);
     }
 
+    @GetMapping("/{name}")
+    public Animal getAnimal(@PathVariable String name) {
+        return animalService.findByName(name);
+    }
+
+
     @Operation(summary = "Получение списка всех животных из БД"
             , tags = "Animals"
             , responses = {@ApiResponse(
@@ -106,6 +112,7 @@ public class AnimalController {
     )
     }
     )
+
     @GetMapping
     public Iterable<Animal> getAllAnimals() {
         return animalService.findAll();
