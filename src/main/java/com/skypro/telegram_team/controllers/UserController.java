@@ -18,6 +18,7 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
     @Operation(summary = "Поиск пользователя по id", description = "Get user by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Поиск пользователя по id", content = {
@@ -71,6 +72,7 @@ public class UserController {
     })
     @PutMapping("/{id}")
     public User updateUser(@RequestBody User user, @PathVariable Long id) {
-        return userService.update(user,id);
+        return userService.update(user, id);
     }
+
 }

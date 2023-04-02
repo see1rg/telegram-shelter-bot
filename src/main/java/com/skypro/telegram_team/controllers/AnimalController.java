@@ -18,6 +18,11 @@ public class AnimalController {
         return animalService.findById(id);
     }
 
+    @GetMapping("/{name}")
+    public Animal getAnimal(@PathVariable String name) {
+        return animalService.findByName(name);
+    }
+
     @GetMapping
     public Iterable<Animal> getAllAnimals() {
         return animalService.findAll();
