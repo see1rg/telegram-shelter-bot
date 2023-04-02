@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Сервис для работы с животными приюта
@@ -76,7 +77,8 @@ public class AnimalService {
      */
     public List<Animal> findAnimalsByName(String name) {
         log.info("Finding animal by name: " + name);
-        return animalRepository.findAnimalsByName(name);
+        return animalRepository.findAnimalsByName(name)
+                .orElseThrow(() -> new EntityNotFoundException("Animals not found"));
     }
 
     /**

@@ -12,6 +12,6 @@ public interface AnimalRepository extends JpaRepository<Animal, Long> {
 
     Animal findAnimalsByUserId(Long userId);
 
-    List<Animal> findAnimalsByName(String name);
+    Optional<List<Animal>> findAnimalsByName(String name);
 
 }
