@@ -33,8 +33,8 @@ public class ReportController {
         return reportService.save(report);
     }
 
-//    @PutMapping("/{id}")
-//    public Report updateReport(@RequestBody Report report, @PathVariable Long id) {
-//        return reportService.update(report);
-//    }
+    @PutMapping("/{id}")
+    public Report updateReport(@RequestBody Report report, @PathVariable Long id) {
+        return reportService.update(report, id);
+    }
 }

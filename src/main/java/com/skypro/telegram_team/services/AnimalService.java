@@ -1,8 +1,10 @@
 package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.Animal;
+import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import lombok.extern.log4j.Log4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,12 +43,6 @@ public class AnimalService {
         return animalRepository.findAll(Sort.by("name"));
     }
 
-//    @Transactional
-//    public Animal update(Animal animal) {
-//        log.info("Updating animal: " + animal);
-//        return animalRepository.updateAnimalById(animal, animal.getId());
-//    }
-
     public Animal findByName(String name) {
         log.info("Finding animal by name: " + name);
         return animalRepository.findByName(name).orElseThrow(() -> new EntityNotFoundException("Animal not found"));
@@ -55,6 +51,16 @@ public class AnimalService {
     public Animal findByUserId(Long userId) {
         log.info("Finding animals by user id: " + userId);
         return animalRepository.findAnimalsByUserId(userId);
+    }
+
+    @Transactional
+    public Animal update(Animal animal, Long id) {
+        log.info("Updating animal: " + animal);
+        ModelMapper modelMapper = new ModelMapper();
+        Animal animalToUpdate = animalRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Animal not found"));
+        animal.setId(id);
+        modelMapper.map(animal, animalToUpdate);
+        return animalRepository.save(animalToUpdate);
     }
 
 }

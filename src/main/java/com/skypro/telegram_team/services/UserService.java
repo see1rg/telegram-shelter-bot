@@ -3,6 +3,7 @@ package com.skypro.telegram_team.services;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.UserRepository;
 import lombok.extern.log4j.Log4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +24,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-//    @Transactional
-//    public User update(User user) {
-//        log.info("Updating user: " + user);
-//        return userRepository.updateUserById(user.getId(), user);
-//    }
-
     public User findById(Long id) {
         log.info("Finding user by id: " + id);
         return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -45,4 +40,15 @@ public class UserService {
         log.info("Finding all users");
         return userRepository.findAll();
     }
+
+    @Transactional
+    public User update(User user, Long id) {
+        log.info("Updating myUser: " + user);
+        ModelMapper modelMapper = new ModelMapper();
+        User userToUpdate = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setId(id);
+        modelMapper.map(user, userToUpdate);
+        return userRepository.save(userToUpdate);
+    }
+
 }

@@ -23,7 +23,7 @@ public class AnimalController {
         return animalService.findAll();
     }
 
-    @DeleteMapping("/del/{id}")
+    @DeleteMapping("/{id}")
     public Animal deleteAnimal(@PathVariable long id) {
         return animalService.deleteById(id);
     }
@@ -33,8 +33,8 @@ public class AnimalController {
         return animalService.save(animal);
     }
 
-//    @PutMapping("/put/{id}")
-//    public Animal updateAnimal(@RequestBody Animal animal) {
-//        return animalService.update(animal);
-//    }
+    @PutMapping("/{id}")
+    public Animal updateAnimal(@RequestBody Animal animal, @PathVariable Long id) {
+        return animalService.update(animal, id);
+    }
 }

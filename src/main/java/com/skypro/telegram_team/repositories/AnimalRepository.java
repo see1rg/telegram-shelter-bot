@@ -13,6 +13,4 @@ public interface AnimalRepository extends JpaRepository<Animal, Long> {
 
     Optional<Animal> findByName(String name);
 
-//    Animal updateAnimalById(Animal animal, Long id);
-
 }

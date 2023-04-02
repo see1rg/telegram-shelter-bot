@@ -23,7 +23,7 @@ public class UserController {
         return userService.findAll();
     }
 
-    @DeleteMapping("/del/{id}")
+    @DeleteMapping("/{id}")
     public User deleteUser(@PathVariable long id) {
         return userService.deleteById(id);
     }
@@ -33,8 +33,8 @@ public class UserController {
         return userService.save(user);
     }
 
-//    @PutMapping("/{id}")
-//    public User updateUser(@RequestBody User user, @PathVariable Long id) {
-//        return userService.update(user);
-//    }
+    @PutMapping("/{id}")
+    public User updateUser(@RequestBody User user, @PathVariable Long id) {
+        return userService.update(user,id);
+    }
 }
