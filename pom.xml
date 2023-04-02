@@ -75,7 +75,6 @@
             <artifactId>liquibase-core</artifactId>
             <version>4.20.0</version>
         </dependency>
-
     </dependencies>
 
     <build>
