@@ -25,12 +25,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.setUpdatesListener(this);
     }
 
+    /**
+     * метод получает приходящие апдэйты с помощью long polling
+     * @param updates
+     * @return
+     */
     @Override
     public int process(List<Update> updates) {
-
         KeyboardService keyboardService = new KeyboardService();
         keyboardService.getResponse(updates, telegramBot);
-
         return CONFIRMED_UPDATES_ALL;
     }
 }
