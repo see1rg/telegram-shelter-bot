@@ -5,12 +5,12 @@ import com.skypro.telegram_team.repositories.AnimalRepository;
 import lombok.extern.log4j.Log4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Сервис для работы с животными приюта
@@ -27,6 +27,7 @@ public class AnimalService {
     /**
      * Сохранение животного в базу данных, использует метод репозитория
      * {@link JpaRepository#save(Object)}
+     *
      * @param animal
      * @return Animal
      */
@@ -37,7 +38,8 @@ public class AnimalService {
     }
 
     /**
-     * получение животного по id из БД используя метод репозитория {@link JpaRepository#findById(Long)}
+     * получение животного по id из БД используя метод репозитория {@link JpaRepository#findById(Object)}}
+     *
      * @param id
      * @return Animal
      * @throws EntityNotFoundException
@@ -48,7 +50,8 @@ public class AnimalService {
     }
 
     /**
-     * удаление животного по id из БД используя метод репозитория {@link JpaRepository#deleteById(Long)}
+     * удаление животного по id из БД используя метод репозитория {@link JpaRepository#deleteById(Object)}
+     *
      * @param id
      * @return Animal
      * @throws EntityNotFoundException
@@ -63,6 +66,7 @@ public class AnimalService {
 
     /**
      * Находит всех животных в БД, сортируя их по имени, использует метод репозитория{@link JpaRepository#findAll()}
+     *
      * @return List<Animal>
      */
     public List<Animal> findAll() {
@@ -71,18 +75,21 @@ public class AnimalService {
     }
 
     /**
-     * Находит список животных по имени, использует метод репозитория {@link JpaRepository#findAnimalsByName(String)}
+     * Находит список животных по имени, использует метод репозитория {@link AnimalRepository#findAnimalsByName(String)}
+     *
      * @param name
      * @return List<Animals>
+     * @throws EntityNotFoundException
      */
-    public List<Animal> findAnimalsByName(String name) {
+    public List<Animal> findByName(String name) {
         log.info("Finding animal by name: " + name);
         return animalRepository.findAnimalsByName(name)
                 .orElseThrow(() -> new EntityNotFoundException("Animals not found"));
     }
 
     /**
-     * Находит животное по имени хозяина, использует метод репозитория {@link JpaRepository#findAnimalsByUserId(Long)}
+     * Находит животное по имени хозяина, использует метод репозитория {@link AnimalRepository#findAnimalsByUserId(Long)} (Long)}
+     *
      * @param userId
      * @return Animal
      */
@@ -93,6 +100,7 @@ public class AnimalService {
 
     /**
      * Обновление животного в БД используя метод репозитория {@link JpaRepository#save(Object)}
+     *
      * @param animal
      * @param id
      * @return Animal

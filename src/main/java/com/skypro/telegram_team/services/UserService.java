@@ -17,7 +17,7 @@ import java.util.List;
 @Log4j
 @Service
 public class UserService {
-    UserRepository userRepository;
+   private final UserRepository userRepository;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -38,7 +38,7 @@ public class UserService {
     }
 
     /**
-     * получение пользователя по id из БД используя метод репозитория {@link JpaRepository#findById(Long)}
+     * получение пользователя по id из БД используя метод репозитория {@link JpaRepository#findById(Object)}
      *
      * @param id
      * @return
@@ -49,7 +49,7 @@ public class UserService {
     }
 
     /**
-     * удаление пользователя по id из БД используя метод репозитория {@link JpaRepository#deleteById(Long)}
+     * удаление пользователя по id из БД используя метод репозитория {@link JpaRepository#deleteById(Object)}
      *
      * @param id
      * @return
