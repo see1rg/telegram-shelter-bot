@@ -26,6 +26,17 @@ public class User {
     private String phone;
     private String email;
 
+    @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL)
+    private Animal animal;
+
+    @Enumerated(EnumType.STRING)
+    private OwnerStateEnum state;
+
+    public enum OwnerStateEnum {
+        SEARCH, PROBATION, ACCEPTED, REFUSE
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
