@@ -25,7 +25,7 @@ public class User {
     private String surname;
     private String phone;
     private String email;
-
+    private long animalId;
     @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL)
     private Animal animal;
 

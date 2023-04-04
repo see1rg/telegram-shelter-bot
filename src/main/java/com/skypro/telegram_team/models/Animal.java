@@ -30,7 +30,6 @@ public class Animal {
     @OneToOne
     @JoinColumn(name = "owner_id")
     private User owner;
-    private String status;
     @Lob
     private byte[] photo;
 
