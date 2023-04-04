@@ -19,7 +19,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Поиск пользователя по id", description = "Get user by id")
+    @Operation(summary = "Поиск пользователя по id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Поиск пользователя по id", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -27,11 +27,11 @@ public class UserController {
     }
     )
     @GetMapping("/{id}")
-    public User getUser(@Parameter(description = "Id пользователя") @PathVariable long id) {
+    public User findUserById(@Parameter(description = "Id пользователя") @PathVariable long id) {
         return userService.findById(id);
     }
 
-    @Operation(summary = "Получение списка всех пользователей", description = "Get all users")
+    @Operation(summary = "Получение списка всех пользователей")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Получение списка всех пользователей", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -42,18 +42,18 @@ public class UserController {
         return userService.findAll();
     }
 
-    @Operation(summary = "Удаление пользователя по id", description = "Delete user by id")
+    @Operation(summary = "Удаление пользователя по id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Удаление пользователя по id", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
             })
     })
     @DeleteMapping("/{id}")
-    public User deleteUser(@PathVariable long id) {
+    public User deleteUserById(@PathVariable long id) {
         return userService.deleteById(id);
     }
 
-    @Operation(summary = "Создание пользователя", description = "Create user")
+    @Operation(summary = "Создание пользователя")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Создание пользователя", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -64,7 +64,7 @@ public class UserController {
         return userService.save(user);
     }
 
-    @Operation(summary = "Обновление данных пользователя", description = "Update user")
+    @Operation(summary = "Обновление данных пользователя")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Обновление данных пользователя", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))

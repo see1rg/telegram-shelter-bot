@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/animals")
 public class AnimalController {
@@ -22,56 +24,59 @@ public class AnimalController {
 
     @Operation(summary = "поиск животного в БД по личному идентификатору", tags = "Animals"
             , responses = {@ApiResponse(
-                    responseCode = "200",
-                    description = "Найденное животное",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = Animal.class)
-                    )
-            ), @ApiResponse(responseCode = "404",
+            responseCode = "200",
+            description = "Найденное животное",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = Animal.class)
+            )
+    ), @ApiResponse(responseCode = "404",
             description = "Животное не найдено",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(example = "{\n" +
-                            "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                            "  \"status\": 404,\n" +
-                            "  \"error\": \"Bad Request\",\n" +
-                            "  \"path\": \"/animals/{id}\"\n" +
-                            "}")
+                    schema = @Schema(example = """
+                            {
+                              "timestamp": "2023-04-02T16:20:14.430+00:00",
+                              "status": 404,
+                              "error": "Bad Request",
+                              "path": "/animals/{id}"
+                            }""")
             )
     ), @ApiResponse(
             responseCode = "400",
             description = "Неверный запрос",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(example = "{\n" +
-                            "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                            "  \"status\": 400,\n" +
-                            "  \"error\": \"Bad Request\",\n" +
-                            "  \"path\": \"/animals/{id}\"\n" +
-                            "}")
+                    schema = @Schema(example = """
+                            {
+                              "timestamp": "2023-04-02T16:20:14.430+00:00",
+                              "status": 400,
+                              "error": "Bad Request",
+                              "path": "/animals/{id}"
+                            }""")
             )
     ), @ApiResponse(
             responseCode = "500",
             description = "Проблемы на стороне сервера",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(example = "{\n" +
-                            "  \"timestamp\": \"2023-04-02T16:22:05.642+00:00\",\n" +
-                            "  \"status\": 500,\n" +
-                            "  \"error\": \"Internal Server Error\",\n" +
-                            "  \"path\": \"/animals/{id}\"\n" +
-                            "}")
+                    schema = @Schema(example = """
+                            {
+                              "timestamp": "2023-04-02T16:22:05.642+00:00",
+                              "status": 500,
+                              "error": "Internal Server Error",
+                              "path": "/animals/{id}"
+                            }""")
             )
-    )}
     )
+    })
     @GetMapping("/{id}")
-    public Animal getAnimal(@Parameter(description = "Идентификатор животного") @PathVariable long id) {
+    public Animal findById(@Parameter(description = "Идентификатор животного") @PathVariable long id) {
         return animalService.findById(id);
     }
 
     @GetMapping("/{name}")
-    public Animal getAnimal(@PathVariable String name) {
+    public List<Animal> findByName(@PathVariable String name) {
         return animalService.findByName(name);
     }
 
@@ -90,29 +95,29 @@ public class AnimalController {
             description = "Неверный запрос",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(example = "{\n" +
-                            "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                            "  \"status\": 400,\n" +
-                            "  \"error\": \"Bad Request\",\n" +
-                            "  \"path\": \"/animals/\"\n" +
-                            "}")
+                    schema = @Schema(example = """
+                            {
+                              "timestamp": "2023-04-02T16:20:14.430+00:00",
+                              "status": 400,
+                              "error": "Bad Request",
+                              "path": "/animals/"
+                            }""")
             )
     ), @ApiResponse(
             responseCode = "500",
             description = "Проблемы на стороне сервера",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(example = "{\n" +
-                            "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                            "  \"status\": 500,\n" +
-                            "  \"error\": \"Internal Server Error\",\n" +
-                            "  \"path\": \"/animals/\"\n" +
-                            "}")
+                    schema = @Schema(example = """
+                            {
+                              "timestamp": "2023-04-02T16:20:14.430+00:00",
+                              "status": 500,
+                              "error": "Internal Server Error",
+                              "path": "/animals/"
+                            }""")
             )
     )
-    }
-    )
-
+    })
     @GetMapping
     public Iterable<Animal> getAllAnimals() {
         return animalService.findAll();
@@ -130,38 +135,41 @@ public class AnimalController {
     ), @ApiResponse(responseCode = "404",
             description = "Животное по указанному идентификатору не найдено",
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE
-                    , schema = @Schema(example = "{\n" +
-                    "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                    "  \"status\": 404,\n" +
-                    "  \"error\": \"Bad Request\",\n" +
-                    "  \"path\": \"/animals/{id}\"\n" +
-                    "}"))
+                    , schema = @Schema(example = """
+                    {
+                      "timestamp": "2023-04-02T16:20:14.430+00:00",
+                      "status": 404,
+                      "error": "Bad Request",
+                      "path": "/animals/{id}"
+                    }"""))
     ), @ApiResponse(
             responseCode = "400",
             description = "Неверный запрос",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(example = "{\n" +
-                            "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                            "  \"status\": 400,\n" +
-                            "  \"error\": \"Bad Request\",\n" +
-                            "  \"path\": \"/animals/{id}\"\n" +
-                            "}")
+                    schema = @Schema(example = """
+                            {
+                              "timestamp": "2023-04-02T16:20:14.430+00:00",
+                              "status": 400,
+                              "error": "Bad Request",
+                              "path": "/animals/{id}"
+                            }""")
             )
     ), @ApiResponse(
             responseCode = "500",
             description = "Проблемы на стороне сервера",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(example = "{\n" +
-                            "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                            "  \"status\": 500,\n" +
-                            "  \"error\": \"Internal Server Error\",\n" +
-                            "  \"path\": \"/animals/{id}\"\n" +
-                            "}")
-                    )
-            )}
+                    schema = @Schema(example = """
+                            {
+                              "timestamp": "2023-04-02T16:20:14.430+00:00",
+                              "status": 500,
+                              "error": "Internal Server Error",
+                              "path": "/animals/{id}"
+                            }""")
+            )
     )
+    })
     @DeleteMapping("/{id}")
     public Animal deleteAnimal(@Parameter(description = "Идентификатор животного", example = "1") @PathVariable long id) {
         return animalService.deleteById(id);
@@ -185,27 +193,29 @@ public class AnimalController {
                     description = "Неверный запрос",
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(example = "{\n" +
-                                    "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                                    "  \"status\": 400,\n" +
-                                    "  \"error\": \"Bad Request\",\n" +
-                                    "  \"path\": \"/animals/\"\n" +
-                                    "}")
+                            schema = @Schema(example = """
+                                    {
+                                      "timestamp": "2023-04-02T16:20:14.430+00:00",
+                                      "status": 400,
+                                      "error": "Bad Request",
+                                      "path": "/animals/"
+                                    }""")
                     )
             ), @ApiResponse(
-                    responseCode = "500",
-                    description = "Проблемы на стороне сервера",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(example = "{\n" +
-                                    "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                                    "  \"status\": 500,\n" +
-                                    "  \"error\": \"Internal Server Error\",\n" +
-                                    "  \"path\": \"/animals/\"\n" +
-                                    "}")
-                    )
-            )}
+            responseCode = "500",
+            description = "Проблемы на стороне сервера",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(example = """
+                            {
+                              "timestamp": "2023-04-02T16:20:14.430+00:00",
+                              "status": 500,
+                              "error": "Internal Server Error",
+                              "path": "/animals/"
+                            }""")
+            )
     )
+    })
     @PostMapping
     public Animal createAnimal(@RequestBody Animal animal) {
         return animalService.save(animal);
@@ -213,7 +223,7 @@ public class AnimalController {
 
     @Operation(
             summary = "Изменение данных о животном по личному идентификатору"
-            ,tags = "Animals",
+            , tags = "Animals",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Ввод новых данных о животном",
                     content = @Content(
@@ -222,41 +232,44 @@ public class AnimalController {
                     )
             ),
             responses = {@ApiResponse(responseCode = "200"
-            ,description = "Животное с изменными данными",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = Animal.class))
-    ), @ApiResponse(responseCode = "404"
-            , description = "Животное по данному идентификатору не найдено",
-            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE
-                    , schema = @Schema(example = "{\n" +
-                    "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                    "  \"status\": 404,\n" +
-                    "  \"error\": \"Bad Request\",\n" +
-                    "  \"path\": \"/animals/{id}\"\n" +
-                    "}"))
-    ), @ApiResponse(
-            responseCode = "400",
-            description = "Неверный запрос",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(example = "{\n" +
-                            "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                            "  \"status\": 400,\n" +
-                            "  \"error\": \"Bad Request\",\n" +
-                            "  \"path\": \"/animals/{id}\"\n" +
-                            "}")
-            )
-    ), @ApiResponse(
-            responseCode = "500",
-            description = "Проблемы на стороне сервера",
-            content = @Content(
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(example = "{\n" +
-                            "  \"timestamp\": \"2023-04-02T16:20:14.430+00:00\",\n" +
-                            "  \"status\": 500,\n" +
-                            "  \"error\": \"Internal Server Error\",\n" +
-                            "  \"path\": \"/animals/{id}\"\n" +
-                            "}")
+                    , description = "Животное с измененными данными",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = Animal.class))
+            ), @ApiResponse(responseCode = "404"
+                    , description = "Животное по данному идентификатору не найдено",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE
+                            , schema = @Schema(example = """
+                            {
+                              "timestamp": "2023-04-02T16:20:14.430+00:00",
+                              "status": 404,
+                              "error": "Bad Request",
+                              "path": "/animals/{id}"
+                            }"""))
+            ), @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверный запрос",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(example = """
+                                    {
+                                      "timestamp": "2023-04-02T16:20:14.430+00:00",
+                                      "status": 400,
+                                      "error": "Bad Request",
+                                      "path": "/animals/{id}"
+                                    }""")
+                    )
+            ), @ApiResponse(
+                    responseCode = "500",
+                    description = "Проблемы на стороне сервера",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(example = """
+                                    {
+                                      "timestamp": "2023-04-02T16:20:14.430+00:00",
+                                      "status": 500,
+                                      "error": "Internal Server Error",
+                                      "path": "/animals/{id}"
+                                    }""")
                     )
             )}
     )
