@@ -26,10 +26,12 @@ public class Animal {
     private String description;
     private LocalDateTime startTest;
     private int daysForTest;
-    private long userId;
+
     @OneToOne
-    @JoinColumn(name = "owner_id")
-    private User owner;
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
     @Lob
     private byte[] photo;
 

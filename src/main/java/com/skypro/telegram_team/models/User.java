@@ -26,8 +26,10 @@ public class User {
     private String phone;
     private String email;
     private long animalId;
-    @OneToOne(mappedBy = "owner", cascade = CascadeType.ALL)
+
+    @OneToOne(mappedBy = "user")
     private Animal animal;
+
 
     @Enumerated(EnumType.STRING)
     private OwnerStateEnum state;
