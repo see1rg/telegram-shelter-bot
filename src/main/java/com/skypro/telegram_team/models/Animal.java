@@ -26,7 +26,11 @@ public class Animal {
     private String description;
     private LocalDateTime startTest;
     private int daysForTest;
-    private long userId;
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
 
 
     @Lob
