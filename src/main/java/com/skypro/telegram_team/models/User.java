@@ -27,8 +27,6 @@ public class User {
     private String email;
     private long animalId;
 
-    @OneToOne(mappedBy = "user")
-    private Animal animal;
 
 
     @Enumerated(EnumType.STRING)
