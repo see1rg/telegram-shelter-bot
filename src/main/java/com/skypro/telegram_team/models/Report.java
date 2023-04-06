@@ -30,7 +30,7 @@ public class Report {
     private long userId;
     @Lob
     @Column(nullable = false)
-    private byte photo;
+    private byte[] photo;
     @Column(nullable = false)
     private String diet;
     @Column(nullable = false)
