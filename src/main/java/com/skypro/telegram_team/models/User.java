@@ -35,6 +35,7 @@ public class User {
         SEARCH, PROBATION, ACCEPTED, REFUSE
     }
 
+    private boolean isVolunteer;
 
     @Override
     public boolean equals(Object o) {
