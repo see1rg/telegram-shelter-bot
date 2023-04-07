@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -147,6 +148,15 @@ public class KeyboardServiceExt {
         sendMessage.ifPresent(telegramBot::execute);
     }
 
+    /**
+     * Обработка сообщений в последовательности:
+     * 1. текстовые сообщения от главного меню
+     * 2. сообщения от пользователя
+     * 3. ответные сообщения
+     *
+     * @param message
+     * @return
+     */
     private Optional<SendMessage> processMessage(Message message) {
         Optional<SendMessage> sendMessage;
         sendMessage = processTextMessage(message);
@@ -159,7 +169,7 @@ public class KeyboardServiceExt {
     }
 
     /**
-     * Обработка команд меню
+     * Обработка текстовых команд меню
      *
      * @param message
      */
@@ -257,31 +267,31 @@ public class KeyboardServiceExt {
         } else if (callbackQuery.data().equals(Commands.INF_SAFETY.name())) {
             //Техника безопасности
             sendMessage = new SendMessage(userChatId, "Будьте осторожны...");
-        } else if(callbackQuery.data().equals(Commands.HOW_RULES.name())) {
+        } else if (callbackQuery.data().equals(Commands.HOW_RULES.name())) {
             //Правила знакомства с собакой
             sendMessage = new SendMessage(userChatId, "Правила...");
-        } else if(callbackQuery.data().equals(Commands.HOW_DOCS.name())) {
+        } else if (callbackQuery.data().equals(Commands.HOW_DOCS.name())) {
             //Список документов
             sendMessage = new SendMessage(userChatId, "Документы...");
-        } else if(callbackQuery.data().equals(Commands.HOW_MOVE.name())) {
+        } else if (callbackQuery.data().equals(Commands.HOW_MOVE.name())) {
             //Рекомендации по транспортировке
             sendMessage = new SendMessage(userChatId, "Рекомендации...");
-        } else if(callbackQuery.data().equals(Commands.HOW_ARRANGE.name())) {
+        } else if (callbackQuery.data().equals(Commands.HOW_ARRANGE.name())) {
             //Рекомендации по обустройству
             sendMessage = new SendMessage(userChatId, "Рекомендации...");
-        } else if(callbackQuery.data().equals(Commands.HOW_ARRANGE_PUPPY.name())) {
+        } else if (callbackQuery.data().equals(Commands.HOW_ARRANGE_PUPPY.name())) {
             //Рекомендации по обустройству для щенка
             sendMessage = new SendMessage(userChatId, "Рекомендации...");
-        } else if(callbackQuery.data().equals(Commands.HOW_ARRANGE_CRIPPLE.name())) {
+        } else if (callbackQuery.data().equals(Commands.HOW_ARRANGE_CRIPPLE.name())) {
             //Рекомендации по обустройству для собаки-инвалида
             sendMessage = new SendMessage(userChatId, "Рекомендации...");
-        } else if(callbackQuery.data().equals(Commands.HOW_EXPERT_FIRST.name())) {
+        } else if (callbackQuery.data().equals(Commands.HOW_EXPERT_FIRST.name())) {
             //Советы кинолога по первому общению
             sendMessage = new SendMessage(userChatId, "Советы кинолога...");
-        } else if(callbackQuery.data().equals(Commands.HOW_EXPERT_NEXT.name())) {
+        } else if (callbackQuery.data().equals(Commands.HOW_EXPERT_NEXT.name())) {
             //Советы кинолога по дальнейшему общению
             sendMessage = new SendMessage(userChatId, "Советы кинолога...");
-        } else if(callbackQuery.data().equals(Commands.HOW_REJECT_REASONS.name())) {
+        } else if (callbackQuery.data().equals(Commands.HOW_REJECT_REASONS.name())) {
             //Причины отказа
             sendMessage = new SendMessage(userChatId, "Первая причина это ты...");
         } else if (callbackQuery.data().startsWith(Commands.ASK_VOLUNTEER.name())) {
@@ -351,41 +361,18 @@ public class KeyboardServiceExt {
         if (questionsBuffer.getQuestionByUserChat(userChatId).isPresent()) {
             //Записать сообщение волонтеру
             Question question = questionsBuffer.getQuestionByUserChat(userChatId).get();
-            if (question.getQuestion() == null) {
-                question.setId(message.messageId());
-                question.setQuestion(String.format("%d: Сообщение от пользователя, для ответа используйте reply:\n %s", message.messageId(), message.text()));
-                telegramBot.execute(new SendMessage(question.getVolunteerChatId(), question.getQuestion()));
-                sendMessage = new SendMessage(question.getUserChatId(), "Сообщение отправлено волонтеру");
-            } else {
-                sendMessage = new SendMessage(question.getUserChatId(), "Волонтер еще не ответил");
-            }
+            sendMessage = sendQuestionToVolunteer(question, message);
         } else if (requestsBuffer.getRequest(userChatId).isPresent()) {
             //Есть запрос на данные
             Request request = requestsBuffer.getRequest(userChatId).get();
             if (request.isUserPhoneRequested() || request.isUserEmailRequested()) {
-                //Записать данные пользователя (если пользователя нет, то добавляем)
-                User user = addUserIfNotExist(userChatId, message.chat().username());
-                if (request.isUserPhoneRequested())
-                    user.setPhone(message.text());
-                if (request.isUserEmailRequested())
-                    user.setEmail(message.text());
-                userService.update(user, user.getId());
-                sendMessage = new SendMessage(userChatId, "Данные пользователя записаны");
+                //Записать данные пользователя
+                sendMessage = updateRequestedUserData(request, message);
             }
             if (request.isReportPhotoRequested() || request.isReportDietRequested() ||
                     request.isReportBehaviorRequested() || request.isReportWellBeingRequest()) {
-                //Записать данные отчета (если отчет за текущий день не найден, то добавляем)
-                Report report = addReportIfNotExist(addUserIfNotExist(userChatId, message.chat().username()));
-                if (request.isReportDietRequested())
-                    report.setDiet(message.text());
-                if (request.isReportBehaviorRequested())
-                    report.setChangeBehavior(message.text());
-                if (request.isReportPhotoRequested())
-                    report.setPhoto(new byte['z']); //подумать как преобразовать message.photo()
-                if (request.isReportWellBeingRequest())
-                    report.setWellBeing(message.text());
-                reportService.update(report, report.getId());
-                sendMessage = new SendMessage(userChatId, "Данные отчета записаны");
+                //Записать данные дневного отчета
+                sendMessage = updateRequestedReportData(request, message);
             }
             requestsBuffer.delRequest(request);
         }
@@ -411,6 +398,81 @@ public class KeyboardServiceExt {
             }
         }
         return Optional.ofNullable(sendMessage);
+    }
+
+    /**
+     * Отправить сообщение волонтеру
+     *
+     * @param question
+     * @param message
+     * @return
+     */
+    private SendMessage sendQuestionToVolunteer(Question question, Message message) {
+        SendMessage sendMessage = null;
+        if (question.getQuestion() == null) {
+            question.setId(message.messageId());
+            question.setQuestion(String.format("%d: Сообщение от пользователя, для ответа используйте reply:\n %s",
+                    message.messageId(), message.text()));
+            telegramBot.execute(new SendMessage(question.getVolunteerChatId(), question.getQuestion()));
+            sendMessage = new SendMessage(question.getUserChatId(), "Сообщение отправлено волонтеру");
+        } else {
+            sendMessage = new SendMessage(question.getUserChatId(), "Волонтер еще не ответил");
+        }
+        return sendMessage;
+    }
+
+    /**
+     * Обновить данные пользователя
+     * Если пользователя нет, то создать
+     *
+     * @return
+     */
+    private SendMessage updateRequestedUserData(Request request, Message message) {
+        Long userChatId = message.chat().id();
+        String userName = message.chat().username();
+        User user = addUserIfNotExist(userChatId, userName);
+        if (request.isUserPhoneRequested())
+            //Добавить валидацию телефона
+            user.setPhone(message.text());
+        if (request.isUserEmailRequested())
+            //Добавить валидацию почты
+            user.setEmail(message.text());
+        userService.update(user, user.getId());
+        return new SendMessage(userChatId, "Данные пользователя записаны");
+    }
+
+    /**
+     * Обновить дневной отчет
+     * Если отчет за текущий день не найден, то создать
+     * Если пользователя нет, то создать
+     *
+     * @param request
+     * @param message
+     * @return
+     */
+    private SendMessage updateRequestedReportData(Request request, Message message) {
+        Long userChatId = message.chat().id();
+        String userName = message.chat().username();
+        Report report = addReportIfNotExist(
+                addUserIfNotExist(userChatId, userName));
+        if (request.isReportDietRequested()) {
+            report.setDiet(message.text());
+        }
+        if (request.isReportBehaviorRequested()) {
+            report.setChangeBehavior(message.text());
+        }
+        if (request.isReportPhotoRequested()) {
+            if (message.photo() != null) {
+                report.setPhoto(message.photo()[0].fileId().getBytes());
+            } else {
+                return new SendMessage(userChatId, "Пришлите фото");
+            }
+        }
+        if (request.isReportWellBeingRequest()) {
+            report.setWellBeing(message.text());
+        }
+        reportService.update(report, report.getId());
+        return new SendMessage(userChatId, "Данные отчета записаны");
     }
 
     /**
@@ -452,11 +514,11 @@ public class KeyboardServiceExt {
     }
 
     //метод для тестов, нужно заменить методом из ReportService
-    private Report findReportByUserAndDate(User user, Date date) {
+    private Report findReportByUserAndDate(User user, LocalDateTime dateTime) {
+        LocalDateTime finalDateTime = dateTime.truncatedTo(ChronoUnit.DAYS);
         return reportService.findAll().stream()
-                //поиск по дате пока не работает
-                //.filter(r -> r.getUserId() == user.getId() && r.getDate().equals(date))
-                .filter(r -> r.getUserId() == user.getId())
+                .filter(r -> r.getUserId() == user.getId() &&
+                        r.getDate().toLocalDate().isEqual(finalDateTime.toLocalDate()))
                 .findFirst().orElse(new Report());
     }
 
@@ -474,15 +536,15 @@ public class KeyboardServiceExt {
     //метод для тестов, подумать куда его переместить
     private Report addReportIfNotExist(User user) {
         //Ищем отчет на текущую дату, считаем что один отчет в день от пользователя
-        Report report = findReportByUserAndDate(user, new Date());
+        Report report = findReportByUserAndDate(user, LocalDateTime.now());
         if (report.getId() == 0L) {
             //Сейчас все поля обязательны, заполняем значениями по-умолчанию
             //Далее нужно убрать обязательность с некоторых полей!!!
             report.setUserId(user.getId());
-            report.setAnimalId(1);//(user.getAnimal().getId);
+            report.setAnimalId(1);//(user.getAnimal().getId); //Добавить поиск собаки
             report.setStatus("new");
             report.setDescription("default");
-            report.setDate(new Date());
+            report.setDate(LocalDateTime.now());
             report.setPhoto(new byte['x']);
             report.setDiet("default");
             report.setWellBeing("default");

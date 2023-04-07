@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -37,7 +37,7 @@ public class Report {
     private String wellBeing;
     @Column(nullable = false)
     private String changeBehavior;
-    private Date date;
+    private LocalDateTime date;
 
     @Override
     public boolean equals(Object o) {
