@@ -7,11 +7,16 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.skypro.telegram_team.listener.TelegramBotUpdatesListener;
+import com.skypro.telegram_team.models.Report;
+import com.skypro.telegram_team.services.ReportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
 import static com.skypro.telegram_team.Command.*;
+
 import com.vdurmont.emoji.*;
+
 import java.util.List;
 
 /**
@@ -19,12 +24,13 @@ import java.util.List;
  */
 @Service
 public class KeyboardService {
-    Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
+    private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     /**
      * метод для прослушивания апдэйтов и ответа на них с использованием клавиатуры
      * использует методы TelegramBot {@link TelegramBot#execute(BaseRequest)}
      * {@link SendMessage#replyMarkup(Keyboard)}
+     *
      * @param updates
      * @param telegramBot
      */
@@ -35,8 +41,8 @@ public class KeyboardService {
                 if (update.message() != null) {
                     if (START.getCommandName().equals(update.message().text())) {
                         Keyboard keyboard = new ReplyKeyboardMarkup
-                                (new KeyboardButton(HOW_TO_GET_INFO_ABOUT_SHELTER.getCommandName()))
-                                .addRow(HOW_TO_GET_DOG_FROM_SHELTER.getCommandName())
+                                (new KeyboardButton(GET_SHELTER_INFO.getCommandName()))
+                                .addRow(GET_SHELTER_INFO.getCommandName())
                                 .addRow(SEND_DOG_REPORT.getCommandName())
                                 .addRow(CALL_VOLUNTEER.getCommandName())
                                 .resizeKeyboard(true);
@@ -45,7 +51,7 @@ public class KeyboardService {
                                 dogEmoji);
                         sendMessage.replyMarkup(keyboard);
                         SendResponse sendResponse = telegramBot.execute(sendMessage);
-                    } else if (HOW_TO_GET_INFO_ABOUT_SHELTER.getCommandName().equals(update.message().text())) {
+                    } else if (GET_SHELTER_INFO.getCommandName().equals(update.message().text())) {
                         InlineKeyboardMarkup markup = new InlineKeyboardMarkup
                                 (new InlineKeyboardButton(WRITE_DOWN_CONTACT_INFORMATION.getCommandName())
                                         .callbackData(WRITE_DOWN_CONTACT_INFORMATION.getCallBack()))
@@ -55,26 +61,26 @@ public class KeyboardService {
                                 "Должна выводиться какая-то информация о приюте");
                         sendMessage.replyMarkup(markup);
                         SendResponse sendResponse = telegramBot.execute(sendMessage);
-                    } else if (HOW_TO_GET_DOG_FROM_SHELTER.getCommandName().equals(update.message().text())) {
+                    } else if (GET_DOG.getCommandName().equals(update.message().text())) {
                         InlineKeyboardMarkup markup = new InlineKeyboardMarkup
                                 (new InlineKeyboardButton(LEARN_RULES_OF_DATING_DOG.getCommandName())
                                         .callbackData(LEARN_RULES_OF_DATING_DOG.getCallBack())
-                                        , new InlineKeyboardButton(GET_LIST_OF_DOCUMENTS_TO_GET_DOG.getCommandName())
-                                        .callbackData(GET_LIST_OF_DOCUMENTS_TO_GET_DOG.getCallBack()),
-                                        new InlineKeyboardButton(GET_LIST_OF_RECOMMENDATIONS_FOR_TRANSPORTING_DOG.getCommandName())
-                                                .callbackData(GET_LIST_OF_RECOMMENDATIONS_FOR_TRANSPORTING_DOG.getCallBack()))
-                                .addRow(new InlineKeyboardButton(GET_LIST_OF_HOME_IMPROVEMENT_TIPS_FOR_PUPPY.getCommandName())
-                                                .callbackData(GET_LIST_OF_HOME_IMPROVEMENT_TIPS_FOR_PUPPY.getCallBack()),
-                                        new InlineKeyboardButton(GET_LIST_OF_HOME_IMPROVEMENT_TIPS_FOR_ADULT_DOG.getCommandName())
-                                                .callbackData(GET_LIST_OF_HOME_IMPROVEMENT_TIPS_FOR_ADULT_DOG.getCallBack())
-                                        , new InlineKeyboardButton(GET_LIST_OF_HOME_IMPROVEMENT_FOR_DOG_WITH_DISABILITY.getCommandName())
-                                                .callbackData(GET_LIST_OF_HOME_IMPROVEMENT_FOR_DOG_WITH_DISABILITY.getCallBack()))
-                                .addRow(new InlineKeyboardButton(GET_ADVICE_FROM_CYNOLOGIST_ON_INITIAL_COMMUNICATION_WITH_DOG.getCommandName())
-                                                .callbackData(GET_ADVICE_FROM_CYNOLOGIST_ON_INITIAL_COMMUNICATION_WITH_DOG.getCallBack())
-                                        , (new InlineKeyboardButton(GET_RECOMMENDATIONS_ON_PROVEN_CYNOLOGISTS_FOR_FURTHER_REFERRAL.getCommandName())
-                                                .callbackData(GET_RECOMMENDATIONS_ON_PROVEN_CYNOLOGISTS_FOR_FURTHER_REFERRAL.getCallBack())),
-                                        new InlineKeyboardButton(GET_LIST_REASONS_FOR_REFUSING_TO_PICK_UP_DOG.getCommandName())
-                                                .callbackData(GET_LIST_REASONS_FOR_REFUSING_TO_PICK_UP_DOG.getCallBack()))
+                                        , new InlineKeyboardButton(GET_LIST_OF_DOCUMENTS.getCommandName())
+                                        .callbackData(GET_LIST_OF_DOCUMENTS.getCallBack()),
+                                        new InlineKeyboardButton(GET_RECOMMENDATIONS_FOR_TRANSPORTING.getCommandName())
+                                                .callbackData(GET_RECOMMENDATIONS_FOR_TRANSPORTING.getCallBack()))
+                                .addRow(new InlineKeyboardButton(GET_TIPS_FOR_PUPPY.getCommandName())
+                                                .callbackData(GET_TIPS_FOR_PUPPY.getCallBack()),
+                                        new InlineKeyboardButton(GET_TIPS_FOR_ADULT_DOG.getCommandName())
+                                                .callbackData(GET_TIPS_FOR_ADULT_DOG.getCallBack())
+                                        , new InlineKeyboardButton(GET_TIPS_FOR_DOG_WITH_DISABILITY.getCommandName())
+                                                .callbackData(GET_TIPS_FOR_DOG_WITH_DISABILITY.getCallBack()))
+                                .addRow(new InlineKeyboardButton(GET_ADVICE_FROM_CYNOLOGIST.getCommandName())
+                                                .callbackData(GET_ADVICE_FROM_CYNOLOGIST.getCallBack())
+                                        , (new InlineKeyboardButton(GET_RECOMMENDATIONS_ON_PROVEN_CYNOLOGISTS.getCommandName())
+                                                .callbackData(GET_RECOMMENDATIONS_ON_PROVEN_CYNOLOGISTS.getCallBack())),
+                                        new InlineKeyboardButton(GET_REASONS_FOR_REFUSING.getCommandName())
+                                                .callbackData(GET_REASONS_FOR_REFUSING.getCallBack()))
                                 .addRow(new InlineKeyboardButton(WRITE_DOWN_CONTACT_INFORMATION.getCommandName())
                                         .callbackData(WRITE_DOWN_CONTACT_INFORMATION.getCallBack()))
                                 .addRow(new InlineKeyboardButton(CALL_VOLUNTEER.getCommandName())
@@ -93,13 +99,13 @@ public class KeyboardService {
                         SendResponse sendResponse = telegramBot.execute(sendMessage);
                     } else if (Command.SEND_DOG_REPORT.getCommandName().equals(update.message().text())) {
                         InlineKeyboardMarkup markup = new InlineKeyboardMarkup
-                                (new InlineKeyboardButton(GET_DAILY_REPORT_FORM.getCommandName())
-                                        .callbackData(GET_DAILY_REPORT_FORM.getCallBack()))
+                                (new InlineKeyboardButton(GET_DAILY_REPORT.getCommandName())
+                                        .callbackData(GET_DAILY_REPORT.getCallBack()))
                                 .addRow(new InlineKeyboardButton(CALL_VOLUNTEER.getCommandName())
                                         .callbackData(CALL_VOLUNTEER.getCallBack()));
                         String dogEmoji = EmojiParser.parseToUnicode(":dog:");
                         SendMessage sendMessage = new SendMessage(update.message().chat().id(),
-                                dogEmoji + "ок");
+                                dogEmoji +"Выбери нужное");
                         sendMessage.replyMarkup(markup);
                         SendResponse sendResponse = telegramBot.execute(sendMessage);
                     } else if (Command.CALL_VOLUNTEER.getCommandName().equals(update.message().text())) {
@@ -115,7 +121,7 @@ public class KeyboardService {
                     SendMessage sendMessage = new SendMessage(update.callbackQuery().message().chat().id(),
                             "ожидайте");
                     SendResponse sendResponse = telegramBot.execute(sendMessage);
-                } else if (GET_DAILY_REPORT_FORM.getCallBack().equals(update.callbackQuery().data())) {
+                } else if (GET_DAILY_REPORT.getCallBack().equals(update.callbackQuery().data())) {
                     SendMessage sendMessage = new SendMessage(update.callbackQuery().message().chat().id(),
                             "В ежедневный отчет входит следующая информация:\n" +
                                     "1.Фото животного.\n" +

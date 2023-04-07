@@ -20,6 +20,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     @Autowired
     private TelegramBot telegramBot;
 
+    @Autowired
+    private KeyboardService keyboardService;
+
     @PostConstruct
     public void init() {
         telegramBot.setUpdatesListener(this);
@@ -32,7 +35,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     @Override
     public int process(List<Update> updates) {
-        KeyboardService keyboardService = new KeyboardService();
         keyboardService.getResponse(updates, telegramBot);
         return CONFIRMED_UPDATES_ALL;
     }
