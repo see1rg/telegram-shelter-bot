@@ -26,10 +26,21 @@ public class Animal {
     private String description;
     private LocalDateTime startTest;
     private int daysForTest;
-    private long userId;
-    private String status;
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
     @Lob
     private byte[] photo;
+
+    @Enumerated(EnumType.STRING)
+    private AnimalStateEnum state;
+
+    public enum AnimalStateEnum {
+        IN_SHELTER, IN_TEST, HAPPY_END
+    }
 
     @Override
     public boolean equals(Object o) {

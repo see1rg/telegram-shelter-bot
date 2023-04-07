@@ -26,8 +26,6 @@ public class Report {
     private String status;
     @Column(nullable = false)
     private long animalId;
-    @Column(nullable = false)
-    private long userId;
     @Lob
     @Column(nullable = false)
     private byte photo;
@@ -38,6 +36,10 @@ public class Report {
     @Column(nullable = false)
     private String changeBehavior;
     private Date date;
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Override
     public boolean equals(Object o) {

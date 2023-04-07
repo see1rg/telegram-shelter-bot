@@ -25,6 +25,16 @@ public class User {
     private String surname;
     private String phone;
     private String email;
+    private long animalId;
+
+
+    @Enumerated(EnumType.STRING)
+    private OwnerStateEnum state;
+
+    public enum OwnerStateEnum {
+        SEARCH, PROBATION, ACCEPTED, REFUSE
+    }
+
     private boolean isVolunteer;
 
     @Override

@@ -1,6 +1,7 @@
 package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.User;
+import com.skypro.telegram_team.repositories.ReportRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
 import lombok.extern.log4j.Log4j;
 import org.modelmapper.ModelMapper;
@@ -17,18 +18,17 @@ import java.util.List;
 @Log4j
 @Service
 public class UserService {
-   private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, ReportRepository reportRepository) {
         this.userRepository = userRepository;
     }
 
     /**
      * сохранение пользователя в БД используя метод репозитория {@link JpaRepository#save(Object)}
      *
-     * @param  user
+     * @param user
      * @return
-     *
      * @see
      */
     @Transactional
@@ -83,7 +83,8 @@ public class UserService {
     public User update(User user, Long id) {
         log.info("Updating myUser: " + user);
         ModelMapper modelMapper = new ModelMapper();
-        User userToUpdate = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User userToUpdate = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setId(id);
         modelMapper.map(user, userToUpdate);
         return userRepository.save(userToUpdate);
