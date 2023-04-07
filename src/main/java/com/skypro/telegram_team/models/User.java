@@ -28,7 +28,6 @@ public class User {
     private long animalId;
 
 
-
     @Enumerated(EnumType.STRING)
     private OwnerStateEnum state;
 

@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS animals
     description   TEXT,
     photo         OID,
     user_id       BIGINT REFERENCES users (id),
+    status VARCHAR(10),
     start_test    TIMESTAMP,
     days_for_test INT
 );
@@ -47,7 +48,4 @@ CREATE TABLE IF NOT EXISTS reports
 
 --changeSet slyubimov:2
 ALTER TABLE users
-    ADD COLUMN status VARCHAR(10);
-
-ALTER TABLE animals
     ADD COLUMN status VARCHAR(10);

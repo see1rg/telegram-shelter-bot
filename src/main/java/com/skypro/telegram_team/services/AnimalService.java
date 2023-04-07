@@ -115,4 +115,9 @@ public class AnimalService {
         modelMapper.map(animal, animalToUpdate);
         return animalRepository.save(animalToUpdate);
     }
+
+    public List<Animal> findAllByUserIdNotNullAndState(Animal.AnimalStateEnum inTest) {
+        log.info("Finding animals by user id and state");
+        return animalRepository.findAllByUserIdNotNullAndState(inTest);
+    }
 }

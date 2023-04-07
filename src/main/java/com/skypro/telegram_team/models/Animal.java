@@ -32,7 +32,6 @@ public class Animal {
     private User user;
 
 
-
     @Lob
     private byte[] photo;
 
