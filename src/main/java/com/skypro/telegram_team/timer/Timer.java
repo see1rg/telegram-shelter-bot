@@ -15,8 +15,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Component
@@ -42,7 +42,7 @@ public class Timer {
 // every 4 hours from 8 to 20
     void checkingDailyReportFromUsers() {
 
-        Date twoDaysAgo = new Date(System.currentTimeMillis() - (2 * 24 * 60 * 60 * 1000));
+        LocalDateTime twoDaysAgo = LocalDateTime.now().minusDays(2);
         List<Animal> animals = animalService.findAllByUserIdNotNullAndState(Animal.AnimalStateEnum.IN_TEST);
         List<User> usersWithoutDailyReports = new ArrayList<>();
 
@@ -50,7 +50,7 @@ public class Timer {
             User user = animal.getUser();
 
             List<Report> reports = reportService.findByAnimalId(animal.getId());
-            if (reports.isEmpty() || reports.get(reports.size() - 1).getDate().before(twoDaysAgo)) {
+            if (reports.isEmpty() || reports.get(reports.size() - 1).getDate().isBefore(twoDaysAgo)) {
                 usersWithoutDailyReports.add(user);
             }
         }
