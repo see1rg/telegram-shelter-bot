@@ -17,7 +17,7 @@ import java.util.List;
 @Log4j
 @Service
 public class ReportService {
-    ReportRepository reportRepository;
+    private final ReportRepository reportRepository;
 
     public ReportService(ReportRepository reportRepository) {
         this.reportRepository = reportRepository;
@@ -74,7 +74,7 @@ public class ReportService {
      * Обновление отчета в БД используя метод репозитория {@link JpaRepository#save(Object)}}
      *
      * @param report отчет для обновления
-     * @param id идентификатор отчета
+     * @param id     идентификатор отчета
      * @return обновленный отчет
      */
     @Transactional
@@ -87,4 +87,8 @@ public class ReportService {
         return reportRepository.save(reportToUpdate);
     }
 
+    public List<Report> findByAnimalId(long id) {
+        log.info("Finding reports by animal id: " + id);
+        return reportRepository.findByAnimalId(id);
+    }
 }

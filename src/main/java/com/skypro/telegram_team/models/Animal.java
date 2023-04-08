@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -24,12 +24,23 @@ public class Animal {
     private String name;
     private String breed;
     private String description;
-    private Date startTest;
+    private LocalDateTime startTest;
     private int daysForTest;
-    private long userId;
-    private String status;
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
     @Lob
     private byte[] photo;
+
+    @Enumerated(EnumType.STRING)
+    private AnimalStateEnum state;
+
+    public enum AnimalStateEnum {
+        IN_SHELTER, IN_TEST, HAPPY_END
+    }
 
     @Override
     public boolean equals(Object o) {
