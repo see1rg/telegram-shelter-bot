@@ -2,7 +2,7 @@ package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.repositories.ReportRepository;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Сервис для работы с отчетами
  */
-@Log4j
+@Log4j2
 @Service
 public class ReportService {
     private final ReportRepository reportRepository;
@@ -87,6 +87,12 @@ public class ReportService {
         return reportRepository.save(reportToUpdate);
     }
 
+    /**
+     * Получение отчетов по идентификатору из БД используя метод репозитория {@link ReportRepository#findByAnimalId(long)}}
+     *
+     * @param id
+     * @return
+     */
     public List<Report> findByAnimalId(long id) {
         log.info("Finding reports by animal id: " + id);
         return reportRepository.findByAnimalId(id);

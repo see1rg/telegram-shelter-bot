@@ -9,6 +9,7 @@ import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.services.AnimalService;
 import com.skypro.telegram_team.services.ReportService;
+import com.skypro.telegram_team.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -26,17 +27,46 @@ public class Timer {
     private final TelegramBot telegramBot;
     private final AnimalService animalService;
     private final ReportService reportService;
+    private final UserService userService;
     @Value("${telegram.bot.support.chat}")
     private long supportChatId;
 
-    @Scheduled(cron = "0 0 14 * * ?")
-// 14:00 MSK
-    void trialPeriod() {
+    @Scheduled(cron = "0 0 9-18/3 * * *")
+    void endTrialPeriod() {
+        List<User> allUsers = userService.findAll();
+        List<User> acceptedUsers = new ArrayList<>();
+        List<User> refusedUsers = new ArrayList<>();
+        List<User> prolongedUsers = new ArrayList<>();
 
+        for (User user : allUsers) {
+            if (User.OwnerStateEnum.ACCEPTED.equals(user.getState())) {
+                acceptedUsers.add(user);
+            } else if (User.OwnerStateEnum.REFUSE.equals(user.getState())) {
+                refusedUsers.add(user);
+            } else if (User.OwnerStateEnum.PROLONGED.equals(user.getState())) {
+                prolongedUsers.add(user);
+            }
+        }
 
-        String text = "Пробный период закончился!";
-//        sendMessage(chatId, text);
+        for (User user : acceptedUsers) {
+            sendMessage(user.getTelegramId(), "Уважаемый " + user.getName() + " " + user.getSurname() +
+                    " Поздравляем, вы прошли пробный период!");
+            sendMessage(supportChatId, "Пробный период закончился у " + user.getName() + " " + user.getSurname());
+        }
+
+        for (User user : refusedUsers) {
+            sendMessage(user.getTelegramId(), "Уважаемый " + user.getName() + " " + user.getSurname() +
+                    " Вы НЕ прошли пробный период! Пожалуйста сдайте собаку в приют!");
+            sendMessage(supportChatId, "Отказ подтвержден у " + user.getName() + " " + user.getSurname());
+        }
+
+        for (User user : prolongedUsers) {
+            sendMessage(user.getTelegramId(), "Уважаемый " + user.getName() + " " + user.getSurname() +
+                    " Вы НЕ прошли пробный период! Пожалуйста сдайте собаку в приют!");
+            sendMessage(supportChatId, "Пробный период закончился у " + user.getName() + " " + user.getSurname());
+        }
     }
+
 
     @Scheduled(cron = "0 0 8-20/4 * * *")
 // every 4 hours from 8 to 20
@@ -57,6 +87,8 @@ public class Timer {
         for (User user : usersWithoutDailyReports) {
             sendMessage(supportChatId,
                     "Последний отчет был написан более двух дней у :" + user.getName() + " " + user.getSurname());
+            sendMessage(user.getTelegramId(),
+                    "Последний отчет был написан более двух дней! Пожалуйста, сдайте отчет.");
         }
 
     }

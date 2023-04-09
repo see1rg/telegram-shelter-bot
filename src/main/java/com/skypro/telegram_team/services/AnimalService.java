@@ -2,7 +2,7 @@ package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.repositories.AnimalRepository;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Сервис для работы с животными приюта
  */
-@Log4j
+@Log4j2
 @Service
 public class AnimalService {
     private final AnimalRepository animalRepository;

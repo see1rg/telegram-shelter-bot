@@ -1,9 +1,8 @@
 package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.User;
-import com.skypro.telegram_team.repositories.ReportRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
@@ -15,12 +14,12 @@ import java.util.List;
 /**
  * сервис для работы с пользователями
  */
-@Log4j
+@Log4j2
 @Service
 public class UserService {
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository, ReportRepository reportRepository) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -33,7 +32,7 @@ public class UserService {
      */
     @Transactional
     public User save(User user) {
-        log.info("Saving user: " + user);
+        log.info("Saving user: " + user.getName() + " " + user.getSurname());
         return userRepository.save(user);
     }
 
