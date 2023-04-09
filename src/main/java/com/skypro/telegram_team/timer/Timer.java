@@ -85,7 +85,14 @@ public class Timer {
                     sendMessage(user.getTelegramId(), "Уважаемый " + user.getName() + " " + user.getSurname() +
                             " Закончился испытательный срок, пожалуйста дождитесь принятия решения волонтером о вашем животном!");
                     sendMessage(supportChatId, "Отказ подтвержден у " + user.getName() + " " + user.getSurname());
-                }); // todo осталось реализовать сохранение статуса в БД
+                });
+
+        List<User> saveChangeOfUsers = new ArrayList<>();
+        saveChangeOfUsers.addAll(refusedUsers);
+        saveChangeOfUsers.addAll(prolongedUsers);
+        saveChangeOfUsers.addAll(decisionMakingOfVolunteersAboutUsers);
+        saveChangeOfUsers.forEach(userService::save); // сохраняем изменения в БД
+
     }
 
 
