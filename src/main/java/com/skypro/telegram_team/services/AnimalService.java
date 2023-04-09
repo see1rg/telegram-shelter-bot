@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -110,8 +111,13 @@ public class AnimalService {
     public Animal update(Animal animal, Long id) {
         log.info("Updating animal: " + animal);
         ModelMapper modelMapper = new ModelMapper();
-        Animal animalToUpdate = animalRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Animal not found"));
+        Animal animalToUpdate = animalRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Animal not found"));
         animal.setId(id);
+        if (animal.getEndTest() == null && animal.getState() != Animal.AnimalStateEnum.IN_SHELTER
+                && animal.getState() != Animal.AnimalStateEnum.HAPPY_END) {
+            animal.setEndTest(LocalDateTime.now().plusDays(30));    //если время окончания не установлено, то ставим 30 дней
+        }
         modelMapper.map(animal, animalToUpdate);
         return animalRepository.save(animalToUpdate);
     }

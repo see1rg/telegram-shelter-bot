@@ -24,7 +24,7 @@ public class Animal {
     private String name;
     private String breed;
     private String description;
-    private LocalDateTime startTest;
+    private LocalDateTime endTest;
     private int daysForTest;
 
     @OneToOne

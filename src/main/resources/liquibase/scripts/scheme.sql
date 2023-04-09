@@ -57,3 +57,7 @@ DROP TABLE volunteers;
 --changeSet slyubimov:1
 ALTER TABLE users
     ADD COLUMN state VARCHAR(10);
+
+--changeSet slyubimov:2
+ALTER TABLE users
+ADD COLUMN endTrialPeriod TIMESTAMP;

@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -26,13 +27,14 @@ public class User {
     private String phone;
     private String email;
     private long animalId;
+    private LocalDateTime endTrialPeriod;
 
 
     @Enumerated(EnumType.STRING)
     private OwnerStateEnum state;
 
     public enum OwnerStateEnum {
-        SEARCH, PROBATION, ACCEPTED, REFUSE, PROLONGED
+        SEARCH, PROBATION, ACCEPTED, REFUSE, PROLONGED, DECISION, BLACKLIST
     }
 
     private boolean isVolunteer;

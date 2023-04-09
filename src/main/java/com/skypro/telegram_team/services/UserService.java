@@ -9,10 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * сервис для работы с пользователями
+ * Сервис для работы с пользователями
  */
 @Log4j2
 @Service
@@ -85,6 +86,9 @@ public class UserService {
         User userToUpdate = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setId(id);
+        if (user.getState().equals(User.OwnerStateEnum.PROBATION)) {
+            user.setEndTrialPeriod(LocalDateTime.now().plusDays(30));
+        }
         modelMapper.map(user, userToUpdate);
         return userRepository.save(userToUpdate);
     }
