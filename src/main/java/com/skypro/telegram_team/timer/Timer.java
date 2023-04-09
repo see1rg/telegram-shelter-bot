@@ -62,33 +62,45 @@ public class Timer {
 
         for (User user : prolongedUsers) {
             sendMessage(user.getTelegramId(), "Уважаемый " + user.getName() + " " + user.getSurname() +
-                    " Вы НЕ прошли пробный период! Пожалуйста сдайте собаку в приют!");
-            sendMessage(supportChatId, "Пробный период закончился у " + user.getName() + " " + user.getSurname());
+                    " Решение о пробном периоде не принято! Пожалуйста продолжайте присылать отчеты ежедневно.");
+            sendMessage(supportChatId, "Пробный период продлен у " + user.getName() + " " + user.getSurname());
         }
     }
 
 
     @Scheduled(cron = "0 0 8-20/4 * * *")
 // every 4 hours from 8 to 20
-    void checkingDailyReportFromUsers() {
+    void checkingDailyAndTwoDaysReportFromUsers() {
 
-        LocalDateTime twoDaysAgo = LocalDateTime.now().minusDays(2);
+        LocalDateTime twoDaysAgo = LocalDateTime.now().minusDays(2).withHour(0);
+        LocalDateTime yesterdayAt0AM = LocalDateTime.now().minusDays(1).withHour(0);
+
         List<Animal> animals = animalService.findAllByUserIdNotNullAndState(Animal.AnimalStateEnum.IN_TEST);
-        List<User> usersWithoutDailyReports = new ArrayList<>();
+        List<User> usersWithoutReportForTwoDays = new ArrayList<>();
+        List<User> usersWithoutDailyReport = new ArrayList<>();
 
         for (Animal animal : animals) {
             User user = animal.getUser();
 
             List<Report> reports = reportService.findByAnimalId(animal.getId());
-            if (reports.isEmpty() || reports.get(reports.size() - 1).getDate().isBefore(twoDaysAgo)) {
-                usersWithoutDailyReports.add(user);
+            if (reports.isEmpty() || reports.get(reports.size() - 1).getDate().isEqual(yesterdayAt0AM)) {
+                usersWithoutDailyReport.add(user);
+            }
+            if (reports.get(reports.size() - 1).getDate().isBefore(twoDaysAgo)) {
+                usersWithoutReportForTwoDays.add(user);
             }
         }
-        for (User user : usersWithoutDailyReports) {
+
+        for (User user : usersWithoutReportForTwoDays) {
             sendMessage(supportChatId,
-                    "Последний отчет был написан более двух дней у :" + user.getName() + " " + user.getSurname());
+                    "Последний отчет был принят более двух дней у :" + user.getName() + " " + user.getSurname());
             sendMessage(user.getTelegramId(),
-                    "Последний отчет был написан более двух дней! Пожалуйста, сдайте отчет.");
+                    "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");
+        }
+
+        for (User user : usersWithoutDailyReport) {
+            sendMessage(user.getTelegramId(),
+                    "Здравствуйте, вчера от вас не поступал отчет о собаке. Пожалуйста, сдайте отчет.");
         }
 
     }
