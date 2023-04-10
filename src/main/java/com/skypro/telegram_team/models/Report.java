@@ -20,26 +20,21 @@ public class Report {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private long id;
-    @Column(nullable = false)
-    private String description;
-    @Column(nullable = false)
-    private String status;
-    @Column(nullable = false)
-    private long animalId;
-    @Lob
-    @Column(nullable = false)
-    private byte[] photo;
-    @Column(nullable = false)
     private String diet;
-    @Column(nullable = false)
     private String wellBeing;
-    @Column(nullable = false)
     private String changeBehavior;
     private LocalDateTime date;
 
+    @Lob
+    private byte[] photo;
+
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+    @OneToOne
+    @JoinColumn(name = "animal_id", referencedColumnName = "id")
+    private Animal animal;
 
     @Override
     public boolean equals(Object o) {

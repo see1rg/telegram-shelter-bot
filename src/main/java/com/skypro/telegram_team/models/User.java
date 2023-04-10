@@ -13,7 +13,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@ToString
 @Table(name = "users")
 public class User {
     @Id
@@ -26,8 +25,12 @@ public class User {
     private String surname;
     private String phone;
     private String email;
-    private LocalDateTime endTrialPeriod;
+    private int daysForTest;
+    private LocalDateTime endTest;
 
+    @OneToOne
+    @JoinColumn(name = "animal_id", referencedColumnName = "id")
+    private Animal animal;
 
     @Enumerated(EnumType.STRING)
     private OwnerStateEnum state;
@@ -49,5 +52,21 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", telegramId=" + telegramId +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", daysForTest=" + daysForTest +
+                ", endTest=" + endTest +
+                ", state=" + state +
+                ", isVolunteer=" + isVolunteer +
+                '}';
     }
 }

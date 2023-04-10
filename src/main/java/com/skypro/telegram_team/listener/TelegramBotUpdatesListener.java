@@ -16,14 +16,13 @@ import java.util.List;
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final TelegramBot telegramBot;
+    private final KeyboardServiceExt keyboardService;
 
     @Autowired
-    public TelegramBotUpdatesListener(TelegramBot telegramBot) {
+    public TelegramBotUpdatesListener(TelegramBot telegramBot, KeyboardServiceExt keyboardService) {
         this.telegramBot = telegramBot;
+        this.keyboardService = keyboardService;
     }
-
-    @Autowired
-    private KeyboardService keyboardService;
 
     @PostConstruct
     public void init() {
@@ -37,7 +36,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     @Override
     public int process(List<Update> updates) {
-        keyboardService.getResponse(updates, telegramBot);
+        keyboardService.processUpdates(updates);
         return CONFIRMED_UPDATES_ALL;
     }
 }

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -215,11 +214,8 @@ public class KeyboardServiceExt {
             } else if (Menu.ASK_VOLUNTEER.getText().equals(message.text())) {
                 //Вопрос волонтеру
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
-                findVolunteers().entrySet().stream()
-                        .forEach((entry) -> {
-                            markup.addRow(new InlineKeyboardButton(entry.getValue())
-                                    .callbackData(Commands.ASK_VOLUNTEER + entry.getKey()));
-                        });
+                findVolunteers().forEach((key, value) -> markup.addRow(new InlineKeyboardButton(value)
+                        .callbackData(Commands.ASK_VOLUNTEER + key)));
                 markup.addRow(new InlineKeyboardButton(Commands.ASK_ANY_VOLUNTEER.getText())
                         .callbackData(Commands.ASK_ANY_VOLUNTEER.name()));
                 sendMessage = new SendMessage(message.chat().id(), "Кого спросить?");
@@ -408,7 +404,7 @@ public class KeyboardServiceExt {
      * @return
      */
     private SendMessage sendQuestionToVolunteer(Question question, Message message) {
-        SendMessage sendMessage = null;
+        SendMessage sendMessage;
         if (question.getQuestion() == null) {
             question.setId(message.messageId());
             question.setQuestion(String.format("%d: Сообщение от пользователя, для ответа используйте reply:\n %s",
@@ -432,10 +428,8 @@ public class KeyboardServiceExt {
         String userName = message.chat().username();
         User user = addUserIfNotExist(userChatId, userName);
         if (request.isUserPhoneRequested())
-            //Добавить валидацию телефона
             user.setPhone(message.text());
         if (request.isUserEmailRequested())
-            //Добавить валидацию почты
             user.setEmail(message.text());
         userService.update(user, user.getId());
         return new SendMessage(userChatId, "Данные пользователя записаны");
@@ -528,6 +522,7 @@ public class KeyboardServiceExt {
         if (user.getId() == 0L) {
             user.setTelegramId(telegramId);
             user.setName(username);
+            user.setState(User.OwnerStateEnum.SEARCH);
             userService.save(user);
         }
         return user;
@@ -538,17 +533,9 @@ public class KeyboardServiceExt {
         //Ищем отчет на текущую дату, считаем что один отчет в день от пользователя
         Report report = findReportByUserAndDate(user, LocalDateTime.now());
         if (report.getId() == 0L) {
-            //Сейчас все поля обязательны, заполняем значениями по-умолчанию
-            //Далее нужно убрать обязательность с некоторых полей!!!
-//            report.setUserId(user.getId());
-            report.setAnimalId(1);//(user.getAnimal().getId); //Добавить поиск собаки
-            report.setStatus("new");
-            report.setDescription("default");
+            report.setUser(user);
+            report.setAnimal(user.getAnimal());
             report.setDate(LocalDateTime.now());
-            report.setPhoto(new byte['x']);
-            report.setDiet("default");
-            report.setWellBeing("default");
-            report.setChangeBehavior("default");
             reportService.save(report);
         }
         return report;
