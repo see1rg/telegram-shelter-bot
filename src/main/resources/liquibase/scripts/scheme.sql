@@ -69,3 +69,28 @@ ALTER TABLE animals drop COLUMN start_test,
 --changeSet slyubimov:4
 ALTER TABLE animals
     ADD COLUMN state VARCHAR(10)
+
+-- changeSet 11th:4
+;
+ALTER TABLE animals
+    DROP COLUMN days_for_test,
+    DROP COLUMN end_test;
+
+ALTER TABLE users
+    ADD COLUMN animal_id BIGINT REFERENCES animals (id),
+    ADD COLUMN days_for_test INT,
+    ADD COLUMN end_test TIMESTAMP,
+    DROP COLUMN end_trial_period;
+
+-- changeSet 11th:5
+ALTER TABLE animals
+    DROP COLUMN status;
+
+-- changeSet 11th:6
+ALTER TABLE reports
+    DROP COLUMN description,
+    DROP COLUMN status,
+    ALTER photo DROP NOT NULL,
+    ALTER diet DROP NOT NULL,
+    ALTER well_being DROP NOT NULL,
+    ALTER change_behavior DROP NOT NULL;

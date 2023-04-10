@@ -114,10 +114,11 @@ public class AnimalService {
         Animal animalToUpdate = animalRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Animal not found"));
         animal.setId(id);
-        if (animal.getEndTest() == null && animal.getState() != Animal.AnimalStateEnum.IN_SHELTER
-                && animal.getState() != Animal.AnimalStateEnum.HAPPY_END) {
-            animal.setEndTest(LocalDateTime.now().plusDays(30));    //если время окончания не установлено, то ставим 30 дней
-        }
+        //Мне кажется это не нужно здесь
+        //if (animal.getEndTest() == null && animal.getState() != Animal.AnimalStateEnum.IN_SHELTER
+        //        && animal.getState() != Animal.AnimalStateEnum.HAPPY_END) {
+        //    animal.setEndTest(LocalDateTime.now().plusDays(30));    //если время окончания не установлено, то ставим 30 дней
+        //}
         modelMapper.map(animal, animalToUpdate);
         return animalRepository.save(animalToUpdate);
     }

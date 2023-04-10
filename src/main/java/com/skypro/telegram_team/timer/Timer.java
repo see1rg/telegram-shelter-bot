@@ -93,16 +93,16 @@ public class Timer {
                     sendMessage(user.getTelegramId(), String.format(
                             "Уважаемый %s %s, мы решили продлить пробный период на %s дней!",
                             user.getName(), user.getSurname(),
-                            Duration.between(user.getEndTrialPeriod(), LocalDateTime.now()).toDays()));
+                            Duration.between(user.getEndTest(), LocalDateTime.now()).toDays()));
                     sendMessage(supportChatId, String.format("Продлено у %s %s на %s дней!",user.getName(), user.getSurname(),
-                             Duration.between(user.getEndTrialPeriod(), LocalDateTime.now()).toDays()));
+                             Duration.between(user.getEndTest(), LocalDateTime.now()).toDays()));
                 });
         return prolongedUsers;
     }
 
     private List<User> decisionMakingOfVolunteersAboutUsers(List<User> allUsers) {
         List<User> decisionAboutUsers = allUsers.stream()
-                .filter(user -> user.getEndTrialPeriod().isAfter(LocalDateTime.now()))
+                .filter(user -> user.getEndTest().isAfter(LocalDateTime.now()))
                 .toList();
 
         decisionAboutUsers.stream()
