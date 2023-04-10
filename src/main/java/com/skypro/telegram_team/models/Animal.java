@@ -14,7 +14,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Getter
 @Setter
-//@ToString
 @Table(name = "animals")
 public class Animal {
     @Id

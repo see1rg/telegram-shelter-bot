@@ -523,7 +523,6 @@ public class KeyboardServiceExt {
             user.setTelegramId(telegramId);
             user.setName(username);
             user.setState(User.OwnerStateEnum.SEARCH);
-            //user.setDaysForTest(0);
             userService.save(user);
         }
         return user;
