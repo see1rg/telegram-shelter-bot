@@ -28,7 +28,7 @@ public class Report {
     private long animalId;
     @Lob
     @Column(nullable = false)
-    private byte photo;
+    private byte[] photo;
     @Column(nullable = false)
     private String diet;
     @Column(nullable = false)
