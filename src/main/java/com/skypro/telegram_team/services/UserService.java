@@ -93,4 +93,17 @@ public class UserService {
         return userRepository.save(userToUpdate);
     }
 
+    /**
+     * Назначить пользователя волонтером
+     *
+     * @param id
+     * @param isVolunteer
+     * @return
+     */
+    public User userIsVolunteer(Long id, Boolean isVolunteer) {
+        log.info("User is volunteer: " + isVolunteer);
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.setVolunteer(isVolunteer);
+        return update(user, id);
+    }
 }

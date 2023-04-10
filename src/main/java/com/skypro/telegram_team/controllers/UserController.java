@@ -19,7 +19,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Поиск пользователя по id")
+    @Operation(summary = "Поиск пользователя по id", tags = "Users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Поиск пользователя по id", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -31,7 +31,7 @@ public class UserController {
         return userService.findById(id);
     }
 
-    @Operation(summary = "Получение списка всех пользователей")
+    @Operation(summary = "Получение списка всех пользователей", tags = "Users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Получение списка всех пользователей", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -42,7 +42,7 @@ public class UserController {
         return userService.findAll();
     }
 
-    @Operation(summary = "Удаление пользователя по id")
+    @Operation(summary = "Удаление пользователя по id", tags = "Users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Удаление пользователя по id", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -53,7 +53,7 @@ public class UserController {
         return userService.deleteById(id);
     }
 
-    @Operation(summary = "Создание пользователя")
+    @Operation(summary = "Создание пользователя", tags = "Users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Создание пользователя", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -64,7 +64,7 @@ public class UserController {
         return userService.save(user);
     }
 
-    @Operation(summary = "Обновление данных пользователя")
+    @Operation(summary = "Обновление данных пользователя", tags = "Users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Обновление данных пользователя", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -75,4 +75,14 @@ public class UserController {
         return userService.update(user, id);
     }
 
+    @Operation(summary = "Назначить пользователя волонтером", tags = "Users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Данные обновлены", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
+            })
+    })
+    @PatchMapping("/{id}/volunteer")
+    public User userIsVolunteer(@PathVariable Long id, @RequestParam("isVolunteer") Boolean isVolunteer) {
+        return userService.userIsVolunteer(id, isVolunteer);
+    }
 }
