@@ -36,31 +36,53 @@ public class Timer {
     void endTrialPeriod() {
         List<User> allUsers = userService.findAll();
 
-        List<User> acceptedUsers = allUsers.stream()
+        List<User> acceptedUsers = changeStateAcceptedToSearchAndCollect(allUsers);
+        List<User> refusedUsers = changeStateRefusedToBlackListAndCollect(allUsers);
+        List<User> prolongedUsers = findStateProlongedAndCollect(allUsers);
+        List<User> decisionAboutUsers = decisionMakingOfVolunteersAboutUsers(allUsers);
+
+        List<User> saveChangeOfUsers = new ArrayList<>();
+        saveChangeOfUsers.addAll(acceptedUsers);
+        saveChangeOfUsers.addAll(refusedUsers);
+        saveChangeOfUsers.addAll(prolongedUsers);
+        saveChangeOfUsers.addAll(decisionAboutUsers);
+
+        saveChangeOfUsers.forEach(userService::save); // сохраняем изменения в БД
+    }
+
+    private List<User> changeStateAcceptedToSearchAndCollect(List<User> allUsers) {
+        List<User> sortUsersWithStateAccepted = allUsers.stream()
                 .filter(user -> User.OwnerStateEnum.ACCEPTED.equals(user.getState()))
-                .toList();
+                .peek(user -> user.setState(User.OwnerStateEnum.SEARCH)).toList();
 
-        acceptedUsers.stream()
-                .peek(user -> user.setState(User.OwnerStateEnum.SEARCH))
-                .forEach(user -> {
-                    sendMessage(user.getTelegramId(), "Уважаемый " + user.getName() + " " + user.getSurname() +
-                            " Поздравляем, вы прошли пробный период!");
-                    sendMessage(supportChatId, "Пробный период закончился у " + user.getName() + " " + user.getSurname());
-                });
+        sortUsersWithStateAccepted.forEach(user -> {
+            sendMessage(user.getTelegramId(),
+                    String.format("Уважаемый %s %s Поздравляем, вы прошли пробный период!",
+                            user.getName(),user.getSurname()));
+            sendMessage(supportChatId,
+                    String.format("Пробный период закончился у %s %s.", user.getName(), user.getSurname()));
+        });
+        return sortUsersWithStateAccepted;
+    }
 
-
-        List<User> refusedUsers = allUsers.stream()
+    private List<User> changeStateRefusedToBlackListAndCollect(List<User> allUsers) {
+        List<User> sortUsersWithStateRefused = allUsers.stream()
                 .filter(user -> User.OwnerStateEnum.REFUSE.equals(user.getState()))
-                .toList();
+                .peek(user -> user.setState(User.OwnerStateEnum.BLACKLIST)).toList();
 
-        refusedUsers.stream()
+        sortUsersWithStateRefused.stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.BLACKLIST))
                 .forEach(user -> {
-                    sendMessage(user.getTelegramId(), "Уважаемый " + user.getName() + " " + user.getSurname() +
-                            " Вы НЕ прошли пробный период! Пожалуйста сдайте собаку в приют!");
-                    sendMessage(supportChatId, "Отказ подтвержден у " + user.getName() + " " + user.getSurname());
+                    sendMessage(user.getTelegramId(),
+                            String.format("Уважаемый %s %s Вы НЕ прошли пробный период! " +
+                                    "Пожалуйста сдайте собаку в приют!", user.getName(), user.getSurname()));
+                    sendMessage(supportChatId, String.format("Отказ подтвержден у %s %s.",
+                            user.getName(), user.getSurname()));
                 });
+        return sortUsersWithStateRefused;
+    }
 
+    private List<User> findStateProlongedAndCollect(List<User> allUsers) {
         List<User> prolongedUsers = allUsers.stream()
                 .filter(user -> User.OwnerStateEnum.PROLONGED.equals(user.getState()))
                 .toList();
@@ -68,31 +90,29 @@ public class Timer {
         prolongedUsers.stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.PROBATION))
                 .forEach(user -> {
-                    sendMessage(user.getTelegramId(), "Уважаемый " + user.getName() + " " + user.getSurname() +
-                            " Мы решили продлить пробный период на "
-                            + Duration.between(user.getEndTrialPeriod(), LocalDateTime.now()).toDays() + " дней!");
-                    sendMessage(supportChatId, "Продлено у " + user.getName() + " " + user.getSurname()
-                            + " на " + Duration.between(user.getEndTrialPeriod(), LocalDateTime.now()).toDays() + " дней!");
+                    sendMessage(user.getTelegramId(), String.format(
+                            "Уважаемый %s %s, мы решили продлить пробный период на %s дней!",
+                            user.getName(), user.getSurname(),
+                            Duration.between(user.getEndTrialPeriod(), LocalDateTime.now()).toDays()));
+                    sendMessage(supportChatId, String.format("Продлено у %s %s на %s дней!",user.getName(), user.getSurname(),
+                             Duration.between(user.getEndTrialPeriod(), LocalDateTime.now()).toDays()));
                 });
+        return prolongedUsers;
+    }
 
-        List<User> decisionMakingOfVolunteersAboutUsers = allUsers.stream()
+    private List<User> decisionMakingOfVolunteersAboutUsers(List<User> allUsers) {
+        List<User> decisionAboutUsers = allUsers.stream()
                 .filter(user -> user.getEndTrialPeriod().isAfter(LocalDateTime.now()))
                 .toList();
 
-        decisionMakingOfVolunteersAboutUsers.stream()
+        decisionAboutUsers.stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.DECISION))
                 .forEach(user -> {
-                    sendMessage(user.getTelegramId(), "Уважаемый " + user.getName() + " " + user.getSurname() +
-                            " Закончился испытательный срок, пожалуйста дождитесь принятия решения волонтером о вашем животном!");
-                    sendMessage(supportChatId, "Отказ подтвержден у " + user.getName() + " " + user.getSurname());
+                    sendMessage(user.getTelegramId(), String.format("Уважаемый %s %s, у Вас закончился испытательный срок," +
+                            " пожалуйста дождитесь принятия решения волонтером о вашем животном!", user.getName(), user.getSurname()));
+                    sendMessage(supportChatId, String.format("Отказ подтвержден у %s %s.",user.getName(), user.getSurname()));
                 });
-
-        List<User> saveChangeOfUsers = new ArrayList<>();
-        saveChangeOfUsers.addAll(refusedUsers);
-        saveChangeOfUsers.addAll(prolongedUsers);
-        saveChangeOfUsers.addAll(decisionMakingOfVolunteersAboutUsers);
-        saveChangeOfUsers.forEach(userService::save); // сохраняем изменения в БД
-
+        return decisionAboutUsers;
     }
 
 
@@ -121,7 +141,8 @@ public class Timer {
 
         for (User user : usersWithoutReportForTwoDays) {
             sendMessage(supportChatId,
-                    "Последний отчет был принят более двух дней у :" + user.getName() + " " + user.getSurname());
+                    String.format("Последний отчет был принят более двух дней у : %s %s.",
+                            user.getName(), user.getSurname()));
             sendMessage(user.getTelegramId(),
                     "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");
         }

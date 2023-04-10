@@ -60,4 +60,12 @@ ALTER TABLE users
 
 --changeSet slyubimov:2
 ALTER TABLE users
-ADD COLUMN endTrialPeriod TIMESTAMP;
+ADD COLUMN end_trial_period TIMESTAMP;
+
+--changeSet slyubimov:3
+ALTER TABLE animals drop COLUMN start_test,
+    ADD COLUMN end_test TIMESTAMP;
+
+--changeSet slyubimov:4
+ALTER TABLE animals
+    ADD COLUMN state VARCHAR(10)
