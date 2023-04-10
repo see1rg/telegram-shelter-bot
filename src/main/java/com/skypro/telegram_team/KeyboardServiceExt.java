@@ -215,11 +215,8 @@ public class KeyboardServiceExt {
             } else if (Menu.ASK_VOLUNTEER.getText().equals(message.text())) {
                 //Вопрос волонтеру
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
-                findVolunteers().entrySet().stream()
-                        .forEach((entry) -> {
-                            markup.addRow(new InlineKeyboardButton(entry.getValue())
-                                    .callbackData(Commands.ASK_VOLUNTEER + entry.getKey()));
-                        });
+                findVolunteers().forEach((key, value) -> markup.addRow(new InlineKeyboardButton(value)
+                        .callbackData(Commands.ASK_VOLUNTEER + key)));
                 markup.addRow(new InlineKeyboardButton(Commands.ASK_ANY_VOLUNTEER.getText())
                         .callbackData(Commands.ASK_ANY_VOLUNTEER.name()));
                 sendMessage = new SendMessage(message.chat().id(), "Кого спросить?");
@@ -408,7 +405,7 @@ public class KeyboardServiceExt {
      * @return
      */
     private SendMessage sendQuestionToVolunteer(Question question, Message message) {
-        SendMessage sendMessage = null;
+        SendMessage sendMessage;
         if (question.getQuestion() == null) {
             question.setId(message.messageId());
             question.setQuestion(String.format("%d: Сообщение от пользователя, для ответа используйте reply:\n %s",
@@ -496,7 +493,7 @@ public class KeyboardServiceExt {
                 .filter(User::isVolunteer)
                 .collect(Collectors.toMap(
                         user -> Long.toString(user.getTelegramId()),
-                        user -> user.getName()));
+                        User::getName));
     }
 
     //метод для тестов, нужно заменить методом из UserService
@@ -517,7 +514,7 @@ public class KeyboardServiceExt {
     private Report findReportByUserAndDate(User user, LocalDateTime dateTime) {
         LocalDateTime finalDateTime = dateTime.truncatedTo(ChronoUnit.DAYS);
         return reportService.findAll().stream()
-                .filter(r -> r.getUserId() == user.getId() &&
+                .filter(r -> r.getUser().getId() == user.getId() &&
                         r.getDate().toLocalDate().isEqual(finalDateTime.toLocalDate()))
                 .findFirst().orElse(new Report());
     }
@@ -540,7 +537,7 @@ public class KeyboardServiceExt {
         if (report.getId() == 0L) {
             //Сейчас все поля обязательны, заполняем значениями по-умолчанию
             //Далее нужно убрать обязательность с некоторых полей!!!
-            report.setUserId(user.getId());
+//            report.setUserId(user.getId());
             report.setAnimalId(1);//(user.getAnimal().getId); //Добавить поиск собаки
             report.setStatus("new");
             report.setDescription("default");
