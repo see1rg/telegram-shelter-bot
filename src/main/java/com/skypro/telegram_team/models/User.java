@@ -26,7 +26,6 @@ public class User {
     private String surname;
     private String phone;
     private String email;
-    private long animalId;
     private LocalDateTime endTrialPeriod;
 
 

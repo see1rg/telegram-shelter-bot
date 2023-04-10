@@ -25,7 +25,7 @@ public class Animal {
     private String breed;
     private String description;
     private LocalDateTime endTest;
-    private int daysForTest;
+//    private int daysForTest; // дублируется поле у юзера endTrialPeriod выбрать
 
     @OneToOne
     @JoinColumn(name = "user_id")

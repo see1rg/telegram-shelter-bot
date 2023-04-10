@@ -47,7 +47,7 @@ public class Timer {
         saveChangeOfUsers.addAll(prolongedUsers);
         saveChangeOfUsers.addAll(decisionAboutUsers);
 
-        saveChangeOfUsers.forEach(userService::save); // сохраняем изменения в БД
+        saveChangeOfUsers.forEach(userService::save); // сохраняем изменения в БД добавить id
     }
 
     private List<User> changeStateAcceptedToSearchAndCollect(List<User> allUsers) {
