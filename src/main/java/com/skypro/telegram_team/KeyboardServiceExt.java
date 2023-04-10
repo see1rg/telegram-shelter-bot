@@ -215,8 +215,11 @@ public class KeyboardServiceExt {
             } else if (Menu.ASK_VOLUNTEER.getText().equals(message.text())) {
                 //Вопрос волонтеру
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
-                findVolunteers().forEach((key, value) -> markup.addRow(new InlineKeyboardButton(value)
-                        .callbackData(Commands.ASK_VOLUNTEER + key)));
+                findVolunteers().entrySet().stream()
+                        .forEach((entry) -> {
+                            markup.addRow(new InlineKeyboardButton(entry.getValue())
+                                    .callbackData(Commands.ASK_VOLUNTEER + entry.getKey()));
+                        });
                 markup.addRow(new InlineKeyboardButton(Commands.ASK_ANY_VOLUNTEER.getText())
                         .callbackData(Commands.ASK_ANY_VOLUNTEER.name()));
                 sendMessage = new SendMessage(message.chat().id(), "Кого спросить?");
@@ -405,7 +408,7 @@ public class KeyboardServiceExt {
      * @return
      */
     private SendMessage sendQuestionToVolunteer(Question question, Message message) {
-        SendMessage sendMessage;
+        SendMessage sendMessage = null;
         if (question.getQuestion() == null) {
             question.setId(message.messageId());
             question.setQuestion(String.format("%d: Сообщение от пользователя, для ответа используйте reply:\n %s",
@@ -493,7 +496,7 @@ public class KeyboardServiceExt {
                 .filter(User::isVolunteer)
                 .collect(Collectors.toMap(
                         user -> Long.toString(user.getTelegramId()),
-                        User::getName));
+                        user -> user.getName()));
     }
 
     //метод для тестов, нужно заменить методом из UserService

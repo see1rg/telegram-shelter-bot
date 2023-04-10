@@ -86,7 +86,7 @@ public class UserService {
         User userToUpdate = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setId(id);
-        if (user.getState().equals(User.OwnerStateEnum.PROBATION)) {
+        if (user.getState().equals(User.OwnerStateEnum.PROBATION) && user.getEndTrialPeriod() != null) {
             user.setEndTrialPeriod(LocalDateTime.now().plusDays(30));
         }
         modelMapper.map(user, userToUpdate);
