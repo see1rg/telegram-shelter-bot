@@ -517,7 +517,7 @@ public class KeyboardServiceExt {
     private Report findReportByUserAndDate(User user, LocalDateTime dateTime) {
         LocalDateTime finalDateTime = dateTime.truncatedTo(ChronoUnit.DAYS);
         return reportService.findAll().stream()
-                .filter(r -> r.getUserId() == user.getId() &&
+                .filter(r -> r.getUser().getId() == user.getId() &&
                         r.getDate().toLocalDate().isEqual(finalDateTime.toLocalDate()))
                 .findFirst().orElse(new Report());
     }
@@ -540,7 +540,7 @@ public class KeyboardServiceExt {
         if (report.getId() == 0L) {
             //Сейчас все поля обязательны, заполняем значениями по-умолчанию
             //Далее нужно убрать обязательность с некоторых полей!!!
-            report.setUserId(user.getId());
+//            report.setUserId(user.getId());
             report.setAnimalId(1);//(user.getAnimal().getId); //Добавить поиск собаки
             report.setStatus("new");
             report.setDescription("default");
