@@ -14,4 +14,5 @@ public interface AnimalRepository extends JpaRepository<Animal, Long> {
 
     Optional<List<Animal>> findAnimalsByName(String name);
 
+    List<Animal> findAllByUserIdNotNullAndState(Animal.AnimalStateEnum inTest);
 }

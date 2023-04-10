@@ -1,13 +1,5 @@
 -- liquibase formatted sql
 
--- changeSet 11th:3
-ALTER TABLE reports DROP COLUMN volunteer_id;
-DROP TABLE volunteers;
-
--- changeSet 11th:2
-ALTER TABLE users
-    ADD is_volunteer BOOL DEFAULT false;
-
 -- changeSet 11th:1
 CREATE TABLE IF NOT EXISTS users
 (
@@ -53,3 +45,19 @@ CREATE TABLE IF NOT EXISTS reports
     well_being      TEXT                           NOT NULL,
     change_behavior TEXT                           NOT NULL
 );
+
+-- changeSet 11th:2
+ALTER TABLE users
+    ADD is_volunteer BOOL DEFAULT false;
+
+-- changeSet 11th:3
+ALTER TABLE reports DROP COLUMN volunteer_id;
+DROP TABLE volunteers;
+
+--changeSet slyubimov:1
+ALTER TABLE users
+    ADD COLUMN state VARCHAR(10);
+
+--changeSet slyubimov:2
+ALTER TABLE users
+ADD COLUMN endTrialPeriod TIMESTAMP;
