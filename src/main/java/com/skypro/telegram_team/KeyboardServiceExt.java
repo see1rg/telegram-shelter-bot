@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -297,8 +296,8 @@ public class KeyboardServiceExt {
             sendMessage = new SendMessage(userChatId, "Напишите вопрос");
         } else if (callbackQuery.data().startsWith(Commands.ASK_ANY_VOLUNTEER.name())) {
             //Любой волонтер (будет найден первый попавшийся)
-            if (findAnyVolunteer().isPresent()) {
-                var volunteer = findAnyVolunteer().get();
+            if (userService.findAnyVolunteer().isPresent()) {
+                var volunteer = userService.findAnyVolunteer().get();
                 Long volunteerChatId = volunteer.getTelegramId();
                 questionsBuffer.addQuestion(new Question(userChatId, volunteerChatId));
                 sendMessage = new SendMessage(userChatId, "Напишите вопрос");
@@ -398,6 +397,7 @@ public class KeyboardServiceExt {
 
     /**
      * Отправить сообщение волонтеру
+     * В сообщении вначале указываем id сообщения пользователя
      *
      * @param question
      * @param message
@@ -425,13 +425,17 @@ public class KeyboardServiceExt {
      */
     private SendMessage updateRequestedUserData(Request request, Message message) {
         Long userChatId = message.chat().id();
-        String userName = message.chat().username();
-        User user = addUserIfNotExist(userChatId, userName);
-        if (request.isUserPhoneRequested())
-            user.setPhone(message.text());
-        if (request.isUserEmailRequested())
-            user.setEmail(message.text());
-        userService.update(user, user.getId());
+        try {
+            User user = addUserIfNotExist(message);
+            if (request.isUserPhoneRequested())
+                user.setPhone(message.text());
+            if (request.isUserEmailRequested())
+                user.setEmail(message.text());
+            userService.update(user, user.getId());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new SendMessage(userChatId, String.format("Возникла ошибка: %s", e.getMessage()));
+        }
         return new SendMessage(userChatId, "Данные пользователя записаны");
     }
 
@@ -446,26 +450,30 @@ public class KeyboardServiceExt {
      */
     private SendMessage updateRequestedReportData(Request request, Message message) {
         Long userChatId = message.chat().id();
-        String userName = message.chat().username();
-        Report report = addReportIfNotExist(
-                addUserIfNotExist(userChatId, userName));
-        if (request.isReportDietRequested()) {
-            report.setDiet(message.text());
-        }
-        if (request.isReportBehaviorRequested()) {
-            report.setChangeBehavior(message.text());
-        }
-        if (request.isReportPhotoRequested()) {
-            if (message.photo() != null) {
-                report.setPhoto(message.photo()[0].fileId().getBytes());
-            } else {
-                return new SendMessage(userChatId, "Пришлите фото");
+        try {
+            Report report = addReportIfNotExist(
+                    addUserIfNotExist(message));
+            if (request.isReportDietRequested()) {
+                report.setDiet(message.text());
             }
+            if (request.isReportBehaviorRequested()) {
+                report.setChangeBehavior(message.text());
+            }
+            if (request.isReportPhotoRequested()) {
+                if (message.photo() != null) {
+                    report.setPhoto(message.photo()[0].fileId().getBytes());
+                } else {
+                    return new SendMessage(userChatId, "Пришлите фото");
+                }
+            }
+            if (request.isReportWellBeingRequest()) {
+                report.setWellBeing(message.text());
+            }
+            reportService.update(report, report.getId());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return new SendMessage(userChatId, String.format("Возникла ошибка: %s", e.getMessage()));
         }
-        if (request.isReportWellBeingRequest()) {
-            report.setWellBeing(message.text());
-        }
-        reportService.update(report, report.getId());
         return new SendMessage(userChatId, "Данные отчета записаны");
     }
 
@@ -484,54 +492,57 @@ public class KeyboardServiceExt {
         return 0;
     }
 
-    //метод для тестов, нужно заменить методом из UserService
+    /**
+     * Поиск волонтеров, метод возвращает Map, где
+     * ключ chatId волонтера
+     * значение имя волонтера
+     *
+     * @return
+     */
     private Map<String, String> findVolunteers() {
-        return userService.findAll().stream()
-                .filter(User::isVolunteer)
+        return userService.findVolunteers().stream()
                 .collect(Collectors.toMap(
                         user -> Long.toString(user.getTelegramId()),
                         user -> user.getName()));
     }
 
-    //метод для тестов, нужно заменить методом из UserService
-    private Optional<User> findAnyVolunteer() {
-        return userService.findAll().stream()
-                .filter(User::isVolunteer)
-                .findAny();
-    }
-
-    //метод для тестов, нужно заменить методом из UserService
-    private User findByTelegramId(Long telegramId) {
-        return userService.findAll().stream()
-                .filter(u -> u.getTelegramId() == telegramId)
-                .findFirst().orElse(new User());
-    }
-
-    //метод для тестов, нужно заменить методом из ReportService
-    private Report findReportByUserAndDate(User user, LocalDateTime dateTime) {
-        LocalDateTime finalDateTime = dateTime.truncatedTo(ChronoUnit.DAYS);
-        return reportService.findAll().stream()
-                .filter(r -> r.getUser().getId() == user.getId() &&
-                        r.getDate().toLocalDate().isEqual(finalDateTime.toLocalDate()))
-                .findFirst().orElse(new Report());
-    }
-
-    //метод для тестов, подумать куда его переместить
-    private User addUserIfNotExist(Long telegramId, String username) {
-        User user = findByTelegramId(telegramId);
+    /**
+     * Создать пользователя если еще нет в БД
+     * поиск по telegramId
+     *
+     * @param message
+     * @return
+     */
+    private User addUserIfNotExist(Message message) {
+        Long telegramId = message.chat().id();
+        User user = userService.findByTelegramId(telegramId);
         if (user.getId() == 0L) {
             user.setTelegramId(telegramId);
-            user.setName(username);
+            if (message.chat().firstName() != null) {
+                user.setName(message.chat().firstName());
+            } else {
+                user.setName(message.chat().username());
+            }
+            if (message.chat().lastName() != null) {
+                user.setSurname(message.chat().lastName());
+            } else {
+                user.setSurname(message.chat().username());
+            }
             user.setState(User.OwnerStateEnum.SEARCH);
             userService.save(user);
         }
         return user;
     }
 
-    //метод для тестов, подумать куда его переместить
+    /**
+     * Создать отчет если еще нет в БД
+     * считаем что один отчет в день от пользователя
+     *
+     * @param user
+     * @return
+     */
     private Report addReportIfNotExist(User user) {
-        //Ищем отчет на текущую дату, считаем что один отчет в день от пользователя
-        Report report = findReportByUserAndDate(user, LocalDateTime.now());
+        Report report = reportService.findFirstByUserIdAndDate(user.getId(), LocalDateTime.now());
         if (report.getId() == 0L) {
             report.setUser(user);
             report.setAnimal(user.getAnimal());
