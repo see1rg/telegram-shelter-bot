@@ -20,7 +20,7 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @Operation(summary = "Поиск отчета по id", description = "Поиск отчета по id")
+    @Operation(summary = "Поиск отчета по id", description = "Поиск отчета по id", tags = "Reports")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Отчет найден по id", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = Report.class))
@@ -31,7 +31,7 @@ public class ReportController {
         return reportService.findById(id);
     }
 
-    @Operation(summary = "Получение списка всех отчетов", description = "Получение списка всех отчетов")
+    @Operation(summary = "Получение списка всех отчетов", description = "Получение списка всех отчетов", tags = "Reports")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список всех отчетов", content = {
                     @Content(mediaType = "application/json", array = @ArraySchema(
@@ -43,7 +43,7 @@ public class ReportController {
         return reportService.findAll();
     }
 
-    @Operation(summary = "Удаление отчета по id", description = "Удаление отчета по id")
+    @Operation(summary = "Удаление отчета по id", description = "Удаление отчета по id", tags = "Reports")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Отчет удален", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = Report.class))
@@ -54,7 +54,7 @@ public class ReportController {
         return reportService.deleteById(id);
     }
 
-    @Operation(summary = "Создание отчета", description = "Создание отчета")
+    @Operation(summary = "Создание отчета", description = "Создание отчета", tags = "Reports")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Отчет создан", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = Report.class))
@@ -65,7 +65,7 @@ public class ReportController {
         return reportService.save(report);
     }
 
-    @Operation(summary = "Изменение отчета", description = "Изменение отчета")
+    @Operation(summary = "Изменение отчета", description = "Изменение отчета", tags = "Reports")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Измененный отчет", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = Report.class))

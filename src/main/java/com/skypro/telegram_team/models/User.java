@@ -1,5 +1,6 @@
 package com.skypro.telegram_team.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -30,6 +31,7 @@ public class User {
 
     @OneToOne
     @JoinColumn(name = "animal_id", referencedColumnName = "id")
+    @JsonIgnoreProperties("user")
     private Animal animal;
 
     @Enumerated(EnumType.STRING)

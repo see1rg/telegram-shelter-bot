@@ -75,11 +75,11 @@ public class AnimalController {
         return animalService.findById(id);
     }
 
-    @GetMapping("/{name}")
+    @Operation(summary = "поиск животного в БД по имени", tags = "Animals")
+    @GetMapping("/name/{name}")
     public List<Animal> findByName(@PathVariable String name) {
         return animalService.findByName(name);
     }
-
 
     @Operation(summary = "Получение списка всех животных из БД"
             , tags = "Animals"
