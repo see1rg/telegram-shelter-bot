@@ -38,7 +38,7 @@ public class User {
     private OwnerStateEnum state;
 
     public enum OwnerStateEnum {
-        SEARCH, PROBATION, ACCEPTED, REFUSE, PROLONGED, DECISION, BLACKLIST
+        SEARCH, PROBATION, ACCEPTED, REFUSE, PROLONGED, DECISION, BLACKLIST, ADOPTED
     }
 
     private boolean isVolunteer;

@@ -32,35 +32,54 @@ public class Timer {
     @Value("${telegram.bot.support.chat}")
     private long supportChatId;
 
+    /** Проверка и изменение статуса пользователей. У пользователей есть следующие состояния:
+     * ACCEPTED - усыновление одобрено и при следующей проверке статус будет изменен на ADOPTED
+     * для хранения в БД информации о пользователе
+     *
+     */
     @Scheduled(cron = "0 0 9-18/3 * * *")
-    void endTrialPeriod() {
+    void checkAndChangeUsersStatus() {
+
         List<User> allUsers = userService.findAll();
+        List<Animal> allAnimals = animalService.findAll();
 
-        List<User> acceptedUsers = changeStateAcceptedToSearchAndCollect(allUsers);
-        List<User> refusedUsers = changeStateRefusedToBlackListAndCollect(allUsers);
-        List<User> prolongedUsers = findStateProlongedAndCollect(allUsers);
-        List<User> decisionAboutUsers = decisionMakingOfVolunteersAboutUsers(allUsers);
+        List<User> acceptedUsers = changeStateAcceptedToAdoptedAndCollect(allUsers); // изменяем статус на ADOPTED у user
+        List<Animal> acceptedAnimals = changeStateAcceptedToHappyEndAndCollect(allAnimals); // изменяем статус на HAPPY_END у animal
 
-        List<User> saveChangeOfUsers = new ArrayList<>();
-        saveChangeOfUsers.addAll(acceptedUsers);
-        saveChangeOfUsers.addAll(refusedUsers);
-        saveChangeOfUsers.addAll(prolongedUsers);
-        saveChangeOfUsers.addAll(decisionAboutUsers);
+        List<User> refusedUsers = changeStateRefusedToBlackListAndCollect(allUsers); // изменяем статус на BLACKLIST у user
+        List<Animal> backInShelterAnimals = changeStateRefusedToInShelterListAndCollect(allAnimals); // изменяем статус на IN_SHELTER_LIST у animal
 
-        saveChangeOfUsers.forEach(userService::save); // сохраняем изменения в БД
+        List<User> prolongedUsers = findStateProlongedAndCollect(allUsers); // изменяем статус на PROLONGED у user
+
+        List<User> decisionAboutUsers = decisionMakingOfVolunteersAboutUsers(allUsers); // изменяем статус на DECISION_ABOUT_USERS у user
+
+        List<User> saveChangesOfUsers = new ArrayList<>();
+        saveChangesOfUsers.addAll(acceptedUsers);
+        saveChangesOfUsers.addAll(refusedUsers);
+        saveChangesOfUsers.addAll(prolongedUsers);
+        saveChangesOfUsers.addAll(decisionAboutUsers); // объединяем все в один массив
+
+        List<Animal> saveChangesOfAnimals = new ArrayList<>();
+        saveChangesOfAnimals.addAll(acceptedAnimals);
+        saveChangesOfAnimals.addAll(backInShelterAnimals); // объединяем все в один массив
+
+        saveChangesOfUsers.forEach(user -> userService.update(user, user.getId())); // обновляем изменения в БД
+        saveChangesOfAnimals.forEach(animal -> animalService.update(animal, animal.getId()));
     }
 
-    private List<User> changeStateAcceptedToSearchAndCollect(List<User> allUsers) {
+
+    private List<User> changeStateAcceptedToAdoptedAndCollect(List<User> allUsers) {
         List<User> sortUsersWithStateAccepted = allUsers.stream()
                 .filter(user -> User.OwnerStateEnum.ACCEPTED.equals(user.getState()))
-                .peek(user -> user.setState(User.OwnerStateEnum.SEARCH)).toList();
+                .peek(user -> user.setState(User.OwnerStateEnum.ADOPTED)).toList();
 
         sortUsersWithStateAccepted.forEach(user -> {
             sendMessage(user.getTelegramId(),
                     String.format("Уважаемый %s %s Поздравляем, вы прошли пробный период!",
                             user.getName(),user.getSurname()));
             sendMessage(supportChatId,
-                    String.format("Пробный период закончился у %s %s.", user.getName(), user.getSurname()));
+                    String.format("Одобрение на усыновление подтверждено у %s %s.",
+                            user.getName(), user.getSurname()));
         });
         return sortUsersWithStateAccepted;
     }
@@ -94,7 +113,8 @@ public class Timer {
                             "Уважаемый %s %s, мы решили продлить пробный период на %s дней!",
                             user.getName(), user.getSurname(),
                             Duration.between(user.getEndTest(), LocalDateTime.now()).toDays()));
-                    sendMessage(supportChatId, String.format("Продлено у %s %s на %s дней!",user.getName(), user.getSurname(),
+                    sendMessage(supportChatId, String.format("Продлено у %s %s на %s дней!",
+                            user.getName(), user.getSurname(),
                              Duration.between(user.getEndTest(), LocalDateTime.now()).toDays()));
                 });
         return prolongedUsers;
@@ -108,11 +128,25 @@ public class Timer {
         decisionAboutUsers.stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.DECISION))
                 .forEach(user -> {
-                    sendMessage(user.getTelegramId(), String.format("Уважаемый %s %s, у Вас закончился испытательный срок," +
-                            " пожалуйста дождитесь принятия решения волонтером о вашем животном!", user.getName(), user.getSurname()));
-                    sendMessage(supportChatId, String.format("Отказ подтвержден у %s %s.",user.getName(), user.getSurname()));
+                    sendMessage(user.getTelegramId(), String.format(
+                            "Уважаемый %s %s, у Вас закончился испытательный срок," +
+                            " пожалуйста дождитесь принятия решения волонтером о вашем животном!",
+                            user.getName(), user.getSurname()));
+                    sendMessage(supportChatId, String.format("Отказ подтвержден у %s %s.",
+                            user.getName(), user.getSurname()));
                 });
         return decisionAboutUsers;
+    }
+
+
+    private List<Animal> changeStateRefusedToInShelterListAndCollect(List<Animal> allAnimals) {
+        return allAnimals.stream().filter(animal -> (animal.getUser().getState().equals(User.OwnerStateEnum.BLACKLIST))).
+                peek(animal -> animal.setState(Animal.AnimalStateEnum.IN_SHELTER)).toList();
+    }
+
+    private List<Animal> changeStateAcceptedToHappyEndAndCollect(List<Animal> allAnimals) {
+        return allAnimals.stream().filter(animal -> (animal.getUser().getState().equals(User.OwnerStateEnum.ADOPTED))).
+                peek(animal -> animal.setState(Animal.AnimalStateEnum.HAPPY_END)).toList();
     }
 
 
@@ -127,9 +161,8 @@ public class Timer {
         List<User> usersWithoutReportForTwoDays = new ArrayList<>();
         List<User> usersWithoutDailyReport = new ArrayList<>();
 
-        for (Animal animal : animals) {
+        animals.forEach(animal -> {
             User user = animal.getUser();
-
             List<Report> reports = reportService.findByAnimalId(animal.getId());
             if (reports.isEmpty() || reports.get(reports.size() - 1).getDate().isBefore(yesterdayAt0AM)) {
                 usersWithoutDailyReport.add(user);
@@ -137,20 +170,18 @@ public class Timer {
             if (reports.get(reports.size() - 1).getDate().isBefore(twoDaysAgo)) {
                 usersWithoutReportForTwoDays.add(user);
             }
-        }
+        });
 
-        for (User user : usersWithoutReportForTwoDays) {
+        usersWithoutReportForTwoDays.forEach(user -> {
             sendMessage(supportChatId,
                     String.format("Последний отчет был принят более двух дней у : %s %s.",
                             user.getName(), user.getSurname()));
             sendMessage(user.getTelegramId(),
                     "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");
-        }
+        });
 
-        for (User user : usersWithoutDailyReport) {
-            sendMessage(user.getTelegramId(),
-                    "Здравствуйте, вчера от вас не поступал отчет о собаке. Пожалуйста, сдайте отчет.");
-        }
+        usersWithoutDailyReport.forEach(user -> sendMessage(user.getTelegramId(),
+                "Здравствуйте, вчера от вас не поступал отчет о собаке. Пожалуйста, сдайте отчет."));
 
     }
 
