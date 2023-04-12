@@ -1,6 +1,7 @@
 package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.Animal;
+import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -20,6 +20,7 @@ import java.util.List;
 @Service
 public class AnimalService {
     private final AnimalRepository animalRepository;
+
 
     public AnimalService(AnimalRepository animalRepository) {
         this.animalRepository = animalRepository;
@@ -114,17 +115,20 @@ public class AnimalService {
         Animal animalToUpdate = animalRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Animal not found"));
         animal.setId(id);
-        //Мне кажется это не нужно здесь
-        //if (animal.getEndTest() == null && animal.getState() != Animal.AnimalStateEnum.IN_SHELTER
-        //        && animal.getState() != Animal.AnimalStateEnum.HAPPY_END) {
-        //    animal.setEndTest(LocalDateTime.now().plusDays(30));    //если время окончания не установлено, то ставим 30 дней
-        //}
+
         modelMapper.map(animal, animalToUpdate);
         return animalRepository.save(animalToUpdate);
     }
 
     public List<Animal> findAllByUserIdNotNullAndState(Animal.AnimalStateEnum inTest) {
-        log.info("Finding animals by user id and state");
+        log.info("Finding animals by user id and state - " + inTest);
         return animalRepository.findAllByUserIdNotNullAndState(inTest);
     }
+
+
+    public List<Animal> findByUserState(User.OwnerStateEnum ownerStateEnum) {
+        log.info("Finding animals by user state - " + ownerStateEnum);
+        return animalRepository.findByUserContainsOrderByState(ownerStateEnum);
+    }
+
 }

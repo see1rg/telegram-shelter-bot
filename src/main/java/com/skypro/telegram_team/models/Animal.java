@@ -1,13 +1,11 @@
 package com.skypro.telegram_team.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -28,10 +26,11 @@ public class Animal {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @JsonIgnoreProperties("animal")
+    @JsonIgnore
     private User user;
 
     @Lob
+    @JsonIgnore
     private byte[] photo;
 
     @Enumerated(EnumType.STRING)

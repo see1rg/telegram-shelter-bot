@@ -107,12 +107,16 @@ public class UserService {
      * @param isVolunteer
      * @return
      */
+    @Transactional
     public User userIsVolunteer(Long id, Boolean isVolunteer) {
         log.info("User is volunteer: " + isVolunteer);
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setVolunteer(isVolunteer);
         return update(user, id);
     }
+
+    public List<User> findByState(User.OwnerStateEnum state) {
+        return userRepository.findByState(state);
 
     /**
      * Поиск волонтеров
@@ -185,5 +189,6 @@ public class UserService {
     private boolean isEmailValid(String email) {
         //Добавить проверку почты
         return true;
+
     }
 }

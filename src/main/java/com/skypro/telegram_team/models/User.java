@@ -1,10 +1,9 @@
 package com.skypro.telegram_team.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -31,14 +30,14 @@ public class User {
 
     @OneToOne
     @JoinColumn(name = "animal_id", referencedColumnName = "id")
-    @JsonIgnoreProperties("user")
+    @JsonIgnore
     private Animal animal;
 
     @Enumerated(EnumType.STRING)
     private OwnerStateEnum state;
 
     public enum OwnerStateEnum {
-        SEARCH, PROBATION, ACCEPTED, REFUSE, PROLONGED, DECISION, BLACKLIST
+        SEARCH, PROBATION, ACCEPTED, REFUSE, PROLONGED, DECISION, BLACKLIST, ADOPTED
     }
 
     private boolean isVolunteer;
