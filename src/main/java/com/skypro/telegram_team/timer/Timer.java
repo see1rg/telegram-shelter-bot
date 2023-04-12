@@ -40,18 +40,15 @@ public class Timer {
     @Scheduled(cron = "0 0 9-18/3 * * *")
     void checkAndChangeUsersStatus() {
 
-        List<User> allUsers = userService.findAll();
-        List<Animal> allAnimals = animalService.findAll();
+        List<User> acceptedUsers = changeStateAcceptedToAdoptedAndCollect(); // изменяем статус на ADOPTED у user
+        List<Animal> acceptedAnimals = changeStateAcceptedToHappyEndAndCollect(); // изменяем статус на HAPPY_END у animal
 
-        List<User> acceptedUsers = changeStateAcceptedToAdoptedAndCollect(allUsers); // изменяем статус на ADOPTED у user
-        List<Animal> acceptedAnimals = changeStateAcceptedToHappyEndAndCollect(allAnimals); // изменяем статус на HAPPY_END у animal
+        List<User> refusedUsers = changeStateRefusedToBlackListAndCollect(); // изменяем статус на BLACKLIST у user
+        List<Animal> backInShelterAnimals = changeStateRefusedToInShelterListAndCollect(); // изменяем статус на IN_SHELTER_LIST у animal
 
-        List<User> refusedUsers = changeStateRefusedToBlackListAndCollect(allUsers); // изменяем статус на BLACKLIST у user
-        List<Animal> backInShelterAnimals = changeStateRefusedToInShelterListAndCollect(allAnimals); // изменяем статус на IN_SHELTER_LIST у animal
+        List<User> prolongedUsers = findStateProlongedAndCollect(); // изменяем статус на PROLONGED у user
 
-        List<User> prolongedUsers = findStateProlongedAndCollect(allUsers); // изменяем статус на PROLONGED у user
-
-        List<User> decisionAboutUsers = decisionMakingOfVolunteersAboutUsers(allUsers); // изменяем статус на DECISION_ABOUT_USERS у user
+        List<User> decisionAboutUsers = decisionMakingOfVolunteersAboutUsers(); // изменяем статус на DECISION_ABOUT_USERS у user
 
         List<User> saveChangesOfUsers = new ArrayList<>();
         saveChangesOfUsers.addAll(acceptedUsers);
@@ -68,9 +65,8 @@ public class Timer {
     }
 
 
-    private List<User> changeStateAcceptedToAdoptedAndCollect(List<User> allUsers) {
-        List<User> sortUsersWithStateAccepted = allUsers.stream()
-                .filter(user -> User.OwnerStateEnum.ACCEPTED.equals(user.getState()))
+    private List<User> changeStateAcceptedToAdoptedAndCollect() {
+        List<User> sortUsersWithStateAccepted = userService.findByState(User.OwnerStateEnum.ACCEPTED).stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.ADOPTED)).toList();
 
         sortUsersWithStateAccepted.forEach(user -> {
@@ -84,9 +80,8 @@ public class Timer {
         return sortUsersWithStateAccepted;
     }
 
-    private List<User> changeStateRefusedToBlackListAndCollect(List<User> allUsers) {
-        List<User> sortUsersWithStateRefused = allUsers.stream()
-                .filter(user -> User.OwnerStateEnum.REFUSE.equals(user.getState()))
+    private List<User> changeStateRefusedToBlackListAndCollect() {
+        List<User> sortUsersWithStateRefused = userService.findByState(User.OwnerStateEnum.REFUSE).stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.BLACKLIST)).toList();
 
         sortUsersWithStateRefused.stream()
@@ -101,9 +96,8 @@ public class Timer {
         return sortUsersWithStateRefused;
     }
 
-    private List<User> findStateProlongedAndCollect(List<User> allUsers) {
-        List<User> prolongedUsers = allUsers.stream()
-                .filter(user -> User.OwnerStateEnum.PROLONGED.equals(user.getState()))
+    private List<User> findStateProlongedAndCollect() {
+        List<User> prolongedUsers = userService.findByState(User.OwnerStateEnum.PROLONGED).stream()
                 .toList();
 
         prolongedUsers.stream()
@@ -120,8 +114,8 @@ public class Timer {
         return prolongedUsers;
     }
 
-    private List<User> decisionMakingOfVolunteersAboutUsers(List<User> allUsers) {
-        List<User> decisionAboutUsers = allUsers.stream()
+    private List<User> decisionMakingOfVolunteersAboutUsers() {
+        List<User> decisionAboutUsers = userService.findByState(User.OwnerStateEnum.PROBATION).stream()
                 .filter(user -> user.getEndTest().isAfter(LocalDateTime.now()))
                 .toList();
 
@@ -132,20 +126,20 @@ public class Timer {
                             "Уважаемый %s %s, у Вас закончился испытательный срок," +
                             " пожалуйста дождитесь принятия решения волонтером о вашем животном!",
                             user.getName(), user.getSurname()));
-                    sendMessage(supportChatId, String.format("Отказ подтвержден у %s %s.",
+                    sendMessage(supportChatId, String.format("Принять решение об усыновлении животного у %s %s.",
                             user.getName(), user.getSurname()));
                 });
         return decisionAboutUsers;
     }
 
 
-    private List<Animal> changeStateRefusedToInShelterListAndCollect(List<Animal> allAnimals) {
-        return allAnimals.stream().filter(animal -> (animal.getUser().getState().equals(User.OwnerStateEnum.BLACKLIST))).
+    private List<Animal> changeStateRefusedToInShelterListAndCollect() {
+        return animalService.findByUserState(User.OwnerStateEnum.BLACKLIST).stream().
                 peek(animal -> animal.setState(Animal.AnimalStateEnum.IN_SHELTER)).toList();
     }
 
-    private List<Animal> changeStateAcceptedToHappyEndAndCollect(List<Animal> allAnimals) {
-        return allAnimals.stream().filter(animal -> (animal.getUser().getState().equals(User.OwnerStateEnum.ADOPTED))).
+    private List<Animal> changeStateAcceptedToHappyEndAndCollect() {
+        return animalService.findByUserState(User.OwnerStateEnum.ADOPTED).stream().
                 peek(animal -> animal.setState(Animal.AnimalStateEnum.HAPPY_END)).toList();
     }
 

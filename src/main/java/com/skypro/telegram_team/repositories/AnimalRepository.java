@@ -1,6 +1,7 @@
 package com.skypro.telegram_team.repositories;
 
 import com.skypro.telegram_team.models.Animal;
+import com.skypro.telegram_team.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +16,6 @@ public interface AnimalRepository extends JpaRepository<Animal, Long> {
     Optional<List<Animal>> findAnimalsByName(String name);
 
     List<Animal> findAllByUserIdNotNullAndState(Animal.AnimalStateEnum inTest);
+
+    List<Animal> findByUserContainsOrderByState(User.OwnerStateEnum ownerStateEnum);
 }
