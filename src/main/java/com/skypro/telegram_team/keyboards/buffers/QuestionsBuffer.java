@@ -1,4 +1,4 @@
-package com.skypro.telegram_team.buffers;
+package com.skypro.telegram_team.keyboards.buffers;
 
 import org.springframework.stereotype.Component;
 

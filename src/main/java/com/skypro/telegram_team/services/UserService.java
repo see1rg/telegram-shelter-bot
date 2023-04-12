@@ -1,5 +1,6 @@
 package com.skypro.telegram_team.services;
 
+import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.UserRepository;
 import lombok.extern.log4j.Log4j2;
@@ -10,7 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Сервис для работы с пользователями
@@ -33,7 +37,9 @@ public class UserService {
      */
     @Transactional
     public User save(User user) {
+        //Нужно переименовать метод save в create
         log.info("Saving user: " + user.getName() + " " + user.getSurname());
+        validate(user);
         return userRepository.save(user);
     }
 
@@ -82,6 +88,7 @@ public class UserService {
     @Transactional
     public User update(User user, Long id) {
         log.info("Updating myUser: " + user);
+        validate(user);
         ModelMapper modelMapper = new ModelMapper();
         User userToUpdate = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
@@ -105,5 +112,78 @@ public class UserService {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setVolunteer(isVolunteer);
         return update(user, id);
+    }
+
+    /**
+     * Поиск волонтеров
+     *
+     * @return
+     */
+    public Collection<User> findVolunteers() {
+        return userRepository.findByIsVolunteerTrue();
+    }
+
+    /**
+     * Поиск любого волонтера
+     *
+     * @return
+     */
+    public Optional<User> findAnyVolunteer() {
+        return findVolunteers().stream()
+                .findAny();
+    }
+
+    /**
+     * Поиск пользователя по telegramId, возвращает пустой User если не нашел в БД
+     *
+     * @param telegramId
+     * @return
+     */
+    public User findByTelegramId(Long telegramId) {
+        return userRepository.findByTelegramId(telegramId).stream()
+                .findFirst()
+                .orElse(new User());
+    }
+
+    /**
+     * Проверить данные пользователя, если данные некорректны то выбросить исключение {@link InvalidDataException}
+     *
+     * @param user
+     */
+    private void validate(User user) {
+        if (user.getName() == null) {
+            throw new InvalidDataException("Отсутствует имя пользователя");
+        }
+        if (user.getTelegramId() == 0L) {
+            throw new InvalidDataException("Отсутствует telegramId");
+        }
+        if (user.getPhone() != null && !isPhoneValid(user.getPhone())) {
+            throw new InvalidDataException("Некорректный телефон");
+        }
+        if (user.getEmail() != null && !isEmailValid(user.getEmail())) {
+            throw new InvalidDataException("Некорректная почта");
+        }
+    }
+
+    /**
+     * Проверить телефон, вернуть true если соответствует шаблону
+     *
+     * @param phone
+     * @return
+     */
+    private boolean isPhoneValid(String phone) {
+        //Добавить проверку телефона
+        return true;
+    }
+
+    /**
+     * Проверить почту, вернуть true если соответствует шаблону
+     *
+     * @param email
+     * @return
+     */
+    private boolean isEmailValid(String email) {
+        //Добавить проверку почты
+        return true;
     }
 }
