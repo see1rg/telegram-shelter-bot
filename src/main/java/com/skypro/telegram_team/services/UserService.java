@@ -117,7 +117,7 @@ public class UserService {
 
     public List<User> findByState(User.OwnerStateEnum state) {
         return userRepository.findByState(state);
-
+    }
     /**
      * Поиск волонтеров
      *
