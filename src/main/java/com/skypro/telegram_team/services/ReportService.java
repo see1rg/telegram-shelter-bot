@@ -1,7 +1,10 @@
 package com.skypro.telegram_team.services;
 
+import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.Report;
+import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.ReportRepository;
+import com.skypro.telegram_team.repositories.UserRepository;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -17,10 +23,13 @@ import java.util.List;
 @Log4j2
 @Service
 public class ReportService {
+    private final UserRepository userRepository;
     private final ReportRepository reportRepository;
 
-    public ReportService(ReportRepository reportRepository) {
+    public ReportService(ReportRepository reportRepository,
+                         UserRepository userRepository) {
         this.reportRepository = reportRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -31,7 +40,9 @@ public class ReportService {
      */
     @Transactional
     public Report save(Report report) {
+        //Нужно переименовать метод save в create
         log.info("Saving report: " + report);
+        validate(report);
         return reportRepository.save(report);
     }
 
@@ -80,6 +91,7 @@ public class ReportService {
     @Transactional
     public Report update(Report report, Long id) {
         log.info("Updating report: " + report);
+        validate(report);
         ModelMapper modelMapper = new ModelMapper();
         Report reportToUpdate = reportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Report not found"));
         report.setId(id);
@@ -96,5 +108,62 @@ public class ReportService {
     public List<Report> findByAnimalId(long id) {
         log.info("Finding reports by animal id: " + id);
         return reportRepository.findByAnimalId(id);
+    }
+
+    /**
+     * Поиск отчетов по пользователю используя метод репозитория {@link ReportRepository#findByUserId(Long)}}
+     *
+     * @param userId
+     * @return
+     */
+    public Collection<Report> findByUserId(Long userId) {
+        return reportRepository.findByUserId(userId);
+    }
+
+    /**
+     * Поиск отчетов пользователя по id и дате используя метод репозитория
+     * {@link ReportRepository#findByUserIdAndDate(Long, LocalDateTime)}}
+     *
+     * @param userId
+     * @param dateTime
+     * @return
+     */
+    public Collection<Report> findByUserIdAndDate(Long userId, LocalDateTime dateTime) {
+        return reportRepository.findByUserIdAndDate(userId, dateTime);
+    }
+
+    /**
+     * Поиск отчета пользователя по дате
+     * Если отчет не найден, то возвращаем пустой отчет
+     *
+     * @param userId
+     * @param dateTime
+     * @return
+     */
+    public Report findFirstByUserIdAndDate(Long userId, LocalDateTime dateTime) {
+        //почему-то не выбирает данные из БД по дате, поэтому пока фильтруем здесь
+        LocalDateTime finalDateTime = dateTime.truncatedTo(ChronoUnit.DAYS);
+        return findAll().stream()
+                .filter(r -> r.getUser().getId() == userId &&
+                        r.getDate().toLocalDate().isEqual(finalDateTime.toLocalDate()))
+                .findFirst()
+                .orElse(new Report());
+    }
+
+    /**
+     * Проверить данные отчета, если данные некорректны то выбросить исключение {@link InvalidDataException}
+     *
+     * @param report
+     */
+    private void validate(Report report) {
+        if (report.getUser() == null) {
+            throw new InvalidDataException("Отчет без пользователя");
+        }
+        if (report.getAnimal() == null) {
+            throw new InvalidDataException("Отчет без животного");
+        }
+        if (!report.getUser().getState().equals(User.OwnerStateEnum.PROBATION)) {
+            throw new InvalidDataException("Пользователь должен быть на испытательном сроке");
+        }
     }
 }

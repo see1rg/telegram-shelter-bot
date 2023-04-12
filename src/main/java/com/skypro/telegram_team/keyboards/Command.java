@@ -1,4 +1,4 @@
-package com.skypro.telegram_team;
+package com.skypro.telegram_team.keyboards;
 
 /**
  * Класс, перечисляющий команды, при вызове которых в телеграмботе будет ответ

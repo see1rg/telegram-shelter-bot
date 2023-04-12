@@ -4,8 +4,7 @@ package com.skypro.telegram_team.listener;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
-import com.skypro.telegram_team.KeyboardService;
-import com.skypro.telegram_team.KeyboardServiceExt;
+import com.skypro.telegram_team.keyboards.KeyboardServiceExt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
