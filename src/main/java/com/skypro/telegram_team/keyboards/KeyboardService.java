@@ -1,4 +1,4 @@
-package com.skypro.telegram_team;
+package com.skypro.telegram_team.keyboards;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -7,13 +7,11 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.skypro.telegram_team.listener.TelegramBotUpdatesListener;
-import com.skypro.telegram_team.models.Report;
-import com.skypro.telegram_team.services.ReportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import static com.skypro.telegram_team.Command.*;
+import static com.skypro.telegram_team.keyboards.Command.*;
 
 import com.vdurmont.emoji.*;
 

@@ -1,4 +1,4 @@
-package com.skypro.telegram_team;
+package com.skypro.telegram_team.keyboards;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.CallbackQuery;
@@ -6,10 +6,10 @@ import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.*;
 import com.pengrad.telegrambot.request.SendMessage;
-import com.skypro.telegram_team.buffers.Question;
-import com.skypro.telegram_team.buffers.QuestionsBuffer;
-import com.skypro.telegram_team.buffers.Request;
-import com.skypro.telegram_team.buffers.RequestsBuffer;
+import com.skypro.telegram_team.keyboards.buffers.Question;
+import com.skypro.telegram_team.keyboards.buffers.QuestionsBuffer;
+import com.skypro.telegram_team.keyboards.buffers.Request;
+import com.skypro.telegram_team.keyboards.buffers.RequestsBuffer;
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.services.ReportService;
