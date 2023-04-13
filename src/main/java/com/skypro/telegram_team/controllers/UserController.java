@@ -85,4 +85,10 @@ public class UserController {
     public User userIsVolunteer(@PathVariable Long id, @RequestParam("isVolunteer") Boolean isVolunteer) {
         return userService.userIsVolunteer(id, isVolunteer);
     }
+
+    @Operation(summary = "Связывание собаки и усыновителя.", tags = "Users" )
+    @PostMapping("/join")
+    public void joinAnimalAndUser(@RequestParam("animalId") long animalId, @RequestParam("userId") long userId) {
+        userService.joinAnimalAndUser(animalId, userId);
+    }
 }

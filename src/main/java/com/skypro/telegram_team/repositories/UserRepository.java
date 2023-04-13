@@ -16,5 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByState(User.OwnerStateEnum state);
 
-    Collection<User> findByTelegramId (Long telegramId);
+    Collection<User> findByTelegramId(Long telegramId);
+}
 
