@@ -11,6 +11,7 @@ import com.skypro.telegram_team.keyboards.buffers.QuestionsBuffer;
 import com.skypro.telegram_team.keyboards.buffers.Request;
 import com.skypro.telegram_team.keyboards.buffers.RequestsBuffer;
 import com.skypro.telegram_team.models.Report;
+import com.skypro.telegram_team.models.Shelter;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.services.ReportService;
 import com.skypro.telegram_team.services.UserService;
@@ -40,7 +41,7 @@ public class KeyboardServiceExt {
     /**
      * Пункты меню
      */
-    private enum Menu {
+    public enum Menu {
         START("/start"),
         GET_INFO("О приюте"),
         GET_ANIMAL("Как взять собаку"),
@@ -61,7 +62,7 @@ public class KeyboardServiceExt {
     /**
      * Команды для inline keyboard
      */
-    private enum Commands {
+    public enum Command {
         INF_SCHEDULE("Расписание"),
         INF_ADDRESS("Адрес"),
         INF_SCHEME("Схема проезда"),
@@ -86,7 +87,7 @@ public class KeyboardServiceExt {
 
         private final String text;
 
-        Commands(String text) {
+        Command(String text) {
             this.text = text;
         }
 
@@ -190,49 +191,49 @@ public class KeyboardServiceExt {
             } else if (Menu.GET_INFO.getText().equals(message.text())) {
                 //Инфо о приюте
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup
-                        (new InlineKeyboardButton(Commands.INF_SCHEDULE.getText()).callbackData(Commands.INF_SCHEDULE.name()),
-                                (new InlineKeyboardButton(Commands.INF_ADDRESS.getText()).callbackData(Commands.INF_ADDRESS.name())),
-                                (new InlineKeyboardButton(Commands.INF_SCHEME.getText()).callbackData(Commands.INF_SCHEME.name())))
-                        .addRow(new InlineKeyboardButton(Commands.INF_SAFETY.getText()).callbackData(Commands.INF_SAFETY.name()));
+                        (new InlineKeyboardButton(Command.INF_SCHEDULE.getText()).callbackData(Command.INF_SCHEDULE.name()),
+                                (new InlineKeyboardButton(Command.INF_ADDRESS.getText()).callbackData(Command.INF_ADDRESS.name())),
+                                (new InlineKeyboardButton(Command.INF_SCHEME.getText()).callbackData(Command.INF_SCHEME.name())))
+                        .addRow(new InlineKeyboardButton(Command.INF_SAFETY.getText()).callbackData(Command.INF_SAFETY.name()));
                 sendMessage = new SendMessage(message.chat().id(), "Информация о приюте");
                 sendMessage.replyMarkup(markup);
             } else if (Menu.GET_ANIMAL.getText().equals(message.text())) {
                 //Как взять собаку
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup
-                        (new InlineKeyboardButton(Commands.HOW_RULES.getText()).callbackData(Commands.HOW_RULES.name()))
-                        .addRow(new InlineKeyboardButton(Commands.HOW_DOCS.getText()).callbackData(Commands.HOW_DOCS.name()))
-                        .addRow(new InlineKeyboardButton(Commands.HOW_MOVE.getText()).callbackData(Commands.HOW_MOVE.name()))
-                        .addRow(new InlineKeyboardButton(Commands.HOW_ARRANGE.getText()).callbackData(Commands.HOW_ARRANGE.name()))
-                        .addRow(new InlineKeyboardButton(Commands.HOW_ARRANGE_PUPPY.getText()).callbackData(Commands.HOW_ARRANGE_PUPPY.name()))
-                        .addRow(new InlineKeyboardButton(Commands.HOW_ARRANGE_CRIPPLE.getText()).callbackData(Commands.HOW_ARRANGE_CRIPPLE.name()))
-                        .addRow(new InlineKeyboardButton(Commands.HOW_EXPERT_FIRST.getText()).callbackData(Commands.HOW_EXPERT_FIRST.name()))
-                        .addRow(new InlineKeyboardButton(Commands.HOW_EXPERT_NEXT.getText()).callbackData(Commands.HOW_EXPERT_NEXT.name()))
-                        .addRow(new InlineKeyboardButton(Commands.HOW_REJECT_REASONS.getText()).callbackData(Commands.HOW_REJECT_REASONS.name()));
+                        (new InlineKeyboardButton(Command.HOW_RULES.getText()).callbackData(Command.HOW_RULES.name()))
+                        .addRow(new InlineKeyboardButton(Command.HOW_DOCS.getText()).callbackData(Command.HOW_DOCS.name()))
+                        .addRow(new InlineKeyboardButton(Command.HOW_MOVE.getText()).callbackData(Command.HOW_MOVE.name()))
+                        .addRow(new InlineKeyboardButton(Command.HOW_ARRANGE.getText()).callbackData(Command.HOW_ARRANGE.name()))
+                        .addRow(new InlineKeyboardButton(Command.HOW_ARRANGE_PUPPY.getText()).callbackData(Command.HOW_ARRANGE_PUPPY.name()))
+                        .addRow(new InlineKeyboardButton(Command.HOW_ARRANGE_CRIPPLE.getText()).callbackData(Command.HOW_ARRANGE_CRIPPLE.name()))
+                        .addRow(new InlineKeyboardButton(Command.HOW_EXPERT_FIRST.getText()).callbackData(Command.HOW_EXPERT_FIRST.name()))
+                        .addRow(new InlineKeyboardButton(Command.HOW_EXPERT_NEXT.getText()).callbackData(Command.HOW_EXPERT_NEXT.name()))
+                        .addRow(new InlineKeyboardButton(Command.HOW_REJECT_REASONS.getText()).callbackData(Command.HOW_REJECT_REASONS.name()));
                 sendMessage = new SendMessage(message.chat().id(), "Как взять собаку");
                 sendMessage.replyMarkup(markup);
             } else if (Menu.ASK_VOLUNTEER.getText().equals(message.text())) {
                 //Вопрос волонтеру
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
                 findVolunteers().forEach((key, value) -> markup.addRow(new InlineKeyboardButton(value)
-                        .callbackData(Commands.ASK_VOLUNTEER + key)));
-                markup.addRow(new InlineKeyboardButton(Commands.ASK_ANY_VOLUNTEER.getText())
-                        .callbackData(Commands.ASK_ANY_VOLUNTEER.name()));
+                        .callbackData(Command.ASK_VOLUNTEER + key)));
+                markup.addRow(new InlineKeyboardButton(Command.ASK_ANY_VOLUNTEER.getText())
+                        .callbackData(Command.ASK_ANY_VOLUNTEER.name()));
                 sendMessage = new SendMessage(message.chat().id(), "Кого спросить?");
                 sendMessage.replyMarkup(markup);
             } else if (Menu.SET_USER_DATA.getText().equals(message.text())) {
                 //Записать данные пользователя
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup
-                        (new InlineKeyboardButton(Commands.SAVE_USER_PHONE.getText()).callbackData(Commands.SAVE_USER_PHONE.name()),
-                                (new InlineKeyboardButton(Commands.SAVE_USER_EMAIL.getText()).callbackData(Commands.SAVE_USER_EMAIL.name())));
+                        (new InlineKeyboardButton(Command.SAVE_USER_PHONE.getText()).callbackData(Command.SAVE_USER_PHONE.name()),
+                                (new InlineKeyboardButton(Command.SAVE_USER_EMAIL.getText()).callbackData(Command.SAVE_USER_EMAIL.name())));
                 sendMessage = new SendMessage(message.chat().id(), "Какие данные записать?");
                 sendMessage.replyMarkup(markup);
             } else if (Menu.SEND_REPORT.getText().equals(message.text())) {
                 //Отправить отчет
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup
-                        (new InlineKeyboardButton(Commands.SEND_PHOTO.getText()).callbackData(Commands.SEND_PHOTO.name()),
-                                (new InlineKeyboardButton(Commands.SEND_DIET.getText()).callbackData(Commands.SEND_DIET.name())))
-                        .addRow((new InlineKeyboardButton(Commands.SEND_BEHAVIOR.getText()).callbackData(Commands.SEND_BEHAVIOR.name())),
-                                (new InlineKeyboardButton(Commands.SEND_WELL_BEING.getText()).callbackData(Commands.SEND_WELL_BEING.name())));
+                        (new InlineKeyboardButton(Command.SEND_PHOTO.getText()).callbackData(Command.SEND_PHOTO.name()),
+                                (new InlineKeyboardButton(Command.SEND_DIET.getText()).callbackData(Command.SEND_DIET.name())))
+                        .addRow((new InlineKeyboardButton(Command.SEND_BEHAVIOR.getText()).callbackData(Command.SEND_BEHAVIOR.name())),
+                                (new InlineKeyboardButton(Command.SEND_WELL_BEING.getText()).callbackData(Command.SEND_WELL_BEING.name())));
                 sendMessage = new SendMessage(message.chat().id(), "Какие данные отправить?");
                 sendMessage.replyMarkup(markup);
             }
@@ -250,51 +251,51 @@ public class KeyboardServiceExt {
         //callback команды
         Long userChatId = callbackQuery.message().chat().id();
         SendMessage sendMessage = null;
-        if (callbackQuery.data().equals(Commands.INF_ADDRESS.name())) {
+        if (callbackQuery.data().equals(Command.INF_ADDRESS.name())) {
             //Адрес
-            sendMessage = new SendMessage(userChatId, "Адрес такой то...");
-        } else if (callbackQuery.data().equals(Commands.INF_SCHEDULE.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getAddress());
+        } else if (callbackQuery.data().equals(Command.INF_SCHEDULE.name())) {
             //Расписание
-            sendMessage = new SendMessage(userChatId, "Расписание такое...");
-        } else if (callbackQuery.data().equals(Commands.INF_SCHEME.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getSchedule());
+        } else if (callbackQuery.data().equals(Command.INF_SCHEME.name())) {
             //Схема проезда
-            sendMessage = new SendMessage(userChatId, "Проехать так то...");
-        } else if (callbackQuery.data().equals(Commands.INF_SAFETY.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getScheme());
+        } else if (callbackQuery.data().equals(Command.INF_SAFETY.name())) {
             //Техника безопасности
-            sendMessage = new SendMessage(userChatId, "Будьте осторожны...");
-        } else if (callbackQuery.data().equals(Commands.HOW_RULES.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getSafety());
+        } else if (callbackQuery.data().equals(Command.HOW_RULES.name())) {
             //Правила знакомства с собакой
-            sendMessage = new SendMessage(userChatId, "Правила...");
-        } else if (callbackQuery.data().equals(Commands.HOW_DOCS.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getRules());
+        } else if (callbackQuery.data().equals(Command.HOW_DOCS.name())) {
             //Список документов
-            sendMessage = new SendMessage(userChatId, "Документы...");
-        } else if (callbackQuery.data().equals(Commands.HOW_MOVE.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getDocs());
+        } else if (callbackQuery.data().equals(Command.HOW_MOVE.name())) {
             //Рекомендации по транспортировке
-            sendMessage = new SendMessage(userChatId, "Рекомендации...");
-        } else if (callbackQuery.data().equals(Commands.HOW_ARRANGE.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getMove());
+        } else if (callbackQuery.data().equals(Command.HOW_ARRANGE.name())) {
             //Рекомендации по обустройству
-            sendMessage = new SendMessage(userChatId, "Рекомендации...");
-        } else if (callbackQuery.data().equals(Commands.HOW_ARRANGE_PUPPY.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getArrangements());
+        } else if (callbackQuery.data().equals(Command.HOW_ARRANGE_PUPPY.name())) {
             //Рекомендации по обустройству для щенка
-            sendMessage = new SendMessage(userChatId, "Рекомендации...");
-        } else if (callbackQuery.data().equals(Commands.HOW_ARRANGE_CRIPPLE.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getArrangementsForPuppy());
+        } else if (callbackQuery.data().equals(Command.HOW_ARRANGE_CRIPPLE.name())) {
             //Рекомендации по обустройству для собаки-инвалида
-            sendMessage = new SendMessage(userChatId, "Рекомендации...");
-        } else if (callbackQuery.data().equals(Commands.HOW_EXPERT_FIRST.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getArrangementsForCripple());
+        } else if (callbackQuery.data().equals(Command.HOW_EXPERT_FIRST.name())) {
             //Советы кинолога по первому общению
-            sendMessage = new SendMessage(userChatId, "Советы кинолога...");
-        } else if (callbackQuery.data().equals(Commands.HOW_EXPERT_NEXT.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getExpertAdvicesFirst());
+        } else if (callbackQuery.data().equals(Command.HOW_EXPERT_NEXT.name())) {
             //Советы кинолога по дальнейшему общению
-            sendMessage = new SendMessage(userChatId, "Советы кинолога...");
-        } else if (callbackQuery.data().equals(Commands.HOW_REJECT_REASONS.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getExpertAdvicesNext());
+        } else if (callbackQuery.data().equals(Command.HOW_REJECT_REASONS.name())) {
             //Причины отказа
-            sendMessage = new SendMessage(userChatId, "Первая причина это ты...");
-        } else if (callbackQuery.data().startsWith(Commands.ASK_VOLUNTEER.name())) {
+            sendMessage = new SendMessage(userChatId, Shelter.getRejectReasons());
+        } else if (callbackQuery.data().startsWith(Command.ASK_VOLUNTEER.name())) {
             //Конкретный волонтера (чат выбранного волонтера в callback data)
-            Long volunteerChatId = Long.parseLong(callbackQuery.data().substring(Commands.ASK_VOLUNTEER.name().length()));
+            Long volunteerChatId = Long.parseLong(callbackQuery.data().substring(Command.ASK_VOLUNTEER.name().length()));
             questionsBuffer.addQuestion(new Question(userChatId, volunteerChatId));
             sendMessage = new SendMessage(userChatId, "Напишите вопрос");
-        } else if (callbackQuery.data().startsWith(Commands.ASK_ANY_VOLUNTEER.name())) {
+        } else if (callbackQuery.data().startsWith(Command.ASK_ANY_VOLUNTEER.name())) {
             //Любой волонтер (будет найден первый попавшийся)
             if (userService.findAnyVolunteer().isPresent()) {
                 var volunteer = userService.findAnyVolunteer().get();
@@ -304,37 +305,37 @@ public class KeyboardServiceExt {
             } else {
                 sendMessage = new SendMessage(userChatId, "Нет свободных волонтеров");
             }
-        } else if (callbackQuery.data().equals(Commands.SAVE_USER_PHONE.name())) {
+        } else if (callbackQuery.data().equals(Command.SAVE_USER_PHONE.name())) {
             //Телефон
             Request request = new Request(userChatId);
             request.setUserPhoneRequested(true);
             requestsBuffer.addRequest(request);
             sendMessage = new SendMessage(userChatId, "Напишите телефон");
-        } else if (callbackQuery.data().equals(Commands.SAVE_USER_EMAIL.name())) {
+        } else if (callbackQuery.data().equals(Command.SAVE_USER_EMAIL.name())) {
             //Почта
             Request request = new Request(userChatId);
             request.setUserEmailRequested(true);
             requestsBuffer.addRequest(request);
             sendMessage = new SendMessage(userChatId, "Напишите почту");
-        } else if (callbackQuery.data().equals(Commands.SEND_PHOTO.name())) {
+        } else if (callbackQuery.data().equals(Command.SEND_PHOTO.name())) {
             //Фото для отчета
             Request request = new Request(userChatId);
             request.setReportPhotoRequested(true);
             requestsBuffer.addRequest(request);
             sendMessage = new SendMessage(userChatId, "Отправьте фото");
-        } else if (callbackQuery.data().equals(Commands.SEND_DIET.name())) {
+        } else if (callbackQuery.data().equals(Command.SEND_DIET.name())) {
             //Диета для отчета
             Request request = new Request(userChatId);
             request.setReportDietRequested(true);
             requestsBuffer.addRequest(request);
             sendMessage = new SendMessage(userChatId, "Опишите диету");
-        } else if (callbackQuery.data().equals(Commands.SEND_BEHAVIOR.name())) {
+        } else if (callbackQuery.data().equals(Command.SEND_BEHAVIOR.name())) {
             //Поведение для отчета
             Request request = new Request(userChatId);
             request.setReportBehaviorRequested(true);
             requestsBuffer.addRequest(request);
             sendMessage = new SendMessage(userChatId, "Опишите поведение");
-        } else if (callbackQuery.data().equals(Commands.SEND_WELL_BEING.name())) {
+        } else if (callbackQuery.data().equals(Command.SEND_WELL_BEING.name())) {
             //Самочувствие для отчета
             Request request = new Request(userChatId);
             request.setReportWellBeingRequest(true);
