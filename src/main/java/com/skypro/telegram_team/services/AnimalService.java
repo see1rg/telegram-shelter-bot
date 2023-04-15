@@ -34,7 +34,7 @@ public class AnimalService {
      * @return Animal
      */
     @Transactional
-    public Animal save(Animal animal) {
+    public Animal create(Animal animal) {
         log.info("Saving animal: " + animal);
         return animalRepository.save(animal);
     }

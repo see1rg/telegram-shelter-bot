@@ -61,7 +61,7 @@ public class UserController {
     })
     @PostMapping
     public User createUser(@RequestBody User user) {
-        return userService.save(user);
+        return userService.create(user);
     }
 
     @Operation(summary = "Обновление данных пользователя", tags = "Users")
@@ -84,5 +84,11 @@ public class UserController {
     @PatchMapping("/{id}/volunteer")
     public User userIsVolunteer(@PathVariable Long id, @RequestParam("isVolunteer") Boolean isVolunteer) {
         return userService.userIsVolunteer(id, isVolunteer);
+    }
+
+    @Operation(summary = "Связывание собаки и усыновителя.", tags = "Users" )
+    @PostMapping("/join")
+    public void joinAnimalAndUser(@RequestParam("animalId") long animalId, @RequestParam("userId") long userId) {
+        userService.joinAnimalAndUser(animalId, userId);
     }
 }
