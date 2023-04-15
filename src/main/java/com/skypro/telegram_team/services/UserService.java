@@ -30,13 +30,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final AnimalRepository animalRepository;
 
+
     /**
      * Конструктор класса UserService.
      *
      * @param userRepository   Репозиторий для работы с сущностью User.
      * @param animalRepository Репозиторий для работы с сущностью Animal.
      */
-    public UserService(UserRepository userRepository, AnimalRepository animalRepository) {
+    public UserService(UserRepository userRepository, AnimalRepository animalRepository, AnimalService animalService) {
         this.userRepository = userRepository;
         this.animalRepository = animalRepository;
     }
@@ -49,8 +50,7 @@ public class UserService {
      * @throws InvalidDataException Если данные пользователя некорректны.
      */
     @Transactional
-    public User save(User user) {
-        //Нужно переименовать метод save в create
+    public User create(User user) {
         log.info("Saving user: " + user.getName() + " " + user.getSurname());
         validate(user);
         return userRepository.save(user);
@@ -160,6 +160,7 @@ public class UserService {
      * если список не пустой, иначе пустой объект Optional.
      */
     public Optional<User> findAnyVolunteer() {
+        log.info("Поиск волонтера");
         return findVolunteers().stream()
                 .findAny();
     }
@@ -185,6 +186,7 @@ public class UserService {
      * @throws InvalidDataException если данные пользователя некорректны.
      */
     private void validate(User user) {
+        log.info("Валидация пользователя: " + user);
         if (user.getName() == null) {
             throw new InvalidDataException("Отсутствует имя пользователя");
         }
@@ -206,6 +208,7 @@ public class UserService {
      * @return true, если номер телефона соответствует российскому формату, и false в противном случае.
      */
     private boolean isPhoneValid(String phone) {
+        log.info("Валидация номера телефона: {}", phone);
         final String regexPattern = "^((\\+7|7|8)+([0-9]){10})$";
         return Pattern.compile(regexPattern).matcher(phone).matches();
     }
@@ -217,24 +220,35 @@ public class UserService {
      * @return true, если email адрес соответствует шаблону, и false в противном случае.
      */
     private boolean isEmailValid(String email) {
+        log.info("Валидация email: {}", email);
         final String regexPattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
         return Pattern.compile(regexPattern).matcher(email).matches();
     }
 
     /**
-     * Метод, который связывает животное с пользователем по их идентификаторам.
-     *
+     * Метод, который связывает животное с пользователем по их идентификаторам, устанавливает статус
+     * {@link User.OwnerStateEnum#PROBATION} и конец испытательного срока{@link User#setEndTest) у пользователя
+     * и у животного статус {@link Animal.AnimalStateEnum#IN_TEST}.
      * @param animalId идентификатор животного, которую нужно связать с пользователем
      * @param userId   идентификатор пользователя, который будет связан с животным
      * @throws EntityNotFoundException если животное или пользователь не найдены в базе данных
      */
+
+    @Transactional
     public void joinAnimalAndUser(long animalId, long userId) {
         log.info("Joining animal and user with animal id: " + animalId + " and user id: " + userId);
         Animal animal = animalRepository.findById(animalId)
                 .orElseThrow(() -> new EntityNotFoundException("Animal not found"));
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         animal.setUser(user);
-        animalRepository.save(animal);
+        animal.setState(Animal.AnimalStateEnum.IN_TEST);
+        user.setAnimal(animal);
+        user.setState(User.OwnerStateEnum.PROBATION);
+        user.setEndTest(LocalDateTime.now().plusMonths(1));
+        update(user,userId);
+        AnimalService animalService = new AnimalService(animalRepository);
+        animalService.update(animal, animalId);
+
     }
 
 }

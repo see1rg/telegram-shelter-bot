@@ -61,7 +61,7 @@ public class UserController {
     })
     @PostMapping
     public User createUser(@RequestBody User user) {
-        return userService.save(user);
+        return userService.create(user);
     }
 
     @Operation(summary = "Обновление данных пользователя", tags = "Users")

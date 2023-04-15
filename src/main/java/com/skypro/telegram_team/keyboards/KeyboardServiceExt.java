@@ -529,7 +529,7 @@ public class KeyboardServiceExt {
                 user.setSurname(message.chat().username());
             }
             user.setState(User.OwnerStateEnum.SEARCH);
-            userService.save(user);
+            userService.create(user);
         }
         return user;
     }

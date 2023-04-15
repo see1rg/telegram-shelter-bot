@@ -218,7 +218,7 @@ public class AnimalController {
     })
     @PostMapping
     public Animal createAnimal(@RequestBody Animal animal) {
-        return animalService.save(animal);
+        return animalService.create(animal);
     }
 
     @Operation(
