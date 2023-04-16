@@ -149,7 +149,7 @@ public class UserService {
      * @return список волонтеров
      */
     public Collection<User> findVolunteers() {
-        return userRepository.findByIsVolunteerTrue();
+        return userRepository.findByVolunteerTrue();
     }
 
     /**
