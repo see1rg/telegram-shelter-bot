@@ -3,14 +3,15 @@ package com.skypro.telegram_team;
 import com.skypro.telegram_team.controllers.AnimalController;
 import com.skypro.telegram_team.controllers.ReportController;
 import com.skypro.telegram_team.controllers.UserController;
+import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
-import com.skypro.telegram_team.repositories.ReportRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
-import com.skypro.telegram_team.services.ReportService;
+import com.skypro.telegram_team.services.AnimalService;
 import com.skypro.telegram_team.services.UserService;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
@@ -44,11 +46,17 @@ public class UserControllerTest {
     private UserRepository userRepository;
     @SpyBean
     private UserService userService;
+    @SpyBean
+    private AnimalService animalService;
+    @MockBean
+    private AnimalRepository animalRepository;
     private final User user = new User();
     private final JSONObject jsonUser = new JSONObject();
+    private final Animal animal = new Animal();
 
     @BeforeEach
     public void setup() throws JSONException {
+        animal.setId(1L);
         user.setId(1L);
         user.setTelegramId(1L);
         user.setName("dima");
@@ -63,9 +71,10 @@ public class UserControllerTest {
         jsonUser.put("email", user.getEmail());
         jsonUser.put("state", user.getState());
         jsonUser.put("isVolunteer", user.isVolunteer());
-        Mockito.when(userRepository.save(any())).thenReturn(user);
-        Mockito.when(userRepository.findById(any())).thenReturn(Optional.of(user));
-        Mockito.when(userRepository.findAll()).thenReturn(List.of(user));
+        when(userRepository.save(any())).thenReturn(user);
+        when(userRepository.findById(any())).thenReturn(Optional.of(user));
+        when(userRepository.findAll()).thenReturn(List.of(user));
+        when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
     }
 
     @Test
@@ -76,7 +85,10 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId()))
                 .andExpect(jsonPath("$.name").value(user.getName()))
-                .andExpect(jsonPath("$.telegramId").value(user.getTelegramId()));
+                .andExpect(jsonPath("$.telegramId").value(user.getTelegramId()))
+                .andExpect(jsonPath("$.phone").value(user.getPhone()))
+                .andExpect(jsonPath("$.email").value(user.getEmail()))
+                .andExpect(jsonPath("$.state").value(user.getState().toString()));
     }
 
     @Test
@@ -87,7 +99,10 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId()))
                 .andExpect(jsonPath("$.name").value(user.getName()))
-                .andExpect(jsonPath("$.telegramId").value(user.getTelegramId()));
+                .andExpect(jsonPath("$.telegramId").value(user.getTelegramId()))
+                .andExpect(jsonPath("$.phone").value(user.getPhone()))
+                .andExpect(jsonPath("$.email").value(user.getEmail()))
+                .andExpect(jsonPath("$.state").value(user.getState().toString()));
     }
 
     @Test
@@ -96,7 +111,10 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId()))
                 .andExpect(jsonPath("$.name").value(user.getName()))
-                .andExpect(jsonPath("$.telegramId").value(user.getTelegramId()));
+                .andExpect(jsonPath("$.telegramId").value(user.getTelegramId()))
+                .andExpect(jsonPath("$.phone").value(user.getPhone()))
+                .andExpect(jsonPath("$.email").value(user.getEmail()))
+                .andExpect(jsonPath("$.state").value(user.getState().toString()));
     }
 
     @Test
@@ -105,7 +123,10 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(user.getId()))
                 .andExpect(jsonPath("$[0].name").value(user.getName()))
-                .andExpect(jsonPath("$[0].telegramId").value(user.getTelegramId()));
+                .andExpect(jsonPath("$[0].telegramId").value(user.getTelegramId()))
+                .andExpect(jsonPath("$[0].phone").value(user.getPhone()))
+                .andExpect(jsonPath("$[0].email").value(user.getEmail()))
+                .andExpect(jsonPath("$[0].state").value(user.getState().toString()));
     }
 
     @Test
@@ -121,6 +142,16 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId()))
                 .andExpect(jsonPath("$.name").value(user.getName()))
-                .andExpect(jsonPath("$.telegramId").value(user.getTelegramId()));
+                .andExpect(jsonPath("$.telegramId").value(user.getTelegramId()))
+                .andExpect(jsonPath("$.phone").value(user.getPhone()))
+                .andExpect(jsonPath("$.email").value(user.getEmail()))
+                .andExpect(jsonPath("$.state").value(user.getState().toString()));
+    }
+
+    @Test
+    public void joinAnimalAndUser() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/users/join?animalId=" + animal.getId() + "&userId=" + user.getId()))
+                .andExpect(status().isOk());
     }
 }
