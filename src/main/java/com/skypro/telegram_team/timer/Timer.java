@@ -3,7 +3,6 @@ package com.skypro.telegram_team.timer;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.response.BaseResponse;
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.User;
@@ -186,11 +185,18 @@ public class Timer {
 
     }
 
-    private BaseResponse sendMessage(long chatId, String text) {
+    /**
+     * Отправляет текстовое сообщение в заданный чат.
+     *
+     * @param chatId идентификатор чата, куда нужно отправить сообщение
+     * @param text   текст сообщения
+     */
+
+    private void sendMessage(long chatId, String text) {
         SendMessage request = new SendMessage(chatId, text)
                 .parseMode(ParseMode.HTML)
                 .disableWebPagePreview(true)
                 .disableNotification(true);
-        return telegramBot.execute(request);
+        telegramBot.execute(request);
     }
 }
