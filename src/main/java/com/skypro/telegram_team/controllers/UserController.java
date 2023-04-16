@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -90,5 +92,15 @@ public class UserController {
     @PostMapping("/join")
     public void joinAnimalAndUser(@RequestParam("animalId") long animalId, @RequestParam("userId") long userId) {
         userService.joinAnimalAndUser(animalId, userId);
+    }
+
+    @Operation(summary = "Изменение статуса усыновителя", tags = "Users" )
+    @PutMapping("/{id}/state")
+    public User updateState(@PathVariable Long id, @RequestParam("state") User.OwnerStateEnum state, @RequestParam int daysForTest) {
+        User user = userService.findById(id);
+        user.setState(state);
+        LocalDateTime dateEndTest = LocalDateTime.now().plusDays(daysForTest);
+        user.setEndTest(dateEndTest);
+        return userService.update(user, id);
     }
 }
