@@ -76,8 +76,8 @@ public class AnimalController {
     }
 
     @Operation(summary = "поиск животного в БД по имени", tags = "Animals")
-    @GetMapping("/name/{name}")
-    public List<Animal> findByName(@PathVariable String name) {
+    @GetMapping("/name")
+    public List<Animal> findByName(@RequestParam String name) {
         return animalService.findByName(name);
     }
 
