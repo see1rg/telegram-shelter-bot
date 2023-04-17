@@ -1,13 +1,5 @@
 -- liquibase formatted sql
 
--- changeSet 11th:3
-ALTER TABLE reports DROP COLUMN volunteer_id;
-DROP TABLE volunteers;
-
--- changeSet 11th:2
-ALTER TABLE users
-    ADD is_volunteer BOOL DEFAULT false;
-
 -- changeSet 11th:1
 CREATE TABLE IF NOT EXISTS users
 (
@@ -27,7 +19,7 @@ CREATE TABLE IF NOT EXISTS animals
     description   TEXT,
     photo         OID,
     user_id       BIGINT REFERENCES users (id),
-    status VARCHAR(10),
+    status        VARCHAR(10),
     start_test    TIMESTAMP,
     days_for_test INT
 );
@@ -54,6 +46,55 @@ CREATE TABLE IF NOT EXISTS reports
     change_behavior TEXT                           NOT NULL
 );
 
+-- changeSet 11th:2
+ALTER TABLE users
+    ADD is_volunteer BOOL DEFAULT false;
+
+-- changeSet 11th:3
+ALTER TABLE reports DROP COLUMN volunteer_id;
+DROP TABLE volunteers;
+
+--changeSet slyubimov:1
+ALTER TABLE users
+    ADD COLUMN state VARCHAR(10);
+
 --changeSet slyubimov:2
 ALTER TABLE users
-    ADD COLUMN status VARCHAR(10);
+ADD COLUMN end_trial_period TIMESTAMP;
+
+--changeSet slyubimov:3
+ALTER TABLE animals drop COLUMN start_test,
+    ADD COLUMN end_test TIMESTAMP;
+
+--changeSet slyubimov:4
+ALTER TABLE animals
+    ADD COLUMN state VARCHAR(10)
+
+-- changeSet 11th:4
+;
+ALTER TABLE animals
+    DROP COLUMN days_for_test,
+    DROP COLUMN end_test;
+
+ALTER TABLE users
+    ADD COLUMN animal_id BIGINT REFERENCES animals (id),
+    ADD COLUMN days_for_test INT,
+    ADD COLUMN end_test TIMESTAMP,
+    DROP COLUMN end_trial_period;
+
+-- changeSet 11th:5
+ALTER TABLE animals
+    DROP COLUMN status;
+
+-- changeSet 11th:6
+ALTER TABLE reports
+    DROP COLUMN description,
+    DROP COLUMN status,
+    ALTER photo DROP NOT NULL,
+    ALTER diet DROP NOT NULL,
+    ALTER well_being DROP NOT NULL,
+    ALTER change_behavior DROP NOT NULL;
+
+--changeSet slyubimov:5
+ALTER TABLE users
+    RENAME COLUMN is_volunteer TO volunteer;

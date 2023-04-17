@@ -1,0 +1,11 @@
+{
+  "message": {
+    "chat": {
+      "id": 11
+    },
+    "reply_to_message": {
+       "text": "%replyText%"
+    },
+    "text": "%text%"
+  }
+}

@@ -1,4 +1,4 @@
-package com.skypro.telegram_team.buffers;
+package com.skypro.telegram_team.keyboards.buffers;
 
 import org.springframework.stereotype.Component;
 
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Класс для хранения в памяти вопросов от пользователя к волонтеру
+ * Буфер для хранения в памяти вопросов от пользователя к волонтеру
  * При ответе на вопрос он должен удаляться
  */
 @Component

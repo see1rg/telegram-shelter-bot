@@ -1,19 +1,18 @@
 package com.skypro.telegram_team.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Objects;
 
 @Entity
 @RequiredArgsConstructor
 @Getter
 @Setter
-@ToString
 @Table(name = "animals")
 public class Animal {
     @Id
@@ -24,15 +23,14 @@ public class Animal {
     private String name;
     private String breed;
     private String description;
-    private LocalDateTime startTest;
-    private int daysForTest;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonIgnore
     private User user;
 
-
     @Lob
+    @JsonIgnore
     private byte[] photo;
 
     @Enumerated(EnumType.STRING)
@@ -53,5 +51,17 @@ public class Animal {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Animal{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", breed='" + breed + '\'' +
+                ", description='" + description + '\'' +
+                ", photo=" + Arrays.toString(photo) +
+                ", state=" + state +
+                '}';
     }
 }

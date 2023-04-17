@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -19,7 +21,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Поиск пользователя по id")
+    @Operation(summary = "Поиск пользователя по id", tags = "Users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Поиск пользователя по id", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -31,7 +33,7 @@ public class UserController {
         return userService.findById(id);
     }
 
-    @Operation(summary = "Получение списка всех пользователей")
+    @Operation(summary = "Получение списка всех пользователей", tags = "Users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Получение списка всех пользователей", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -42,7 +44,7 @@ public class UserController {
         return userService.findAll();
     }
 
-    @Operation(summary = "Удаление пользователя по id")
+    @Operation(summary = "Удаление пользователя по id", tags = "Users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Удаление пользователя по id", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -53,7 +55,7 @@ public class UserController {
         return userService.deleteById(id);
     }
 
-    @Operation(summary = "Создание пользователя")
+    @Operation(summary = "Создание пользователя", tags = "Users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Создание пользователя", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -61,10 +63,10 @@ public class UserController {
     })
     @PostMapping
     public User createUser(@RequestBody User user) {
-        return userService.save(user);
+        return userService.create(user);
     }
 
-    @Operation(summary = "Обновление данных пользователя")
+    @Operation(summary = "Обновление данных пользователя", tags = "Users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Обновление данных пользователя", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
@@ -75,4 +77,36 @@ public class UserController {
         return userService.update(user, id);
     }
 
+    @Operation(summary = "Назначить пользователя волонтером", tags = "Users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Данные обновлены", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))
+            })
+    })
+    @PatchMapping("/{id}/volunteer")
+    public User userIsVolunteer(@PathVariable Long id, @RequestParam("isVolunteer") Boolean isVolunteer) {
+        return userService.userIsVolunteer(id, isVolunteer);
+    }
+
+    @Operation(summary = "Связывание собаки и усыновителя.", tags = "Users" )
+    @PostMapping("/join")
+    public void joinAnimalAndUser(@RequestParam("animalId") long animalId, @RequestParam("userId") long userId) {
+        userService.joinAnimalAndUser(animalId, userId);
+    }
+
+    @Operation(summary = "Изменение статуса усыновителя", tags = "Users" )
+    @PutMapping("/{id}/state")
+    public User updateState(@PathVariable Long id, @RequestParam("state") User.OwnerStateEnum state,
+                            @RequestParam(required = false) int daysForTest ) {
+        if (state == User.OwnerStateEnum.PROLONGED && daysForTest == 0) {
+    throw new IllegalArgumentException("Для продления тестового периода усыновителя" +
+            " необходимо задать количество дней для теста");
+        }
+        User user = userService.findById(id);
+        user.setState(state);
+        if (daysForTest != 0){
+        LocalDateTime dateEndTest = LocalDateTime.now().plusDays(daysForTest);
+        user.setEndTest(dateEndTest);}
+        return userService.update(user, id);
+    }
 }

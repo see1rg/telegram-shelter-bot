@@ -1,8 +1,9 @@
 package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.Animal;
+import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,10 +16,11 @@ import java.util.List;
 /**
  * Сервис для работы с животными приюта
  */
-@Log4j
+@Log4j2
 @Service
 public class AnimalService {
     private final AnimalRepository animalRepository;
+
 
     public AnimalService(AnimalRepository animalRepository) {
         this.animalRepository = animalRepository;
@@ -32,7 +34,7 @@ public class AnimalService {
      * @return Animal
      */
     @Transactional
-    public Animal save(Animal animal) {
+    public Animal create(Animal animal) {
         log.info("Saving animal: " + animal);
         return animalRepository.save(animal);
     }
@@ -110,14 +112,23 @@ public class AnimalService {
     public Animal update(Animal animal, Long id) {
         log.info("Updating animal: " + animal);
         ModelMapper modelMapper = new ModelMapper();
-        Animal animalToUpdate = animalRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Animal not found"));
+        Animal animalToUpdate = animalRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Animal not found"));
         animal.setId(id);
+
         modelMapper.map(animal, animalToUpdate);
         return animalRepository.save(animalToUpdate);
     }
 
     public List<Animal> findAllByUserIdNotNullAndState(Animal.AnimalStateEnum inTest) {
-        log.info("Finding animals by user id and state");
+        log.info("Finding animals by user id and state - " + inTest);
         return animalRepository.findAllByUserIdNotNullAndState(inTest);
     }
+
+
+    public List<Animal> findByUserState(User.OwnerStateEnum ownerStateEnum) {
+        log.info("Finding animals by user state - " + ownerStateEnum);
+        return animalRepository.findByUserContainsOrderByState(ownerStateEnum);
+    }
+
 }

@@ -1,18 +1,19 @@
 package com.skypro.telegram_team.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @RequiredArgsConstructor
 @Getter
 @Setter
-@ToString
 @Table(name = "users")
 public class User {
     @Id
@@ -25,17 +26,23 @@ public class User {
     private String surname;
     private String phone;
     private String email;
-    private long animalId;
+    private int daysForTest;
+    private LocalDateTime endTest;
 
+    @OneToOne
+    @JoinColumn(name = "animal_id", referencedColumnName = "id")
+    @JsonIgnore
+    private Animal animal;
 
     @Enumerated(EnumType.STRING)
     private OwnerStateEnum state;
 
     public enum OwnerStateEnum {
-        SEARCH, PROBATION, ACCEPTED, REFUSE
+        SEARCH, PROBATION, ACCEPTED, REFUSE, PROLONGED, DECISION, BLACKLIST, ADOPTED
     }
 
-    private boolean isVolunteer;
+    @Schema(defaultValue = "false")
+    private boolean volunteer;
 
     @Override
     public boolean equals(Object o) {
@@ -48,5 +55,21 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", telegramId=" + telegramId +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", phone='" + phone + '\'' +
+                ", email='" + email + '\'' +
+                ", daysForTest=" + daysForTest +
+                ", endTest=" + endTest +
+                ", state=" + state +
+                ", isVolunteer=" + volunteer +
+                '}';
     }
 }
