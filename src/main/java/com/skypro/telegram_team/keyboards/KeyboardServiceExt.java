@@ -159,11 +159,11 @@ public class KeyboardServiceExt {
     private Optional<SendMessage> processMessage(Message message) {
         Optional<SendMessage> sendMessage;
         sendMessage = processTextMessage(message);
-        if (sendMessage.isPresent())
-            return sendMessage;
+        if (sendMessage.isPresent()){
+            return sendMessage;}
         sendMessage = processDataMessage(message);
-        if (sendMessage.isPresent())
-            return sendMessage;
+        if (sendMessage.isPresent()){
+            return sendMessage;}
         return processReplyMessage(message);
     }
 
