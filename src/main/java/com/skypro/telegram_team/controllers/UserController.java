@@ -96,11 +96,17 @@ public class UserController {
 
     @Operation(summary = "Изменение статуса усыновителя", tags = "Users" )
     @PutMapping("/{id}/state")
-    public User updateState(@PathVariable Long id, @RequestParam("state") User.OwnerStateEnum state, @RequestParam int daysForTest) {
+    public User updateState(@PathVariable Long id, @RequestParam("state") User.OwnerStateEnum state,
+                            @RequestParam(required = false) int daysForTest ) {
+        if (state == User.OwnerStateEnum.PROLONGED && daysForTest == 0) {
+    throw new IllegalArgumentException("Для продления тестового периода усыновителя" +
+            " необходимо задать количество дней для теста");
+        }
         User user = userService.findById(id);
         user.setState(state);
+        if (daysForTest != 0){
         LocalDateTime dateEndTest = LocalDateTime.now().plusDays(daysForTest);
-        user.setEndTest(dateEndTest);
+        user.setEndTest(dateEndTest);}
         return userService.update(user, id);
     }
 }

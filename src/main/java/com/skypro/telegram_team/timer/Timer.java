@@ -28,6 +28,9 @@ public class Timer {
     private final AnimalService animalService;
     private final ReportService reportService;
     private final UserService userService;
+    @Value("${telegram.bot.support.chat}")
+    private long supportChatId;
+
 
     /** Проверка и изменение статуса пользователей. У пользователей есть следующие состояния:
      * SEARCH - ищет животное для усыновления.
@@ -134,7 +137,7 @@ public class Timer {
                             " пожалуйста дождитесь принятия решения волонтером о вашем животном!",
                             user.getName(), user.getSurname()));
 
-                    sendMessage(getSupportChatId(), String.format("Принять решение об усыновлении животного у %s %s.",
+                    sendMessage(getVolunteerChatIdOrSupportChatId(), String.format("Принять решение об усыновлении животного у %s %s.",
                             user.getName(), user.getSurname()));
                 });
         return decisionAboutUsers;
@@ -174,20 +177,18 @@ public class Timer {
             }
         });
 
-        long supportChatId = getSupportChatId();
+        long supportChatId = getVolunteerChatIdOrSupportChatId();
         if (supportChatId != 0) {
             usersWithoutReportForTwoDays.forEach(user -> {
                 sendMessage(supportChatId,
-                        String.format("Последний отчет был принят более двух дней у : %s %s.", //TODO а если нет волонтера
+                        String.format("Последний отчет был принят более двух дней у : %s %s.",
                                 user.getName(), user.getSurname()));
                 sendMessage(user.getTelegramId(),
                         "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");
             });
         } else {
-            usersWithoutReportForTwoDays.forEach(user -> {
-                sendMessage(user.getTelegramId(),
-                        "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");
-            });
+            usersWithoutReportForTwoDays.forEach(user -> sendMessage(user.getTelegramId(),
+                    "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет."));
         }
 
 
@@ -211,10 +212,14 @@ public class Timer {
         telegramBot.execute(request);
     }
 
-    private long getSupportChatId() {
+    /**
+     * Ищет любого волонтера в БД
+     * @return chatId волонтера или, в случае отсутствия отправляет {@link #supportChatId} службы поддержки
+     */
+    private long getVolunteerChatIdOrSupportChatId() {
         return userService.findAnyVolunteer()
                 .map(User::getTelegramId)
-                .orElse(0L);
+                .orElse(supportChatId);
     }
 
 }
