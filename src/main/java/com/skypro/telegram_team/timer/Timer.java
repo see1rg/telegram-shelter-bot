@@ -3,7 +3,6 @@ package com.skypro.telegram_team.timer;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.response.BaseResponse;
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.User;
@@ -31,6 +30,7 @@ public class Timer {
     private final UserService userService;
     @Value("${telegram.bot.support.chat}")
     private long supportChatId;
+
 
     /** Проверка и изменение статуса пользователей. У пользователей есть следующие состояния:
      * SEARCH - ищет животное для усыновления.
@@ -80,9 +80,10 @@ public class Timer {
             sendMessage(user.getTelegramId(),
                     String.format("Уважаемый %s %s Поздравляем, вы прошли пробный период!",
                             user.getName(),user.getSurname()));
-            sendMessage(supportChatId,
+            userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getId(),
                     String.format("Одобрение на усыновление подтверждено у %s %s.",
-                            user.getName(), user.getSurname()));
+                            user.getName(), user.getSurname())));
+
         });
         return sortUsersWithStateAccepted;
     }
@@ -97,8 +98,9 @@ public class Timer {
                     sendMessage(user.getTelegramId(),
                             String.format("Уважаемый %s %s Вы НЕ прошли пробный период! " +
                                     "Пожалуйста сдайте собаку в приют!", user.getName(), user.getSurname()));
-                    sendMessage(supportChatId, String.format("Отказ подтвержден у %s %s.",
-                            user.getName(), user.getSurname()));
+                    userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getId(),
+                            String.format("Отказ подтвержден у %s %s.",
+                                    user.getName(), user.getSurname())));
                 });
         return sortUsersWithStateRefused;
     }
@@ -114,10 +116,11 @@ public class Timer {
                             "Уважаемый %s %s, мы решили продлить пробный период на %s дней!",
                             user.getName(), user.getSurname(),
                             Duration.between(user.getEndTest(), LocalDateTime.now()).toDays()));
-                    sendMessage(supportChatId, String.format("Продлено у %s %s на %s дней!",
-                            user.getName(), user.getSurname(),
-                             Duration.between(user.getEndTest(), LocalDateTime.now()).toDays()));
-                });
+                    userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getId(),
+                            String.format("Подтверждено продление у %s %s на %s дней!",
+                                    user.getName(), user.getSurname(),
+                                    Duration.between(user.getEndTest(), LocalDateTime.now()).toDays())));
+            });
         return prolongedUsers;
     }
 
@@ -133,7 +136,8 @@ public class Timer {
                             "Уважаемый %s %s, у Вас закончился испытательный срок," +
                             " пожалуйста дождитесь принятия решения волонтером о вашем животном!",
                             user.getName(), user.getSurname()));
-                    sendMessage(supportChatId, String.format("Принять решение об усыновлении животного у %s %s.",
+
+                    sendMessage(getVolunteerChatIdOrSupportChatId(), String.format("Принять решение об усыновлении животного у %s %s.",
                             user.getName(), user.getSurname()));
                 });
         return decisionAboutUsers;
@@ -173,24 +177,49 @@ public class Timer {
             }
         });
 
-        usersWithoutReportForTwoDays.forEach(user -> {
-            sendMessage(supportChatId,
-                    String.format("Последний отчет был принят более двух дней у : %s %s.",
-                            user.getName(), user.getSurname()));
-            sendMessage(user.getTelegramId(),
-                    "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");
-        });
+        long supportChatId = getVolunteerChatIdOrSupportChatId();
+        if (supportChatId != 0) {
+            usersWithoutReportForTwoDays.forEach(user -> {
+                sendMessage(supportChatId,
+                        String.format("Последний отчет был принят более двух дней у : %s %s.",
+                                user.getName(), user.getSurname()));
+                sendMessage(user.getTelegramId(),
+                        "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");
+            });
+        } else {
+            usersWithoutReportForTwoDays.forEach(user -> sendMessage(user.getTelegramId(),
+                    "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет."));
+        }
+
 
         usersWithoutDailyReport.forEach(user -> sendMessage(user.getTelegramId(),
                 "Здравствуйте, вчера от вас не поступал отчет о собаке. Пожалуйста, сдайте отчет."));
 
     }
 
-    private BaseResponse sendMessage(long chatId, String text) {
+    /**
+     * Отправляет текстовое сообщение в заданный чат.
+     *
+     * @param chatId идентификатор чата, куда нужно отправить сообщение
+     * @param text   текст сообщения
+     */
+
+    private void sendMessage(long chatId, String text) {
         SendMessage request = new SendMessage(chatId, text)
                 .parseMode(ParseMode.HTML)
                 .disableWebPagePreview(true)
                 .disableNotification(true);
-        return telegramBot.execute(request);
+        telegramBot.execute(request);
     }
+
+    /**
+     * Ищет любого волонтера в БД
+     * @return chatId волонтера или, в случае отсутствия отправляет {@link #supportChatId} службы поддержки
+     */
+    private long getVolunteerChatIdOrSupportChatId() {
+        return userService.findAnyVolunteer()
+                .map(User::getTelegramId)
+                .orElse(supportChatId);
+    }
+
 }

@@ -11,7 +11,7 @@ import java.util.Collection;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    Collection<User> findByIsVolunteerTrue();
+    Collection<User> findByVolunteerTrue();
 
 
     List<User> findByState(User.OwnerStateEnum state);

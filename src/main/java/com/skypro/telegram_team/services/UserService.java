@@ -37,7 +37,7 @@ public class UserService {
      * @param userRepository   Репозиторий для работы с сущностью User.
      * @param animalRepository Репозиторий для работы с сущностью Animal.
      */
-    public UserService(UserRepository userRepository, AnimalRepository animalRepository, AnimalService animalService) {
+    public UserService(UserRepository userRepository, AnimalRepository animalRepository) {
         this.userRepository = userRepository;
         this.animalRepository = animalRepository;
     }
@@ -59,8 +59,9 @@ public class UserService {
     /**
      * получение пользователя по id из БД используя метод репозитория {@link JpaRepository#findById(Object)}
      *
-     * @param id
-     * @return
+     * @param id ID пользователя, которого нужно найти
+     * @return пользователь с указанным ID
+     * @throws EntityNotFoundException если пользователь с указанным ID не найден
      */
     public User findById(Long id) {
         log.info("Finding user by id: " + id);
@@ -70,8 +71,9 @@ public class UserService {
     /**
      * удаление пользователя по id из БД используя метод репозитория {@link JpaRepository#deleteById(Object)}
      *
-     * @param id
-     * @return
+     * @param id ID пользователя, которого нужно удалить
+     * @return пользователь с указанным ID
+     * @throws EntityNotFoundException если пользователь с указанным ID не найден
      */
     @Transactional
     public User deleteById(Long id) {
@@ -84,7 +86,7 @@ public class UserService {
     /**
      * получение всех пользователей из БД используя метод репозитория {@link JpaRepository#findAll()}
      *
-     * @return
+     * @return список всех пользователей из БД
      */
     public List<User> findAll() {
         log.info("Finding all users");
@@ -110,9 +112,6 @@ public class UserService {
         User userToUpdate = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         user.setId(id);
-        if (user.getState().equals(User.OwnerStateEnum.PROBATION) && user.getEndTest() != null) {
-            user.setEndTest(LocalDateTime.now().plusDays(30));
-        }
         modelMapper.map(user, userToUpdate);
         return userRepository.save(userToUpdate);
     }
@@ -143,14 +142,14 @@ public class UserService {
     public List<User> findByState(User.OwnerStateEnum state) {
         return userRepository.findByState(state);
     }
-    
+
     /**
      * Поиск волонтеров
      *
-     * @return
+     * @return список волонтеров
      */
     public Collection<User> findVolunteers() {
-        return userRepository.findByIsVolunteerTrue();
+        return userRepository.findByVolunteerTrue();
     }
 
     /**
@@ -227,8 +226,9 @@ public class UserService {
 
     /**
      * Метод, который связывает животное с пользователем по их идентификаторам, устанавливает статус
-     * {@link User.OwnerStateEnum#PROBATION} и конец испытательного срока{@link User#setEndTest) у пользователя
+     * {@link User.OwnerStateEnum#PROBATION} и конец испытательного срока {@link User#setEndTest} у пользователя
      * и у животного статус {@link Animal.AnimalStateEnum#IN_TEST}.
+     * <p>
      * @param animalId идентификатор животного, которую нужно связать с пользователем
      * @param userId   идентификатор пользователя, который будет связан с животным
      * @throws EntityNotFoundException если животное или пользователь не найдены в базе данных
@@ -245,7 +245,7 @@ public class UserService {
         user.setAnimal(animal);
         user.setState(User.OwnerStateEnum.PROBATION);
         user.setEndTest(LocalDateTime.now().plusMonths(1));
-        update(user,userId);
+        update(user, userId);
         AnimalService animalService = new AnimalService(animalRepository);
         animalService.update(animal, animalId);
 

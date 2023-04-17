@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -90,5 +92,21 @@ public class UserController {
     @PostMapping("/join")
     public void joinAnimalAndUser(@RequestParam("animalId") long animalId, @RequestParam("userId") long userId) {
         userService.joinAnimalAndUser(animalId, userId);
+    }
+
+    @Operation(summary = "Изменение статуса усыновителя", tags = "Users" )
+    @PutMapping("/{id}/state")
+    public User updateState(@PathVariable Long id, @RequestParam("state") User.OwnerStateEnum state,
+                            @RequestParam(required = false) int daysForTest ) {
+        if (state == User.OwnerStateEnum.PROLONGED && daysForTest == 0) {
+    throw new IllegalArgumentException("Для продления тестового периода усыновителя" +
+            " необходимо задать количество дней для теста");
+        }
+        User user = userService.findById(id);
+        user.setState(state);
+        if (daysForTest != 0){
+        LocalDateTime dateEndTest = LocalDateTime.now().plusDays(daysForTest);
+        user.setEndTest(dateEndTest);}
+        return userService.update(user, id);
     }
 }

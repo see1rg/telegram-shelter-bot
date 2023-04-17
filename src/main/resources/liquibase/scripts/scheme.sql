@@ -94,3 +94,7 @@ ALTER TABLE reports
     ALTER diet DROP NOT NULL,
     ALTER well_being DROP NOT NULL,
     ALTER change_behavior DROP NOT NULL;
+
+--changeSet slyubimov:5
+ALTER TABLE users
+    RENAME COLUMN is_volunteer TO volunteer;

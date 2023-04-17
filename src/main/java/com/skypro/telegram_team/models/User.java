@@ -1,6 +1,7 @@
 package com.skypro.telegram_team.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -40,7 +41,8 @@ public class User {
         SEARCH, PROBATION, ACCEPTED, REFUSE, PROLONGED, DECISION, BLACKLIST, ADOPTED
     }
 
-    private boolean isVolunteer;
+    @Schema(defaultValue = "false")
+    private boolean volunteer;
 
     @Override
     public boolean equals(Object o) {
@@ -67,7 +69,7 @@ public class User {
                 ", daysForTest=" + daysForTest +
                 ", endTest=" + endTest +
                 ", state=" + state +
-                ", isVolunteer=" + isVolunteer +
+                ", isVolunteer=" + volunteer +
                 '}';
     }
 }
