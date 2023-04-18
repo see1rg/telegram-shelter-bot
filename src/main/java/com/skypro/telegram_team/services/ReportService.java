@@ -39,10 +39,9 @@ public class ReportService {
      * @return сохраненный отчет
      */
     @Transactional
-    public Report save(Report report) {
-        //Нужно переименовать метод save в create
+    public Report create(Report report) {
         log.info("Saving report: " + report);
-        validate(report);
+//        validate(report);
         return reportRepository.save(report);
     }
 
@@ -91,7 +90,7 @@ public class ReportService {
     @Transactional
     public Report update(Report report, Long id) {
         log.info("Updating report: " + report);
-        validate(report);
+//        validate(report);
         ModelMapper modelMapper = new ModelMapper();
         Report reportToUpdate = reportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Report not found"));
         report.setId(id);
@@ -155,15 +154,15 @@ public class ReportService {
      *
      * @param report
      */
-    private void validate(Report report) {
-        if (report.getUser() == null) {
-            throw new InvalidDataException("Отчет без пользователя");
-        }
-        if (report.getAnimal() == null) {
-            throw new InvalidDataException("Отчет без животного");
-        }
-        if (!report.getUser().getState().equals(User.OwnerStateEnum.PROBATION)) {
-            throw new InvalidDataException("Пользователь должен быть на испытательном сроке");
-        }
-    }
+//    private void validate(Report report) {
+//        if (report.getUser() == null) {
+//            throw new InvalidDataException("Отчет без пользователя");
+//        }
+//        if (report.getAnimal() == null) {
+//            throw new InvalidDataException("Отчет без животного");
+//        }
+//        if (!report.getUser().getState().equals(User.OwnerStateEnum.PROBATION)) {
+//            throw new InvalidDataException("Пользователь должен быть на испытательном сроке");
+//        }
+//    }
 }
