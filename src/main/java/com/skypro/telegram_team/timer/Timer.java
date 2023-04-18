@@ -72,7 +72,7 @@ public class Timer {
     }
 
 
-    private List<User> changeStateAcceptedToAdoptedAndCollect() {
+    List<User> changeStateAcceptedToAdoptedAndCollect() {
         List<User> sortUsersWithStateAccepted = userService.findByState(User.OwnerStateEnum.ACCEPTED).stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.ADOPTED)).toList();
 
@@ -88,7 +88,7 @@ public class Timer {
         return sortUsersWithStateAccepted;
     }
 
-    private List<User> changeStateRefusedToBlackListAndCollect() {
+    List<User> changeStateRefusedToBlackListAndCollect() {
         List<User> sortUsersWithStateRefused = userService.findByState(User.OwnerStateEnum.REFUSE).stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.BLACKLIST)).toList();
 
@@ -105,7 +105,7 @@ public class Timer {
         return sortUsersWithStateRefused;
     }
 
-    private List<User> findStateProlongedAndCollect() {
+    List<User> findStateProlongedAndCollect() {
         List<User> prolongedUsers = userService.findByState(User.OwnerStateEnum.PROLONGED).stream()
                 .toList();
 
@@ -124,7 +124,7 @@ public class Timer {
         return prolongedUsers;
     }
 
-    private List<User> decisionMakingOfVolunteersAboutUsers() {
+    List<User> decisionMakingOfVolunteersAboutUsers() {
         List<User> decisionAboutUsers = userService.findByState(User.OwnerStateEnum.PROBATION).stream()
                 .filter(user -> user.getEndTest().isAfter(LocalDateTime.now()))
                 .toList();
@@ -144,12 +144,12 @@ public class Timer {
     }
 
 
-    private List<Animal> changeStateRefusedToInShelterListAndCollect() {
+    List<Animal> changeStateRefusedToInShelterListAndCollect() {
         return animalService.findByUserState(User.OwnerStateEnum.BLACKLIST).stream().
                 peek(animal -> animal.setState(Animal.AnimalStateEnum.IN_SHELTER)).toList();
     }
 
-    private List<Animal> changeStateAcceptedToHappyEndAndCollect() {
+    List<Animal> changeStateAcceptedToHappyEndAndCollect() {
         return animalService.findByUserState(User.OwnerStateEnum.ADOPTED).stream().
                 peek(animal -> animal.setState(Animal.AnimalStateEnum.HAPPY_END)).toList();
     }
@@ -168,12 +168,12 @@ public class Timer {
 
         animals.forEach(animal -> {
             User user = animal.getUser();
-            List<Report> reports = reportService.findByAnimalId(animal.getId());
-            if (reports.isEmpty() || reports.get(reports.size() - 1).getDate().isBefore(yesterdayAt0AM)) {
-                usersWithoutDailyReport.add(user);
-            }
+            List<Report> reports = reportService.findByAnimalId(animal.getId()); // todo нужно получить последний отчет
             if (reports.get(reports.size() - 1).getDate().isBefore(twoDaysAgo)) {
                 usersWithoutReportForTwoDays.add(user);
+            }
+            else if (!usersWithoutReportForTwoDays.contains(user) && reports.get(reports.size() - 1).getDate().isBefore(yesterdayAt0AM)) {
+                usersWithoutDailyReport.add(user);
             }
         });
 

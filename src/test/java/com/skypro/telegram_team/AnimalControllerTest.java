@@ -105,7 +105,7 @@ public class AnimalControllerTest {
 
     @Test
     public void findByName() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/animals/name/" + animal.getName()))
+        mockMvc.perform(MockMvcRequestBuilders.get("/animals/name/").param("name", "sharik"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value(animal.getName()))
                 .andExpect(jsonPath("$[0].id").value(animal.getId()))
