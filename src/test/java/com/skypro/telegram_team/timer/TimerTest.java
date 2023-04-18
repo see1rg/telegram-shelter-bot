@@ -1,9 +1,7 @@
 package com.skypro.telegram_team.timer;
 
-import com.pengrad.telegrambot.BotUtils;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.response.SendResponse;
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.User;
@@ -238,8 +236,8 @@ public class TimerTest {
         // Add the animals and report to the database
         animalService.create(animal1);
         animalService.create(animal2);
-        reportService.save(report);
-        reportService.save(report2);
+        reportService.create(report);
+        reportService.create(report2);
         when(reportService.findByAnimalId(animal1.getId())).thenReturn(Collections.singletonList(report));
         when(reportService.findByAnimalId(animal2.getId())).thenReturn(Collections.singletonList(report2));
         when(animalService.findAllByUserIdNotNullAndState(Animal.AnimalStateEnum.IN_TEST)).thenReturn(List.of(animal1, animal2));

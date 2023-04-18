@@ -32,7 +32,8 @@ public class Timer {
     private long supportChatId;
 
 
-    /** Проверка и изменение статуса пользователей. У пользователей есть следующие состояния:
+    /**
+     * Проверка и изменение статуса пользователей. У пользователей есть следующие состояния:
      * SEARCH - ищет животное для усыновления.
      * ACCEPTED - усыновление одобрено и при следующей проверке статус будет изменен на ADOPTED
      * для хранения в БД информации о пользователе.
@@ -42,7 +43,6 @@ public class Timer {
      * PROLONGED - испытательный срок продлен.
      * PROBATION - испытательный срок 30 дней, устанавливается автоматически при связывании животного с пользователем,
      * а так же при продлении испытательного срока на срок указанный волонтером.
-     *
      */
     @Scheduled(cron = "0 0 9-18/3 * * *")
     void checkAndChangeUsersStatus() {
@@ -79,7 +79,7 @@ public class Timer {
         sortUsersWithStateAccepted.forEach(user -> {
             sendMessage(user.getTelegramId(),
                     String.format("Уважаемый %s %s Поздравляем, вы прошли пробный период!",
-                            user.getName(),user.getSurname()));
+                            user.getName(), user.getSurname()));
             userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getId(),
                     String.format("Одобрение на усыновление подтверждено у %s %s.",
                             user.getName(), user.getSurname())));
@@ -120,7 +120,7 @@ public class Timer {
                             String.format("Подтверждено продление у %s %s на %s дней!",
                                     user.getName(), user.getSurname(),
                                     Duration.between(user.getEndTest(), LocalDateTime.now()).toDays())));
-            });
+                });
         return prolongedUsers;
     }
 
@@ -134,7 +134,7 @@ public class Timer {
                 .forEach(user -> {
                     sendMessage(user.getTelegramId(), String.format(
                             "Уважаемый %s %s, у Вас закончился испытательный срок," +
-                            " пожалуйста дождитесь принятия решения волонтером о вашем животном!",
+                                    " пожалуйста дождитесь принятия решения волонтером о вашем животном!",
                             user.getName(), user.getSurname()));
 
                     sendMessage(getVolunteerChatIdOrSupportChatId(), String.format("Принять решение об усыновлении животного у %s %s.",
@@ -171,8 +171,7 @@ public class Timer {
             List<Report> reports = reportService.findByAnimalId(animal.getId()); // todo нужно получить последний отчет
             if (reports.get(reports.size() - 1).getDate().isBefore(twoDaysAgo)) {
                 usersWithoutReportForTwoDays.add(user);
-            }
-            else if (!usersWithoutReportForTwoDays.contains(user) && reports.get(reports.size() - 1).getDate().isBefore(yesterdayAt0AM)) {
+            } else if (!usersWithoutReportForTwoDays.contains(user) && reports.get(reports.size() - 1).getDate().isBefore(yesterdayAt0AM)) {
                 usersWithoutDailyReport.add(user);
             }
         });
@@ -214,6 +213,7 @@ public class Timer {
 
     /**
      * Ищет любого волонтера в БД
+     *
      * @return chatId волонтера или, в случае отсутствия отправляет {@link #supportChatId} службы поддержки
      */
     private long getVolunteerChatIdOrSupportChatId() {
