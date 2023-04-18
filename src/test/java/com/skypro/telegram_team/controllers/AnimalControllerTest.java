@@ -1,4 +1,4 @@
-package com.skypro.telegram_team;
+package com.skypro.telegram_team.controllers;
 
 import com.skypro.telegram_team.controllers.AnimalController;
 import com.skypro.telegram_team.controllers.ReportController;
@@ -28,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest
 public class AnimalControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
     @InjectMocks
@@ -73,6 +72,7 @@ public class AnimalControllerTest {
                 .andExpect(jsonPath("$.id").value(animal.getId()))
                 .andExpect(jsonPath("$.breed").value(animal.getBreed()))
                 .andExpect(jsonPath("$.state").value(animal.getState().toString()));
+
     }
 
     @Test
@@ -105,7 +105,7 @@ public class AnimalControllerTest {
 
     @Test
     public void findByName() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/animals/name/" + animal.getName()))
+        mockMvc.perform(MockMvcRequestBuilders.get("/animals?name=" + animal.getName()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value(animal.getName()))
                 .andExpect(jsonPath("$[0].id").value(animal.getId()))

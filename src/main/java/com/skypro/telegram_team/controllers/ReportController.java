@@ -62,7 +62,7 @@ public class ReportController {
     })
     @PostMapping
     public Report createReport(@RequestBody Report report) {
-        return reportService.save(report);
+        return reportService.create(report);
     }
 
     @Operation(summary = "Изменение отчета", description = "Изменение отчета", tags = "Reports")
