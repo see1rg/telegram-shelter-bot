@@ -1,8 +1,5 @@
-package com.skypro.telegram_team;
+package com.skypro.telegram_team.controllers;
 
-import com.skypro.telegram_team.controllers.AnimalController;
-import com.skypro.telegram_team.controllers.ReportController;
-import com.skypro.telegram_team.controllers.UserController;
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
@@ -11,11 +8,9 @@ import com.skypro.telegram_team.services.AnimalService;
 import com.skypro.telegram_team.services.UserService;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,10 +18,8 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 import java.util.List;
 import java.util.Optional;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -152,6 +145,13 @@ public class UserControllerTest {
     public void joinAnimalAndUser() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/users/join?animalId=" + animal.getId() + "&userId=" + user.getId()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void updateState() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.put("/users/" + user.getId()
+                        + "/state?state=" + user.getState() + "&daysForTest=" + user.getDaysForTest()))
                 .andExpect(status().isOk());
     }
 }

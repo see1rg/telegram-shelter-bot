@@ -1,6 +1,5 @@
 package com.skypro.telegram_team.services;
 
-
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;

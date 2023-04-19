@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -166,10 +165,42 @@ public class UserServiceTest {
     }
 
     @Test
-    public void shouldThrowsInvalidDataExceptionWhenRunMethodUpdate() {
+    public void shouldThrowsInvalidDataExceptionWhenRunMethodUpdateWhereTelegramIdIsZero() {
         User updatedUser = new User();
-        updatedUser.setId(99L);
-        updatedUser.setTelegramId(66L);
+        updatedUser.setName("dima");
         assertThrows(InvalidDataException.class, () -> userService.update(updatedUser, expectedUser.getId()));
+    }
+
+    @Test
+    public void shouldThrowsInvalidDataExceptionWhenRunMethodUpdateWherePhoneIsInvalid() {
+        User updatedUser = new User();
+        updatedUser.setName("dima");
+        updatedUser.setTelegramId(101L);
+        updatedUser.setPhone("123");
+        assertThrows(InvalidDataException.class, () -> userService.update(updatedUser, expectedUser.getId()));
+    }
+
+    @Test
+    public void shouldThrowsInvalidDataExceptionWhenRunMethodUpdateWhereEmailIsInvalid() {
+        User updatedUser = new User();
+        updatedUser.setName("dima");
+        updatedUser.setTelegramId(101L);
+        updatedUser.setEmail("123");
+        assertThrows(InvalidDataException.class, () -> userService.update(updatedUser, expectedUser.getId()));
+    }
+
+    @Test
+    public void shouldThrowsInvalidDataExceptionWhenRunMethodCreate() {
+        User user = new User();
+        assertThrows(InvalidDataException.class, () -> userService.create(user));
+    }
+
+    @Test
+    public void shouldThrowsEntityNotFoundExceptionWhenRunMethodJoinAnimalAndUser() {
+        Animal animal = new Animal();
+        when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
+        when(userRepository.findById(any())).thenReturn(Optional.empty());
+        assertThrows(EntityNotFoundException.class,
+                () -> userService.joinAnimalAndUser(animal.getId(), expectedUser.getId()));
     }
 }
