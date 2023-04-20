@@ -2,6 +2,7 @@ package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.Report;
+import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.ReportRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
 import lombok.extern.log4j.Log4j2;

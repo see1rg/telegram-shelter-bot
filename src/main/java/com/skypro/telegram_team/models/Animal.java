@@ -9,23 +9,20 @@ import javax.persistence.*;
 import java.util.Arrays;
 import java.util.Objects;
 
+@Entity
 @RequiredArgsConstructor
 @Getter
 @Setter
 @Table(name = "animals")
-@Entity
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
-public abstract class Animal {
+public class Animal {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private long id;
     @Column(nullable = false)
     private String name;
     private String breed;
     private String description;
-
-
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")

@@ -2,8 +2,6 @@ package com.skypro.telegram_team.services;
 
 
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Cat;
-import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,12 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
-
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +27,7 @@ public class AnimalServiceTest {
 
     @BeforeEach
     public void setup() {
-        expectedAnimal = new Cat();
+        expectedAnimal = new Animal();
         expectedAnimal.setId(1L);
         expectedAnimal.setName("sharik");
         expectedAnimal.setState(Animal.AnimalStateEnum.IN_TEST);
@@ -67,10 +62,10 @@ public class AnimalServiceTest {
 
     @Test
     public void updateAnimal() {
-        Animal animalInDB = new Dog();
+        Animal animalInDB = new Animal();
         animalInDB.setName("sharik");
         animalInDB.setId(1L);
-        Animal updatedAnimal = new Cat();
+        Animal updatedAnimal = new Animal();
         updatedAnimal.setName("pushok");
         when(animalRepository.findById(any())).thenReturn(Optional.of(animalInDB));
         when(animalRepository.save(any())).thenReturn(updatedAnimal);
@@ -82,11 +77,11 @@ public class AnimalServiceTest {
     //не протестирована сортировка по имени
     @Test
     public void findAll() {
-        Animal animal1 = new Dog();
+        Animal animal1 = new Animal();
         animal1.setName("рекс");
-        Animal animal2 = new Dog();
+        Animal animal2 = new Animal();
         animal2.setName("хатико");
-        Animal animal3 = new Dog();
+        Animal animal3 = new Animal();
         animal3.setName("бетховен");
         when(animalRepository.findAll(Sort.by("name"))).thenReturn(List.of(animal1, animal2, animal3));
         List<Animal> allAnimals = animalService.findAll();

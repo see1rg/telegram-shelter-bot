@@ -1,7 +1,6 @@
 package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.ReportRepository;
@@ -11,12 +10,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,7 +33,7 @@ public class ReportServiceTest {
         expectedReport = new Report();
         expectedReport.setId(1L);
         expectedReport.setDate(LocalDateTime.now());
-        Animal animal = new Dog();
+        Animal animal = new Animal();
         animal.setId(1L);
         User user = new User();
         user.setId(1L);

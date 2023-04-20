@@ -4,7 +4,6 @@ import com.skypro.telegram_team.controllers.AnimalController;
 import com.skypro.telegram_team.controllers.ReportController;
 import com.skypro.telegram_team.controllers.UserController;
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
@@ -12,9 +11,11 @@ import com.skypro.telegram_team.services.AnimalService;
 import com.skypro.telegram_team.services.UserService;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,8 +29,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
 public class UserControllerTest {
@@ -52,7 +52,7 @@ public class UserControllerTest {
     private AnimalRepository animalRepository;
     private final User user = new User();
     private final JSONObject jsonUser = new JSONObject();
-    private final Animal animal = new Dog();
+    private final Animal animal = new Animal();
 
     @BeforeEach
     public void setup() throws JSONException {

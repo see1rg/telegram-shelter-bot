@@ -548,7 +548,7 @@ public class KeyboardServiceExt {
             report.setUser(user);
             report.setAnimal(user.getAnimal());
             report.setDate(LocalDateTime.now());
-            reportService.create(report);
+            reportService.save(report);
         }
         return report;
     }
