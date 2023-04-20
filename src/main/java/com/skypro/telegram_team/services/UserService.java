@@ -251,6 +251,20 @@ public class UserService {
 
     }
 
+    @Transactional
+    public User updateState(long userId, User.OwnerStateEnum state, Long daysForTest) {
+        if (state == User.OwnerStateEnum.PROLONGED && daysForTest == 0) {
+            throw new IllegalArgumentException("Для продления тестового периода усыновителя" +
+                    " необходимо задать количество дней для теста");
+        }
+        User user = findById(userId);
+        user.setState(state);
+        if (daysForTest != 0 && daysForTest > 0) {
+            LocalDateTime dateEndTest = LocalDateTime.now().plusDays(daysForTest);
+            user.setEndTest(dateEndTest);}
+        return update(user, userId);
+    }
+
 }
 
 
