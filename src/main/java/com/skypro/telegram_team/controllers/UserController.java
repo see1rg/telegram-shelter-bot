@@ -88,7 +88,7 @@ public class UserController {
         return userService.userIsVolunteer(id, isVolunteer);
     }
 
-    @Operation(summary = "Связывание собаки и усыновителя.", tags = "Users" )
+    @Operation(summary = "Связывание животного и усыновителя.", tags = "Users" )
     @PostMapping("/join")
     public void joinAnimalAndUser(@RequestParam("animalId") long animalId, @RequestParam("userId") long userId) {
         userService.joinAnimalAndUser(animalId, userId);
@@ -97,16 +97,10 @@ public class UserController {
     @Operation(summary = "Изменение статуса усыновителя", tags = "Users" )
     @PutMapping("/{id}/state")
     public User updateState(@PathVariable Long id, @RequestParam("state") User.OwnerStateEnum state,
-                            @RequestParam(required = false) int daysForTest ) {
-        if (state == User.OwnerStateEnum.PROLONGED && daysForTest == 0) {
-    throw new IllegalArgumentException("Для продления тестового периода усыновителя" +
-            " необходимо задать количество дней для теста");
-        }
-        User user = userService.findById(id);
-        user.setState(state);
-        if (daysForTest != 0){
-        LocalDateTime dateEndTest = LocalDateTime.now().plusDays(daysForTest);
-        user.setEndTest(dateEndTest);}
-        return userService.update(user, id);
+                            @RequestParam(required = false) Long daysForTest ) {
+    if (daysForTest == null) {
+        daysForTest = -1L;
+    }
+        return userService.updateState(id, state, daysForTest);
     }
 }

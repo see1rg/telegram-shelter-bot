@@ -98,3 +98,30 @@ ALTER TABLE reports
 --changeSet slyubimov:5
 ALTER TABLE users
     RENAME COLUMN is_volunteer TO volunteer;
+
+--changeSet slyubimov:6
+CREATE TABLE IF NOT EXISTS cats
+(
+    id            BIGSERIAL PRIMARY KEY NOT NULL,
+    name          VARCHAR(50)           NOT NULL,
+    breed         VARCHAR(50),
+    description   TEXT,
+    photo         OID,
+    user_id       BIGINT REFERENCES users (id),
+    state        VARCHAR(10),
+    start_test    TIMESTAMP,
+    animal_type VARCHAR(10)
+);
+
+CREATE TABLE IF NOT EXISTS dogs
+(
+    id            BIGSERIAL PRIMARY KEY NOT NULL,
+    name          VARCHAR(50)           NOT NULL,
+    breed         VARCHAR(50),
+    description   TEXT,
+    photo         OID,
+    user_id       BIGINT REFERENCES users (id),
+    state        VARCHAR(10),
+    start_test    TIMESTAMP,
+    animal_type VARCHAR(10)
+);

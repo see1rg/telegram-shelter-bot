@@ -1,5 +1,8 @@
 package com.skypro.telegram_team.controllers;
 
+import com.skypro.telegram_team.controllers.AnimalController;
+import com.skypro.telegram_team.controllers.ReportController;
+import com.skypro.telegram_team.controllers.UserController;
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.services.AnimalService;
@@ -16,13 +19,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
 import java.util.List;
 import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
 public class AnimalControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
     @InjectMocks
@@ -100,7 +106,7 @@ public class AnimalControllerTest {
 
     @Test
     public void findByName() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/animals/name?name=" + animal.getName()))
+        mockMvc.perform(MockMvcRequestBuilders.get("/animals/name/").param("name", "sharik"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value(animal.getName()))
                 .andExpect(jsonPath("$[0].id").value(animal.getId()))

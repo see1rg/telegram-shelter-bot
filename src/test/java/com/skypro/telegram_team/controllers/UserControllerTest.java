@@ -1,6 +1,7 @@
 package com.skypro.telegram_team.controllers;
 
 import com.skypro.telegram_team.models.Animal;
+import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
@@ -22,7 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
 public class UserControllerTest {
@@ -45,7 +47,7 @@ public class UserControllerTest {
     private AnimalRepository animalRepository;
     private final User user = new User();
     private final JSONObject jsonUser = new JSONObject();
-    private final Animal animal = new Animal();
+    private final Animal animal = new Dog();
 
     @BeforeEach
     public void setup() throws JSONException {
