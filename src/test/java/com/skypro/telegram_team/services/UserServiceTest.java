@@ -2,6 +2,7 @@ package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.Animal;
+import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
@@ -11,13 +12,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import javax.persistence.EntityNotFoundException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -132,7 +134,7 @@ public class UserServiceTest {
 
     @Test
     public void joinAnimalAndUser() {
-        Animal animal = new Animal();
+        Animal animal = new Dog();
         animal.setId(1L);
         when(userRepository.findById(any())).thenReturn(Optional.ofNullable(expectedUser));
         when(userRepository.save(any())).thenReturn(expectedUser);

@@ -2,9 +2,7 @@ package com.skypro.telegram_team.timer;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
-import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Report;
-import com.skypro.telegram_team.models.User;
+import com.skypro.telegram_team.models.*;
 import com.skypro.telegram_team.services.AnimalService;
 import com.skypro.telegram_team.services.ReportService;
 import com.skypro.telegram_team.services.UserService;
@@ -17,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -53,10 +52,25 @@ public class TimerTest {
         List<User> users = Collections.singletonList(user);
         when(userService.findByState(User.OwnerStateEnum.ACCEPTED)).thenReturn(users);
 
+        User volunteer = new User();
+        volunteer.setTelegramId(0L);
+        volunteer.setVolunteer(true);
+        when(userService.findVolunteers()).thenReturn(Collections.singletonList(volunteer));
+
         // When
         List<User> result = timer.changeStateAcceptedToAdoptedAndCollect();
 
         // Then
+        List<SendMessage> actual = getActualSendMessages();
+        Assertions.assertThat(actual.size()).isEqualTo(2);
+        Assertions.assertThat(actual.get(0).getParameters().get("chat_id")).isEqualTo(1L);
+        Assertions.assertThat(actual.get(0).getParameters().get("text"))
+                .isEqualTo("Уважаемый John Doe Поздравляем, вы прошли пробный период!");
+        Assertions.assertThat(actual.get(1).getParameters().get("chat_id")).isEqualTo(0L);
+        Assertions.assertThat(actual.get(1).getParameters().get("text"))
+                .isEqualTo(String.format("Одобрение на усыновление подтверждено у %s %s.",
+                user.getName(), user.getSurname()));
+
         assertEquals(1, result.size());
         User updatedUser = result.get(0);
         assertEquals(User.OwnerStateEnum.ADOPTED, updatedUser.getState());
@@ -73,6 +87,11 @@ public class TimerTest {
         List<User> users = Collections.singletonList(user);
         when(userService.findByState(User.OwnerStateEnum.REFUSE)).thenReturn(users);
 
+        User volunteer = new User();
+        volunteer.setTelegramId(0L);
+        volunteer.setVolunteer(true);
+        when(userService.findVolunteers()).thenReturn(Collections.singletonList(volunteer));
+
         // When
         List<User> result = timer.changeStateRefusedToBlackListAndCollect();
 
@@ -80,6 +99,17 @@ public class TimerTest {
         assertEquals(1, result.size());
         User updatedUser = result.get(0);
         assertEquals(User.OwnerStateEnum.BLACKLIST, updatedUser.getState());
+
+        List<SendMessage> actual = getActualSendMessages();
+        Assertions.assertThat(actual.size()).isEqualTo(2);
+        Assertions.assertThat(actual.get(0).getParameters().get("chat_id")).isEqualTo(1L);
+        Assertions.assertThat(actual.get(0).getParameters().get("text"))
+                .isEqualTo(String.format("Уважаемый %s %s Вы НЕ прошли пробный период! " +
+                "Пожалуйста сдайте собаку в приют!", user.getName(), user.getSurname()));
+        Assertions.assertThat(actual.get(1).getParameters().get("chat_id")).isEqualTo(0L);
+        Assertions.assertThat(actual.get(1).getParameters().get("text"))
+                .isEqualTo( String.format("Отказ подтвержден у %s %s.",
+                user.getName(), user.getSurname()));
     }
 
 
@@ -87,8 +117,7 @@ public class TimerTest {
     public void testFindStateProlongedAndCollect() {
         // Arrange
         User user = new User();
-        user.setId(1L);
-        user.setTelegramId(12345);
+        user.setTelegramId(12345L);
         user.setName("John");
         user.setSurname("Doe");
         user.setState(User.OwnerStateEnum.PROLONGED);
@@ -96,10 +125,27 @@ public class TimerTest {
         List<User> users = Collections.singletonList(user);
         when(userService.findByState(User.OwnerStateEnum.PROLONGED)).thenReturn(users);
 
+        User volunteer = new User();
+        volunteer.setTelegramId(0L);
+        volunteer.setVolunteer(true);
+        when(userService.findVolunteers()).thenReturn(Collections.singletonList(volunteer));
+
         // Act
         List<User> result = timer.findStateProlongedAndCollect();
 
         // Then
+        List<SendMessage> actual = getActualSendMessages();
+        Assertions.assertThat(actual.size()).isEqualTo(2);
+        Assertions.assertThat(actual.get(0).getParameters().get("chat_id")).isEqualTo(12345L);
+        Assertions.assertThat(actual.get(0).getParameters().get("text")).isEqualTo(String.format(
+                "Уважаемый %s %s, мы решили продлить пробный период на %s дней!",
+                user.getName(), user.getSurname(),
+                Duration.between(user.getEndTest(), LocalDateTime.now()).toDays()));
+        Assertions.assertThat(actual.get(1).getParameters().get("chat_id")).isEqualTo(0L);
+        Assertions.assertThat(actual.get(1).getParameters().get("text")).isEqualTo(String.format(
+                "Подтверждено продление у %s %s на %s дней!",
+                user.getName(), user.getSurname(),
+                Duration.between(user.getEndTest(), LocalDateTime.now()).toDays()));
         assertEquals(1, result.size());
         User updatedUser = result.get(0);
         assertEquals(User.OwnerStateEnum.PROBATION, updatedUser.getState());
@@ -138,7 +184,7 @@ public class TimerTest {
         user.setSurname("Doe");
         user.setState(User.OwnerStateEnum.BLACKLIST);
 
-        Animal animal = new Animal();
+        Animal animal = new Cat();
         animal.setId(1L);
         animal.setName("Animal");
         animal.setState(Animal.AnimalStateEnum.IN_TEST);
@@ -169,7 +215,7 @@ public class TimerTest {
         user.setSurname("Doe");
         user.setState(User.OwnerStateEnum.ADOPTED);
 
-        Animal animal = new Animal();
+        Animal animal = new Cat();
         animal.setId(1L);
         animal.setName("Animal");
         animal.setState(Animal.AnimalStateEnum.IN_TEST);
@@ -211,12 +257,12 @@ public class TimerTest {
         user2.setState(User.OwnerStateEnum.PROBATION);
 
         // Create two animals belonging to user1 and user2
-        Animal animal1 = new Animal();
+        Animal animal1 = new Dog();
         animal1.setUser(user1);
         animal1.setName("Buddy");
         animal1.setState(Animal.AnimalStateEnum.IN_TEST);
 
-        Animal animal2 = new Animal();
+        Animal animal2 = new Dog();
         animal2.setUser(user2);
         animal2.setName("Max");
         animal2.setState(Animal.AnimalStateEnum.IN_TEST);
@@ -240,7 +286,8 @@ public class TimerTest {
         reportService.create(report2);
         when(reportService.findByAnimalId(animal1.getId())).thenReturn(Collections.singletonList(report));
         when(reportService.findByAnimalId(animal2.getId())).thenReturn(Collections.singletonList(report2));
-        when(animalService.findAllByUserIdNotNullAndState(Animal.AnimalStateEnum.IN_TEST)).thenReturn(List.of(animal1, animal2));
+        when(animalService.findAllByUserIdNotNullAndState(Animal.AnimalStateEnum.IN_TEST))
+                .thenReturn(List.of(animal1, animal2));
 
         // Act
         timer.checkingDailyAndTwoDaysReportFromUsers();
@@ -249,9 +296,11 @@ public class TimerTest {
         List<SendMessage> actual = getActualSendMessages();
         Assertions.assertThat(actual.size()).isEqualTo(2);
         Assertions.assertThat(actual.get(0).getParameters().get("chat_id")).isEqualTo(12345L);
-        Assertions.assertThat(actual.get(0).getParameters().get("text")).isEqualTo("Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");
+        Assertions.assertThat(actual.get(0).getParameters().get("text")).isEqualTo("Последний отчет " +
+                "был принят более двух дней! Пожалуйста, сдайте отчет.");
         Assertions.assertThat(actual.get(1).getParameters().get("chat_id")).isEqualTo(67890L);
-        Assertions.assertThat(actual.get(1).getParameters().get("text")).isEqualTo("Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");
+        Assertions.assertThat(actual.get(1).getParameters().get("text")).isEqualTo("Последний отчет" +
+                " был принят более двух дней! Пожалуйста, сдайте отчет.");
     }
 
     private List<SendMessage> getActualSendMessages() {
