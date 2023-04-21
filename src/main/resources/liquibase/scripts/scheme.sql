@@ -125,3 +125,15 @@ CREATE TABLE IF NOT EXISTS dogs
     start_test    TIMESTAMP,
     animal_type VARCHAR(10)
 );
+
+-- changeSet slyubimov:7
+CREATE TABLE hibernate_sequences (
+                                     sequence_name varchar(255) NOT NULL,
+                                     next_val bigint,
+                                     PRIMARY KEY (sequence_name),
+                                     sequence_next_hi_value bigint);
+ALTER TABLE reports
+    ADD COLUMN cat_id BIGINT REFERENCES cats(id),
+    ADD COLUMN dog_id BIGINT REFERENCES dogs(id);
+
+
