@@ -1,5 +1,8 @@
-package com.skypro.telegram_team.controllers;
+package com.skypro.telegram_team;
 
+import com.skypro.telegram_team.controllers.AnimalController;
+import com.skypro.telegram_team.controllers.ReportController;
+import com.skypro.telegram_team.controllers.UserController;
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.User;
@@ -150,10 +153,12 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
+
     @Test
     public void updateState() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.put("/users/" + user.getId()
                         + "/state?state=" + user.getState() + "&daysForTest=" + user.getDaysForTest()))
                 .andExpect(status().isOk());
     }
+
 }
