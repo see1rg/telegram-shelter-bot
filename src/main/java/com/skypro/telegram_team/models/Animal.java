@@ -17,7 +17,7 @@ import java.util.Objects;
 @Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 public abstract class Animal {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     @Column(nullable = false)
     private long id;
     @Column(nullable = false)
