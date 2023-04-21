@@ -43,6 +43,8 @@ public class KeyboardServiceExt {
      */
     public enum Menu {
         START("/start"),
+        CAT_SHELTER("Приют для кошек"),
+        DOG_SHELTER("Приют для собак"),
         GET_INFO("О приюте"),
         GET_ANIMAL("Как взять собаку"),
         SEND_REPORT("Отправить отчет"),
@@ -180,14 +182,25 @@ public class KeyboardServiceExt {
                 //Старт
                 Keyboard keyboard = new ReplyKeyboardMarkup
                         (new KeyboardButton(Menu.GET_INFO.getText()))
-                        .addRow(Menu.GET_ANIMAL.getText())
+                        .addRow(Menu.DOG_SHELTER.getText())
+                        .addRow(Menu.CAT_SHELTER.getText())
+                        .resizeKeyboard(true)
+                        .oneTimeKeyboard(false);
+                sendMessage = new SendMessage(message.chat().id(), "Привет!");
+                sendMessage.replyMarkup(keyboard);
+                // Выбор приюта
+            } else if (Menu.DOG_SHELTER.getText().equals(message.text()) || Menu.CAT_SHELTER.getText().equals(message.text())) {
+                Keyboard keyboard = new ReplyKeyboardMarkup
+                (new KeyboardButton(Menu.GET_ANIMAL.getText()))
                         .addRow(Menu.SEND_REPORT.getText())
                         .addRow(Menu.SET_USER_DATA.getText())
                         .addRow(Menu.ASK_VOLUNTEER.getText())
                         .resizeKeyboard(true)
                         .oneTimeKeyboard(false);
-                sendMessage = new SendMessage(message.chat().id(), "Привет!");
+                sendMessage = new SendMessage(message.chat().id(), "Выберите приют");
                 sendMessage.replyMarkup(keyboard);
+            } else if (Menu.CAT_SHELTER.getText().equals(message.text())) {
+
             } else if (Menu.GET_INFO.getText().equals(message.text())) {
                 //Инфо о приюте
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup

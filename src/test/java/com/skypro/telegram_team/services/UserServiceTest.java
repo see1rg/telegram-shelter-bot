@@ -2,6 +2,7 @@ package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.Animal;
+import com.skypro.telegram_team.models.Cat;
 import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
@@ -168,10 +169,42 @@ public class UserServiceTest {
     }
 
     @Test
-    public void shouldThrowsInvalidDataExceptionWhenRunMethodUpdate() {
+    public void shouldThrowsInvalidDataExceptionWhenRunMethodUpdateWhereTelegramIdIsZero() {
         User updatedUser = new User();
-        updatedUser.setId(99L);
-        updatedUser.setTelegramId(66L);
+        updatedUser.setName("dima");
         assertThrows(InvalidDataException.class, () -> userService.update(updatedUser, expectedUser.getId()));
+    }
+
+    @Test
+    public void shouldThrowsInvalidDataExceptionWhenRunMethodUpdateWherePhoneIsInvalid() {
+        User updatedUser = new User();
+        updatedUser.setName("dima");
+        updatedUser.setTelegramId(101L);
+        updatedUser.setPhone("123");
+        assertThrows(InvalidDataException.class, () -> userService.update(updatedUser, expectedUser.getId()));
+    }
+
+    @Test
+    public void shouldThrowsInvalidDataExceptionWhenRunMethodUpdateWhereEmailIsInvalid() {
+        User updatedUser = new User();
+        updatedUser.setName("dima");
+        updatedUser.setTelegramId(101L);
+        updatedUser.setEmail("123");
+        assertThrows(InvalidDataException.class, () -> userService.update(updatedUser, expectedUser.getId()));
+    }
+
+    @Test
+    public void shouldThrowsInvalidDataExceptionWhenRunMethodCreate() {
+        User user = new User();
+        assertThrows(InvalidDataException.class, () -> userService.create(user));
+    }
+
+    @Test
+    public void shouldThrowsEntityNotFoundExceptionWhenRunMethodJoinAnimalAndUser() {
+        Animal animal = new Cat();
+        when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
+        when(userRepository.findById(any())).thenReturn(Optional.empty());
+        assertThrows(EntityNotFoundException.class,
+                () -> userService.joinAnimalAndUser(animal.getId(), expectedUser.getId()));
     }
 }
