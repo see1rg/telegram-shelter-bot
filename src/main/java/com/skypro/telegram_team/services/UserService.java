@@ -229,6 +229,7 @@ public class UserService {
      * {@link User.OwnerStateEnum#PROBATION} и конец испытательного срока {@link User#setEndTest} у пользователя
      * и у животного статус {@link Animal.AnimalStateEnum#IN_TEST}.
      * <p>
+     *
      * @param animalId идентификатор животного, которую нужно связать с пользователем
      * @param userId   идентификатор пользователя, который будет связан с животным
      * @throws EntityNotFoundException если животное или пользователь не найдены в базе данных
@@ -253,18 +254,18 @@ public class UserService {
 
     @Transactional
     public User updateState(long userId, User.OwnerStateEnum state, Long daysForTest) {
-        if (state == User.OwnerStateEnum.PROLONGED && daysForTest == 0) {
+        if (daysForTest != null && state == User.OwnerStateEnum.PROLONGED && daysForTest == 0) {
             throw new IllegalArgumentException("Для продления тестового периода усыновителя" +
                     " необходимо задать количество дней для теста");
         }
         User user = findById(userId);
         user.setState(state);
-        if (daysForTest != 0 && daysForTest > 0) {
+        if (daysForTest != null && daysForTest > 0) {
             LocalDateTime dateEndTest = LocalDateTime.now().plusDays(daysForTest);
-            user.setEndTest(dateEndTest);}
+            user.setEndTest(dateEndTest);
+        }
         return update(user, userId);
     }
-
 }
 
 
