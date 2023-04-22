@@ -34,6 +34,11 @@ public class User {
     @JsonIgnore
     private Animal animal;
 
+    @OneToOne
+    @JoinColumn(name = "shelter_id", referencedColumnName = "id")
+    @JsonIgnore
+    private Shelter shelter;
+
     @Enumerated(EnumType.STRING)
     private OwnerStateEnum state;
 
