@@ -27,6 +27,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.skypro.telegram_team.keyboards.KeyboardServiceExt.Command.HOW_RULES;
+
 /**
  * Обработка команд клавиатуры
  */
@@ -54,6 +56,15 @@ public class KeyboardServiceExt {
 
         Menu(String text) {
             this.text = text;
+        }
+
+        public static Menu getByText(String text) {
+            for (Menu menu : Menu.values()) {
+                if (menu.getText().equalsIgnoreCase(text)) {
+                    return menu;
+                }
+            }
+            throw new IllegalArgumentException("No enum constant " + Menu.class.getName() + "." + text);
         }
 
         public String getText() {
@@ -96,6 +107,16 @@ public class KeyboardServiceExt {
         public String getText() {
             return text;
         }
+
+        public static Command getByText(String text) {
+            for (Command command : Command.values()) {
+                if (command.getText().equalsIgnoreCase(text)) {
+                    return command;
+                }
+            }
+            throw new IllegalArgumentException("No enum constant " + Command.class.getName() + "." + text);
+        }
+
     }
 
     private final Logger logger = LoggerFactory.getLogger(KeyboardServiceExt.class);
@@ -177,20 +198,35 @@ public class KeyboardServiceExt {
     private Optional<SendMessage> processTextMessage(Message message) {
         //Меню
         SendMessage sendMessage = null;
+        String text = message.text();
         if (message.text() != null) {
-            if (Menu.START.getText().equals(message.text())) {
                 //Старт
-                Keyboard keyboard = new ReplyKeyboardMarkup
-                        (new KeyboardButton(Menu.GET_INFO.getText()))
-                        .addRow(Menu.DOG_SHELTER.getText())
-                        .addRow(Menu.CAT_SHELTER.getText())
-                        .resizeKeyboard(true)
-                        .oneTimeKeyboard(false);
-                sendMessage = new SendMessage(message.chat().id(), "Привет!");
-                sendMessage.replyMarkup(keyboard);
-                // Выбор приюта
-            } else if (Menu.DOG_SHELTER.getText().equals(message.text()) || Menu.CAT_SHELTER.getText().equals(message.text())) {
-                Keyboard keyboard = new ReplyKeyboardMarkup
+                Menu menu = Menu.getByText(text);
+            switch (menu) {
+                case START -> {
+                    Keyboard keyboard = new ReplyKeyboardMarkup(
+                            new KeyboardButton(Menu.GET_INFO.getText()))
+                            .addRow(Menu.DOG_SHELTER.getText())
+                            .addRow(Menu.CAT_SHELTER.getText())
+                            .resizeKeyboard(true)
+                            .oneTimeKeyboard(false);
+                    sendMessage = new SendMessage(message.chat().id(), "Привет!");
+                    sendMessage.replyMarkup(keyboard);
+                }
+
+                case GET_INFO -> {
+                    //Инфо о приюте
+                InlineKeyboardMarkup markup = new InlineKeyboardMarkup
+                        (new InlineKeyboardButton(Command.INF_SCHEDULE.getText()).callbackData(Command.INF_SCHEDULE.name()),
+                                (new InlineKeyboardButton(Command.INF_ADDRESS.getText()).callbackData(Command.INF_ADDRESS.name())),
+                                (new InlineKeyboardButton(Command.INF_SCHEME.getText()).callbackData(Command.INF_SCHEME.name())))
+                        .addRow(new InlineKeyboardButton(Command.INF_SAFETY.getText()).callbackData(Command.INF_SAFETY.name()));
+                sendMessage = new SendMessage(message.chat().id(), "Информация о приюте");
+                sendMessage.replyMarkup(markup);
+                }
+
+                case DOG_SHELTER -> {
+                                    Keyboard keyboard = new ReplyKeyboardMarkup
                 (new KeyboardButton(Menu.GET_ANIMAL.getText()))
                         .addRow(Menu.SEND_REPORT.getText())
                         .addRow(Menu.SET_USER_DATA.getText())
@@ -199,21 +235,12 @@ public class KeyboardServiceExt {
                         .oneTimeKeyboard(false);
                 sendMessage = new SendMessage(message.chat().id(), "Выберите приют");
                 sendMessage.replyMarkup(keyboard);
-            } else if (Menu.CAT_SHELTER.getText().equals(message.text())) {
+                }
 
-            } else if (Menu.GET_INFO.getText().equals(message.text())) {
-                //Инфо о приюте
+                case GET_ANIMAL -> {
+                                   //Как взять собаку
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup
-                        (new InlineKeyboardButton(Command.INF_SCHEDULE.getText()).callbackData(Command.INF_SCHEDULE.name()),
-                                (new InlineKeyboardButton(Command.INF_ADDRESS.getText()).callbackData(Command.INF_ADDRESS.name())),
-                                (new InlineKeyboardButton(Command.INF_SCHEME.getText()).callbackData(Command.INF_SCHEME.name())))
-                        .addRow(new InlineKeyboardButton(Command.INF_SAFETY.getText()).callbackData(Command.INF_SAFETY.name()));
-                sendMessage = new SendMessage(message.chat().id(), "Информация о приюте");
-                sendMessage.replyMarkup(markup);
-            } else if (Menu.GET_ANIMAL.getText().equals(message.text())) {
-                //Как взять собаку
-                InlineKeyboardMarkup markup = new InlineKeyboardMarkup
-                        (new InlineKeyboardButton(Command.HOW_RULES.getText()).callbackData(Command.HOW_RULES.name()))
+                        (new InlineKeyboardButton(HOW_RULES.getText()).callbackData(HOW_RULES.name()))
                         .addRow(new InlineKeyboardButton(Command.HOW_DOCS.getText()).callbackData(Command.HOW_DOCS.name()))
                         .addRow(new InlineKeyboardButton(Command.HOW_MOVE.getText()).callbackData(Command.HOW_MOVE.name()))
                         .addRow(new InlineKeyboardButton(Command.HOW_ARRANGE.getText()).callbackData(Command.HOW_ARRANGE.name()))
@@ -224,8 +251,10 @@ public class KeyboardServiceExt {
                         .addRow(new InlineKeyboardButton(Command.HOW_REJECT_REASONS.getText()).callbackData(Command.HOW_REJECT_REASONS.name()));
                 sendMessage = new SendMessage(message.chat().id(), "Как взять собаку");
                 sendMessage.replyMarkup(markup);
-            } else if (Menu.ASK_VOLUNTEER.getText().equals(message.text())) {
-                //Вопрос волонтеру
+                }
+
+                case ASK_VOLUNTEER -> {
+                                    //Вопрос волонтеру
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
                 findVolunteers().forEach((key, value) -> markup.addRow(new InlineKeyboardButton(value)
                         .callbackData(Command.ASK_VOLUNTEER + key)));
@@ -233,15 +262,19 @@ public class KeyboardServiceExt {
                         .callbackData(Command.ASK_ANY_VOLUNTEER.name()));
                 sendMessage = new SendMessage(message.chat().id(), "Кого спросить?");
                 sendMessage.replyMarkup(markup);
-            } else if (Menu.SET_USER_DATA.getText().equals(message.text())) {
-                //Записать данные пользователя
+                }
+
+                case SET_USER_DATA -> {
+                                    //Записать данные пользователя
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup
                         (new InlineKeyboardButton(Command.SAVE_USER_PHONE.getText()).callbackData(Command.SAVE_USER_PHONE.name()),
                                 (new InlineKeyboardButton(Command.SAVE_USER_EMAIL.getText()).callbackData(Command.SAVE_USER_EMAIL.name())));
                 sendMessage = new SendMessage(message.chat().id(), "Какие данные записать?");
                 sendMessage.replyMarkup(markup);
-            } else if (Menu.SEND_REPORT.getText().equals(message.text())) {
-                //Отправить отчет
+                }
+
+                case SEND_REPORT -> {
+                                    //Отправить отчет
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup
                         (new InlineKeyboardButton(Command.SEND_PHOTO.getText()).callbackData(Command.SEND_PHOTO.name()),
                                 (new InlineKeyboardButton(Command.SEND_DIET.getText()).callbackData(Command.SEND_DIET.name())))
@@ -249,6 +282,7 @@ public class KeyboardServiceExt {
                                 (new InlineKeyboardButton(Command.SEND_WELL_BEING.getText()).callbackData(Command.SEND_WELL_BEING.name())));
                 sendMessage = new SendMessage(message.chat().id(), "Какие данные отправить?");
                 sendMessage.replyMarkup(markup);
+                }
             }
         }
         return Optional.ofNullable(sendMessage);
@@ -270,13 +304,14 @@ public class KeyboardServiceExt {
         } else if (callbackQuery.data().equals(Command.INF_SCHEDULE.name())) {
             //Расписание
             sendMessage = new SendMessage(userChatId, Shelter.getSchedule());
+
         } else if (callbackQuery.data().equals(Command.INF_SCHEME.name())) {
             //Схема проезда
             sendMessage = new SendMessage(userChatId, Shelter.getScheme());
         } else if (callbackQuery.data().equals(Command.INF_SAFETY.name())) {
             //Техника безопасности
             sendMessage = new SendMessage(userChatId, Shelter.getSafety());
-        } else if (callbackQuery.data().equals(Command.HOW_RULES.name())) {
+        } else if (callbackQuery.data().equals(HOW_RULES.name())) {
             //Правила знакомства с собакой
             sendMessage = new SendMessage(userChatId, Shelter.getRules());
         } else if (callbackQuery.data().equals(Command.HOW_DOCS.name())) {

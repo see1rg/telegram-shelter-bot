@@ -168,10 +168,11 @@ public class Timer {
 
         animals.forEach(animal -> {
             User user = animal.getUser();
-            List<Report> reports = reportService.findByAnimalId(animal.getId()); // todo нужно получить последний отчет
-            if (reports.get(reports.size() - 1).getDate().isBefore(twoDaysAgo)) {
+            List<Report> reports = reportService.findByAnimalId(animal.getId());
+            Report latestReport = reports.get(reports.size() - 1);
+            if (latestReport.getDate().isBefore(twoDaysAgo)) {
                 usersWithoutReportForTwoDays.add(user);
-            } else if (!usersWithoutReportForTwoDays.contains(user) && reports.get(reports.size() - 1).getDate().isBefore(yesterdayAt0AM)) {
+            } else if (!usersWithoutReportForTwoDays.contains(user) && latestReport.getDate().isBefore(yesterdayAt0AM)) {
                 usersWithoutDailyReport.add(user);
             }
         });
