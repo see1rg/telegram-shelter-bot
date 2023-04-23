@@ -38,17 +38,17 @@ public class Shelter {
     @Column
     private String arrangements;
     @Column
-    private String arrangements_for_puppy;
+    private String arrangementsForPuppy;
     @Column
-    private String arrangements_for_cripple;
+    private String arrangementsForCripple;
     @Column
     private String movement;
     @Column
-    private String expert_advices_first;
+    private String expertAdvicesFirst;
     @Column
-    private String expert_advices_next;
+    private String expertAdvicesNext;
     @Column
-    private String reject_reasons;
+    private String rejectReasons;
 
     @Override
     public boolean equals(Object o) {

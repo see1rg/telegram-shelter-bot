@@ -127,7 +127,7 @@ public class KeyboardServiceExt {
      * @param update отдельный update для обработки
      * @return сообщение для отправки пользователю
      */
-    public Optional<SendMessage> processUpdate(Update update) {
+    public void processUpdate(Update update) {
         Optional<SendMessage> sendMessage;
         if (update.callbackQuery() != null) {
             //Update c callback
@@ -136,7 +136,7 @@ public class KeyboardServiceExt {
             //Update c message
             sendMessage = processMessage(update.message());
         }
-        return sendMessage;
+        sendMessage.ifPresent(telegramBot::execute);
     }
 
     /**
@@ -347,19 +347,19 @@ public class KeyboardServiceExt {
                 sendMessage = new SendMessage(userChatId, user.getShelter().getArrangements());
             } else if (callbackQuery.data().equals(Command.HOW_ARRANGE_PUPPY.name())) {
                 //Рекомендации по обустройству для щенка
-                sendMessage = new SendMessage(userChatId, user.getShelter().getArrangements_for_puppy());
+                sendMessage = new SendMessage(userChatId, user.getShelter().getArrangementsForPuppy());
             } else if (callbackQuery.data().equals(Command.HOW_ARRANGE_CRIPPLE.name())) {
                 //Рекомендации по обустройству для собаки-инвалида
-                sendMessage = new SendMessage(userChatId, user.getShelter().getArrangements_for_cripple());
+                sendMessage = new SendMessage(userChatId, user.getShelter().getArrangementsForCripple());
             } else if (callbackQuery.data().equals(Command.HOW_EXPERT_FIRST.name())) {
                 //Советы кинолога по первому общению
-                sendMessage = new SendMessage(userChatId, user.getShelter().getExpert_advices_first());
+                sendMessage = new SendMessage(userChatId, user.getShelter().getExpertAdvicesFirst());
             } else if (callbackQuery.data().equals(Command.HOW_EXPERT_NEXT.name())) {
                 //Советы кинолога по дальнейшему общению
-                sendMessage = new SendMessage(userChatId, user.getShelter().getExpert_advices_next());
+                sendMessage = new SendMessage(userChatId, user.getShelter().getExpertAdvicesNext());
             } else if (callbackQuery.data().equals(Command.HOW_REJECT_REASONS.name())) {
                 //Причины отказа
-                sendMessage = new SendMessage(userChatId, user.getShelter().getReject_reasons());
+                sendMessage = new SendMessage(userChatId, user.getShelter().getRejectReasons());
             } else if (callbackQuery.data().startsWith(Command.ASK_VOLUNTEER.name())) {
                 //Конкретный волонтера (чат выбранного волонтера в callback data)
                 Long volunteerChatId = Long.parseLong(callbackQuery.data().substring(Command.ASK_VOLUNTEER.name().length()));
@@ -413,7 +413,7 @@ public class KeyboardServiceExt {
                 sendMessage = new SendMessage(userChatId, "Опишите самочувствие");
             }
         } else {
-            sendMessage = new SendMessage(userChatId, "приют не выбран");
+            sendMessage = new SendMessage(userChatId, "Приют не выбран");
         }
         return Optional.ofNullable(sendMessage);
     }

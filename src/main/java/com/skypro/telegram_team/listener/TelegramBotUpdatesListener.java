@@ -71,8 +71,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     private void processUpdate(Update update) {
         KeyboardServiceExt keyboardService = context.getBean(KeyboardServiceExt.class);
-        Optional<SendMessage> sendMessage = keyboardService.processUpdate(update);
-        sendMessage.ifPresent(telegramBot::execute);
+        keyboardService.processUpdate(update);
     }
 }
 
