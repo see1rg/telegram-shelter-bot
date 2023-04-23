@@ -14,13 +14,14 @@ import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.Shelter;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.services.ReportService;
+import com.skypro.telegram_team.services.ShelterService;
 import com.skypro.telegram_team.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
  * Обработка команд клавиатуры
  */
 @Component
+@Scope("prototype")
 public class KeyboardServiceExt {
     /**
      * Шаблон сообщения от пользователя к волонтеру
@@ -43,12 +45,11 @@ public class KeyboardServiceExt {
      */
     public enum Menu {
         START("/start"),
-        CAT_SHELTER("Приют для кошек"),
-        DOG_SHELTER("Приют для собак"),
         GET_INFO("О приюте"),
-        GET_ANIMAL("Как взять собаку"),
+        GET_ANIMAL("Как взять животное"),
         SEND_REPORT("Отправить отчет"),
         SET_USER_DATA("Записать контактные данные"),
+        SET_SHELTER("Выбрать приют"),
         ASK_VOLUNTEER("Спросить волонтера");
         private final String text;
 
@@ -69,19 +70,20 @@ public class KeyboardServiceExt {
         INF_ADDRESS("Адрес"),
         INF_SCHEME("Схема проезда"),
         INF_SAFETY("Техника безопасности"),
-        HOW_RULES("Правила знакомства с собакой"),
+        HOW_RULES("Правила знакомства с животным"),
         HOW_DOCS("Список документов"),
         HOW_MOVE("Рекомендации по транспортировке"),
         HOW_ARRANGE("Рекомендации по обустройству"),
-        HOW_ARRANGE_PUPPY("Рекомендации по обустройству для щенка"),
-        HOW_ARRANGE_CRIPPLE("Рекомендации по обустройству для собаки-инвалида"),
-        HOW_EXPERT_FIRST("Советы кинолога по первому общению"),
-        HOW_EXPERT_NEXT("Советы кинолога по дальнейшему общению"),
+        HOW_ARRANGE_PUPPY("Рекомендации по обустройству для щенка/котенка"),
+        HOW_ARRANGE_CRIPPLE("Рекомендации по обустройству для животного-инвалида"),
+        HOW_EXPERT_FIRST("Советы эксперта по первому общению"),
+        HOW_EXPERT_NEXT("Советы эксперта по дальнейшему общению"),
         HOW_REJECT_REASONS("Причины отказа"),
         ASK_VOLUNTEER(""),
         ASK_ANY_VOLUNTEER("Любого"),
         SAVE_USER_PHONE("Указать телефон"),
         SAVE_USER_EMAIL("Указать почту"),
+        SAVE_SHELTER(""),
         SEND_PHOTO("Фото"),
         SEND_DIET("Питание"),
         SEND_BEHAVIOR("Поведение"),
@@ -103,41 +105,29 @@ public class KeyboardServiceExt {
     private final TelegramBot telegramBot;
     private final UserService userService;
     private final ReportService reportService;
+    private final ShelterService shelterService;
     private final QuestionsBuffer questionsBuffer;
     private final RequestsBuffer requestsBuffer;
+    private User user;
 
     public KeyboardServiceExt(TelegramBot telegramBot,
-                              UserService userService, ReportService reportService,
+                              UserService userService, ReportService reportService, ShelterService shelterService,
                               QuestionsBuffer questionsBuffer, RequestsBuffer requestsBuffer) {
         this.telegramBot = telegramBot;
         this.userService = userService;
         this.reportService = reportService;
+        this.shelterService = shelterService;
         this.questionsBuffer = questionsBuffer;
         this.requestsBuffer = requestsBuffer;
     }
 
     /**
-     * Обработка всех Updates
-     *
-     * @param updates
-     */
-    public void processUpdates(List<Update> updates) {
-        updates.forEach(update -> {
-            try {
-                logger.info("Process update: {}", update);
-                processUpdate(update);
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-            }
-        });
-    }
-
-    /**
      * Обработка отдельного Update
      *
-     * @param update
+     * @param update отдельный update для обработки
+     * @return сообщение для отправки пользователю
      */
-    private void processUpdate(Update update) {
+    public Optional<SendMessage> processUpdate(Update update) {
         Optional<SendMessage> sendMessage;
         if (update.callbackQuery() != null) {
             //Update c callback
@@ -146,7 +136,7 @@ public class KeyboardServiceExt {
             //Update c message
             sendMessage = processMessage(update.message());
         }
-        sendMessage.ifPresent(telegramBot::execute);
+        return sendMessage;
     }
 
     /**
@@ -155,52 +145,50 @@ public class KeyboardServiceExt {
      * 2. сообщения от пользователя
      * 3. ответные сообщения
      *
-     * @param message
-     * @return
+     * @param message сообщение от пользователя
+     * @return сообщение для отправки пользователю
      */
     private Optional<SendMessage> processMessage(Message message) {
+        //Определим пользователя
+        user = addUserIfNotExist(message);
+
         Optional<SendMessage> sendMessage;
-        sendMessage = processTextMessage(message);
-        if (sendMessage.isPresent()){
-            return sendMessage;}
+        sendMessage = processMenuMessage(message);
+        if (sendMessage.isPresent()) {
+            return sendMessage;
+        }
         sendMessage = processDataMessage(message);
-        if (sendMessage.isPresent()){
-            return sendMessage;}
+        if (sendMessage.isPresent()) {
+            return sendMessage;
+        }
         return processReplyMessage(message);
     }
 
     /**
      * Обработка текстовых команд меню
      *
-     * @param message
+     * @param message сообщение от пользователя
+     * @return сообщение для отправки пользователю
      */
-    private Optional<SendMessage> processTextMessage(Message message) {
+    private Optional<SendMessage> processMenuMessage(Message message) {
         //Меню
         SendMessage sendMessage = null;
         if (message.text() != null) {
             if (Menu.START.getText().equals(message.text())) {
                 //Старт
                 Keyboard keyboard = new ReplyKeyboardMarkup
-                        (new KeyboardButton(Menu.GET_INFO.getText()))
-                        .addRow(Menu.DOG_SHELTER.getText())
-                        .addRow(Menu.CAT_SHELTER.getText())
+                        (new KeyboardButton(Menu.SET_SHELTER.getText()))
                         .resizeKeyboard(true)
-                        .oneTimeKeyboard(false);
-                sendMessage = new SendMessage(message.chat().id(), "Привет!");
+                        .oneTimeKeyboard(true);
+                sendMessage = new SendMessage(message.chat().id(), "Привет! Для продолжения работы выберите приют.");
                 sendMessage.replyMarkup(keyboard);
-                // Выбор приюта
-            } else if (Menu.DOG_SHELTER.getText().equals(message.text()) || Menu.CAT_SHELTER.getText().equals(message.text())) {
-                Keyboard keyboard = new ReplyKeyboardMarkup
-                (new KeyboardButton(Menu.GET_ANIMAL.getText()))
-                        .addRow(Menu.SEND_REPORT.getText())
-                        .addRow(Menu.SET_USER_DATA.getText())
-                        .addRow(Menu.ASK_VOLUNTEER.getText())
-                        .resizeKeyboard(true)
-                        .oneTimeKeyboard(false);
+            } else if (Menu.SET_SHELTER.getText().equals(message.text())) {
+                //Выбрать приют
+                InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+                findShelters().forEach((key, value) -> markup.addRow(new InlineKeyboardButton(value)
+                        .callbackData(Command.SAVE_SHELTER + key)));
                 sendMessage = new SendMessage(message.chat().id(), "Выберите приют");
-                sendMessage.replyMarkup(keyboard);
-            } else if (Menu.CAT_SHELTER.getText().equals(message.text())) {
-
+                sendMessage.replyMarkup(markup);
             } else if (Menu.GET_INFO.getText().equals(message.text())) {
                 //Инфо о приюте
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup
@@ -211,7 +199,7 @@ public class KeyboardServiceExt {
                 sendMessage = new SendMessage(message.chat().id(), "Информация о приюте");
                 sendMessage.replyMarkup(markup);
             } else if (Menu.GET_ANIMAL.getText().equals(message.text())) {
-                //Как взять собаку
+                //Как взять животное
                 InlineKeyboardMarkup markup = new InlineKeyboardMarkup
                         (new InlineKeyboardButton(Command.HOW_RULES.getText()).callbackData(Command.HOW_RULES.name()))
                         .addRow(new InlineKeyboardButton(Command.HOW_DOCS.getText()).callbackData(Command.HOW_DOCS.name()))
@@ -222,7 +210,7 @@ public class KeyboardServiceExt {
                         .addRow(new InlineKeyboardButton(Command.HOW_EXPERT_FIRST.getText()).callbackData(Command.HOW_EXPERT_FIRST.name()))
                         .addRow(new InlineKeyboardButton(Command.HOW_EXPERT_NEXT.getText()).callbackData(Command.HOW_EXPERT_NEXT.name()))
                         .addRow(new InlineKeyboardButton(Command.HOW_REJECT_REASONS.getText()).callbackData(Command.HOW_REJECT_REASONS.name()));
-                sendMessage = new SendMessage(message.chat().id(), "Как взять собаку");
+                sendMessage = new SendMessage(message.chat().id(), "Как взять животное");
                 sendMessage.replyMarkup(markup);
             } else if (Menu.ASK_VOLUNTEER.getText().equals(message.text())) {
                 //Вопрос волонтеру
@@ -255,113 +243,10 @@ public class KeyboardServiceExt {
     }
 
     /**
-     * Обработка сообщений с callback
-     * (при нажатии на меню inline keyboard)
-     *
-     * @param callbackQuery
-     */
-    private Optional<SendMessage> processCallback(CallbackQuery callbackQuery) {
-        //callback команды
-        Long userChatId = callbackQuery.message().chat().id();
-        SendMessage sendMessage = null;
-        if (callbackQuery.data().equals(Command.INF_ADDRESS.name())) {
-            //Адрес
-            sendMessage = new SendMessage(userChatId, Shelter.getAddress());
-        } else if (callbackQuery.data().equals(Command.INF_SCHEDULE.name())) {
-            //Расписание
-            sendMessage = new SendMessage(userChatId, Shelter.getSchedule());
-        } else if (callbackQuery.data().equals(Command.INF_SCHEME.name())) {
-            //Схема проезда
-            sendMessage = new SendMessage(userChatId, Shelter.getScheme());
-        } else if (callbackQuery.data().equals(Command.INF_SAFETY.name())) {
-            //Техника безопасности
-            sendMessage = new SendMessage(userChatId, Shelter.getSafety());
-        } else if (callbackQuery.data().equals(Command.HOW_RULES.name())) {
-            //Правила знакомства с собакой
-            sendMessage = new SendMessage(userChatId, Shelter.getRules());
-        } else if (callbackQuery.data().equals(Command.HOW_DOCS.name())) {
-            //Список документов
-            sendMessage = new SendMessage(userChatId, Shelter.getDocs());
-        } else if (callbackQuery.data().equals(Command.HOW_MOVE.name())) {
-            //Рекомендации по транспортировке
-            sendMessage = new SendMessage(userChatId, Shelter.getMove());
-        } else if (callbackQuery.data().equals(Command.HOW_ARRANGE.name())) {
-            //Рекомендации по обустройству
-            sendMessage = new SendMessage(userChatId, Shelter.getArrangements());
-        } else if (callbackQuery.data().equals(Command.HOW_ARRANGE_PUPPY.name())) {
-            //Рекомендации по обустройству для щенка
-            sendMessage = new SendMessage(userChatId, Shelter.getArrangementsForPuppy());
-        } else if (callbackQuery.data().equals(Command.HOW_ARRANGE_CRIPPLE.name())) {
-            //Рекомендации по обустройству для собаки-инвалида
-            sendMessage = new SendMessage(userChatId, Shelter.getArrangementsForCripple());
-        } else if (callbackQuery.data().equals(Command.HOW_EXPERT_FIRST.name())) {
-            //Советы кинолога по первому общению
-            sendMessage = new SendMessage(userChatId, Shelter.getExpertAdvicesFirst());
-        } else if (callbackQuery.data().equals(Command.HOW_EXPERT_NEXT.name())) {
-            //Советы кинолога по дальнейшему общению
-            sendMessage = new SendMessage(userChatId, Shelter.getExpertAdvicesNext());
-        } else if (callbackQuery.data().equals(Command.HOW_REJECT_REASONS.name())) {
-            //Причины отказа
-            sendMessage = new SendMessage(userChatId, Shelter.getRejectReasons());
-        } else if (callbackQuery.data().startsWith(Command.ASK_VOLUNTEER.name())) {
-            //Конкретный волонтера (чат выбранного волонтера в callback data)
-            Long volunteerChatId = Long.parseLong(callbackQuery.data().substring(Command.ASK_VOLUNTEER.name().length()));
-            questionsBuffer.addQuestion(new Question(userChatId, volunteerChatId));
-            sendMessage = new SendMessage(userChatId, "Напишите вопрос");
-        } else if (callbackQuery.data().startsWith(Command.ASK_ANY_VOLUNTEER.name())) {
-            //Любой волонтер (будет найден первый попавшийся)
-            if (userService.findAnyVolunteer().isPresent()) {
-                var volunteer = userService.findAnyVolunteer().get();
-                Long volunteerChatId = volunteer.getTelegramId();
-                questionsBuffer.addQuestion(new Question(userChatId, volunteerChatId));
-                sendMessage = new SendMessage(userChatId, "Напишите вопрос");
-            } else {
-                sendMessage = new SendMessage(userChatId, "Нет свободных волонтеров");
-            }
-        } else if (callbackQuery.data().equals(Command.SAVE_USER_PHONE.name())) {
-            //Телефон
-            Request request = new Request(userChatId);
-            request.setUserPhoneRequested(true);
-            requestsBuffer.addRequest(request);
-            sendMessage = new SendMessage(userChatId, "Напишите телефон");
-        } else if (callbackQuery.data().equals(Command.SAVE_USER_EMAIL.name())) {
-            //Почта
-            Request request = new Request(userChatId);
-            request.setUserEmailRequested(true);
-            requestsBuffer.addRequest(request);
-            sendMessage = new SendMessage(userChatId, "Напишите почту");
-        } else if (callbackQuery.data().equals(Command.SEND_PHOTO.name())) {
-            //Фото для отчета
-            Request request = new Request(userChatId);
-            request.setReportPhotoRequested(true);
-            requestsBuffer.addRequest(request);
-            sendMessage = new SendMessage(userChatId, "Отправьте фото");
-        } else if (callbackQuery.data().equals(Command.SEND_DIET.name())) {
-            //Диета для отчета
-            Request request = new Request(userChatId);
-            request.setReportDietRequested(true);
-            requestsBuffer.addRequest(request);
-            sendMessage = new SendMessage(userChatId, "Опишите диету");
-        } else if (callbackQuery.data().equals(Command.SEND_BEHAVIOR.name())) {
-            //Поведение для отчета
-            Request request = new Request(userChatId);
-            request.setReportBehaviorRequested(true);
-            requestsBuffer.addRequest(request);
-            sendMessage = new SendMessage(userChatId, "Опишите поведение");
-        } else if (callbackQuery.data().equals(Command.SEND_WELL_BEING.name())) {
-            //Самочувствие для отчета
-            Request request = new Request(userChatId);
-            request.setReportWellBeingRequest(true);
-            requestsBuffer.addRequest(request);
-            sendMessage = new SendMessage(userChatId, "Опишите самочувствие");
-        }
-        return Optional.ofNullable(sendMessage);
-    }
-
-    /**
      * Обработка сообщений с данными от пользователя
      *
-     * @param message
+     * @param message сообщение от пользователя
+     * @return сообщение для отправки пользователю
      */
     private Optional<SendMessage> processDataMessage(Message message) {
         //Данные от пользователя
@@ -392,7 +277,8 @@ public class KeyboardServiceExt {
      * Обработка reply-сообщений
      * (используется при ответе волонтера на сообщение)
      *
-     * @param message
+     * @param message сообщение с reply
+     * @return сообщение для отправки пользователю
      */
     private Optional<SendMessage> processReplyMessage(Message message) {
         SendMessage sendMessage = null;
@@ -410,12 +296,135 @@ public class KeyboardServiceExt {
     }
 
     /**
+     * Обработка сообщений с callback
+     * (при нажатии на меню inline keyboard)
+     *
+     * @param callbackQuery команды inline keyboard
+     * @return сообщение для отправки пользователю
+     */
+    private Optional<SendMessage> processCallback(CallbackQuery callbackQuery) {
+        //Определим пользователя
+        user = addUserIfNotExist(callbackQuery.message());
+
+        //callback команды
+        Long userChatId = callbackQuery.message().chat().id();
+        SendMessage sendMessage = null;
+
+        if (callbackQuery.data().startsWith(Command.SAVE_SHELTER.name())) {
+            //Присвоить приют
+            Long shelterId = Long.parseLong(callbackQuery.data().substring(Command.SAVE_SHELTER.name().length()));
+            Shelter shelter = shelterService.findById(shelterId);
+            user.setShelter(shelter);
+            updateUser(user);
+            sendMessage = new SendMessage(userChatId, "Приют выбран");
+            sendMessage.replyMarkup(defineMainMenu());
+        }
+
+        if (user.getShelter() != null) {
+            if (callbackQuery.data().equals(Command.INF_ADDRESS.name())) {
+                //Адрес
+                sendMessage = new SendMessage(userChatId, user.getShelter().getAddress());
+            } else if (callbackQuery.data().equals(Command.INF_SCHEDULE.name())) {
+                //Расписание
+                sendMessage = new SendMessage(userChatId, user.getShelter().getSchedule());
+            } else if (callbackQuery.data().equals(Command.INF_SCHEME.name())) {
+                //Схема проезда
+                sendMessage = new SendMessage(userChatId, user.getShelter().getScheme());
+            } else if (callbackQuery.data().equals(Command.INF_SAFETY.name())) {
+                //Техника безопасности
+                sendMessage = new SendMessage(userChatId, user.getShelter().getSafety());
+            } else if (callbackQuery.data().equals(Command.HOW_RULES.name())) {
+                //Правила знакомства с собакой
+                sendMessage = new SendMessage(userChatId, user.getShelter().getRules());
+            } else if (callbackQuery.data().equals(Command.HOW_DOCS.name())) {
+                //Список документов
+                sendMessage = new SendMessage(userChatId, user.getShelter().getDocs());
+            } else if (callbackQuery.data().equals(Command.HOW_MOVE.name())) {
+                //Рекомендации по транспортировке
+                sendMessage = new SendMessage(userChatId, user.getShelter().getMovement());
+            } else if (callbackQuery.data().equals(Command.HOW_ARRANGE.name())) {
+                //Рекомендации по обустройству
+                sendMessage = new SendMessage(userChatId, user.getShelter().getArrangements());
+            } else if (callbackQuery.data().equals(Command.HOW_ARRANGE_PUPPY.name())) {
+                //Рекомендации по обустройству для щенка
+                sendMessage = new SendMessage(userChatId, user.getShelter().getArrangements_for_puppy());
+            } else if (callbackQuery.data().equals(Command.HOW_ARRANGE_CRIPPLE.name())) {
+                //Рекомендации по обустройству для собаки-инвалида
+                sendMessage = new SendMessage(userChatId, user.getShelter().getArrangements_for_cripple());
+            } else if (callbackQuery.data().equals(Command.HOW_EXPERT_FIRST.name())) {
+                //Советы кинолога по первому общению
+                sendMessage = new SendMessage(userChatId, user.getShelter().getExpert_advices_first());
+            } else if (callbackQuery.data().equals(Command.HOW_EXPERT_NEXT.name())) {
+                //Советы кинолога по дальнейшему общению
+                sendMessage = new SendMessage(userChatId, user.getShelter().getExpert_advices_next());
+            } else if (callbackQuery.data().equals(Command.HOW_REJECT_REASONS.name())) {
+                //Причины отказа
+                sendMessage = new SendMessage(userChatId, user.getShelter().getReject_reasons());
+            } else if (callbackQuery.data().startsWith(Command.ASK_VOLUNTEER.name())) {
+                //Конкретный волонтера (чат выбранного волонтера в callback data)
+                Long volunteerChatId = Long.parseLong(callbackQuery.data().substring(Command.ASK_VOLUNTEER.name().length()));
+                questionsBuffer.addQuestion(new Question(userChatId, volunteerChatId));
+                sendMessage = new SendMessage(userChatId, "Напишите вопрос");
+            } else if (callbackQuery.data().startsWith(Command.ASK_ANY_VOLUNTEER.name())) {
+                //Любой волонтер (будет найден первый попавшийся)
+                if (userService.findAnyVolunteer().isPresent()) {
+                    var volunteer = userService.findAnyVolunteer().get();
+                    Long volunteerChatId = volunteer.getTelegramId();
+                    questionsBuffer.addQuestion(new Question(userChatId, volunteerChatId));
+                    sendMessage = new SendMessage(userChatId, "Напишите вопрос");
+                } else {
+                    sendMessage = new SendMessage(userChatId, "Нет свободных волонтеров");
+                }
+            } else if (callbackQuery.data().equals(Command.SAVE_USER_PHONE.name())) {
+                //Телефон
+                Request request = new Request(userChatId);
+                request.setUserPhoneRequested(true);
+                requestsBuffer.addRequest(request);
+                sendMessage = new SendMessage(userChatId, "Напишите телефон");
+            } else if (callbackQuery.data().equals(Command.SAVE_USER_EMAIL.name())) {
+                //Почта
+                Request request = new Request(userChatId);
+                request.setUserEmailRequested(true);
+                requestsBuffer.addRequest(request);
+                sendMessage = new SendMessage(userChatId, "Напишите почту");
+            } else if (callbackQuery.data().equals(Command.SEND_PHOTO.name())) {
+                //Фото для отчета
+                Request request = new Request(userChatId);
+                request.setReportPhotoRequested(true);
+                requestsBuffer.addRequest(request);
+                sendMessage = new SendMessage(userChatId, "Отправьте фото");
+            } else if (callbackQuery.data().equals(Command.SEND_DIET.name())) {
+                //Диета для отчета
+                Request request = new Request(userChatId);
+                request.setReportDietRequested(true);
+                requestsBuffer.addRequest(request);
+                sendMessage = new SendMessage(userChatId, "Опишите диету");
+            } else if (callbackQuery.data().equals(Command.SEND_BEHAVIOR.name())) {
+                //Поведение для отчета
+                Request request = new Request(userChatId);
+                request.setReportBehaviorRequested(true);
+                requestsBuffer.addRequest(request);
+                sendMessage = new SendMessage(userChatId, "Опишите поведение");
+            } else if (callbackQuery.data().equals(Command.SEND_WELL_BEING.name())) {
+                //Самочувствие для отчета
+                Request request = new Request(userChatId);
+                request.setReportWellBeingRequest(true);
+                requestsBuffer.addRequest(request);
+                sendMessage = new SendMessage(userChatId, "Опишите самочувствие");
+            }
+        } else {
+            sendMessage = new SendMessage(userChatId, "приют не выбран");
+        }
+        return Optional.ofNullable(sendMessage);
+    }
+
+    /**
      * Отправить сообщение волонтеру
      * В сообщении вначале указываем id сообщения пользователя
      *
-     * @param question
-     * @param message
-     * @return
+     * @param question вопрос волонтеру
+     * @param message  сообщение от пользователя с вопросом
+     * @return сообщение для отправки пользователю
      */
     private SendMessage sendQuestionToVolunteer(Question question, Message message) {
         SendMessage sendMessage;
@@ -432,25 +441,83 @@ public class KeyboardServiceExt {
     }
 
     /**
+     * Создать пользователя если еще нет в БД
+     * поиск по telegramId
+     *
+     * @param message сообщение от пользователя
+     * @return найденный или созданный пользователь
+     */
+    private User addUserIfNotExist(Message message) {
+        Long telegramId = message.chat().id();
+        User user = userService.findByTelegramId(telegramId);
+        if (user.getId() == 0L) {
+            user.setTelegramId(telegramId);
+            if (message.chat().firstName() != null) {
+                user.setName(message.chat().firstName());
+            } else {
+                user.setName(message.chat().username());
+            }
+            if (message.chat().lastName() != null) {
+                user.setSurname(message.chat().lastName());
+            } else {
+                user.setSurname(message.chat().username());
+            }
+            user.setState(User.OwnerStateEnum.SEARCH);
+            userService.create(user);
+        }
+        return user;
+    }
+
+    /**
      * Обновить данные пользователя
      * Если пользователя нет, то создать
      *
-     * @return
+     * @param request запрос данных пользователя
+     * @param message сообщение с данными пользователя
+     * @return ответное сообщение пользователю
      */
     private SendMessage updateRequestedUserData(Request request, Message message) {
-        Long userChatId = message.chat().id();
+        if (request.isUserPhoneRequested()) {
+            user.setPhone(message.text());
+        }
+        if (request.isUserEmailRequested()) {
+            user.setEmail(message.text());
+        }
+        return updateUser(user);
+    }
+
+    /**
+     * Обновить данные пользователя
+     *
+     * @param user данные пользователя для обновления
+     * @return ответное сообщение пользователю
+     */
+    private SendMessage updateUser(User user) {
         try {
-            User user = addUserIfNotExist(message);
-            if (request.isUserPhoneRequested())
-                user.setPhone(message.text());
-            if (request.isUserEmailRequested())
-                user.setEmail(message.text());
             userService.update(user, user.getId());
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return new SendMessage(userChatId, String.format("Возникла ошибка: %s", e.getMessage()));
+            return new SendMessage(user.getTelegramId(), String.format("Возникла ошибка: %s", e.getMessage()));
         }
-        return new SendMessage(userChatId, "Данные пользователя записаны");
+        return new SendMessage(user.getTelegramId(), "Данные пользователя записаны");
+    }
+
+    /**
+     * Создать отчет если еще нет в БД
+     * считаем что один отчет в день от пользователя
+     *
+     * @param user пользователь
+     * @return найденный или созданный отчет
+     */
+    private Report addReportIfNotExist(User user) {
+        Report report = reportService.findFirstByUserIdAndDate(user.getId(), LocalDateTime.now());
+        if (report.getId() == 0L) {
+            report.setUser(user);
+            report.setAnimal(user.getAnimal());
+            report.setDate(LocalDateTime.now());
+            reportService.create(report);
+        }
+        return report;
     }
 
     /**
@@ -458,15 +525,14 @@ public class KeyboardServiceExt {
      * Если отчет за текущий день не найден, то создать
      * Если пользователя нет, то создать
      *
-     * @param request
-     * @param message
-     * @return
+     * @param request запрос данных пользователя
+     * @param message сообщение с данными пользователя
+     * @return ответное сообщение пользователю
      */
     private SendMessage updateRequestedReportData(Request request, Message message) {
         Long userChatId = message.chat().id();
         try {
-            Report report = addReportIfNotExist(
-                    addUserIfNotExist(message));
+            Report report = addReportIfNotExist(user);
             if (request.isReportDietRequested()) {
                 report.setDiet(message.text());
             }
@@ -492,10 +558,26 @@ public class KeyboardServiceExt {
     }
 
     /**
+     * Основное меню бота
+     *
+     * @return объект Keyboard с основным меню
+     */
+    private Keyboard defineMainMenu() {
+        return new ReplyKeyboardMarkup
+                (new KeyboardButton(Menu.GET_INFO.getText()))
+                .addRow(Menu.GET_ANIMAL.getText())
+                .addRow(Menu.SEND_REPORT.getText())
+                .addRow(Menu.SET_USER_DATA.getText())
+                .addRow(Menu.ASK_VOLUNTEER.getText())
+                .resizeKeyboard(true)
+                .oneTimeKeyboard(false);
+    }
+
+    /**
      * Поиск номера сообщения для ответа пользователю волонтером
      *
-     * @param message
-     * @return
+     * @param message сообщение для поиска номера
+     * @return id сообщения
      */
     private int getMessageId(String message) {
         Pattern pattern = Pattern.compile(USER_VOLUNTEER_MSG_TEMPL);
@@ -507,62 +589,30 @@ public class KeyboardServiceExt {
     }
 
     /**
-     * Поиск волонтеров, метод возвращает Map, где
-     * ключ chatId волонтера
-     * значение имя волонтера
+     * Поиск волонтеров
      *
-     * @return
+     * @return Map, где
+     * ключ - chatId волонтера,
+     * значение - имя волонтера
      */
     private Map<String, String> findVolunteers() {
         return userService.findVolunteers().stream()
                 .collect(Collectors.toMap(
                         user -> Long.toString(user.getTelegramId()),
-                        user -> user.getName()));
+                        User::getName));
     }
 
     /**
-     * Создать пользователя если еще нет в БД
-     * поиск по telegramId
+     * Поиск приютов
      *
-     * @param message
-     * @return
+     * @return Map, где
+     * ключ - Id приюта,
+     * значение - название приюта
      */
-    private User addUserIfNotExist(Message message) {
-        Long telegramId = message.chat().id();
-        User user = userService.findByTelegramId(telegramId);
-        if (user.getId() == 0L) {
-            user.setTelegramId(telegramId);
-            if (message.chat().firstName() != null) {
-                user.setName(message.chat().firstName());
-            } else {
-                user.setName(message.chat().username());
-            }
-            if (message.chat().lastName() != null) {
-                user.setSurname(message.chat().lastName());
-            } else {
-                user.setSurname(message.chat().username());
-            }
-            user.setState(User.OwnerStateEnum.SEARCH);
-            userService.create(user);
-        }
-        return user;
-    }
-
-    /**
-     * Создать отчет если еще нет в БД
-     * считаем что один отчет в день от пользователя
-     *
-     * @param user
-     * @return
-     */
-    private Report addReportIfNotExist(User user) {
-        Report report = reportService.findFirstByUserIdAndDate(user.getId(), LocalDateTime.now());
-        if (report.getId() == 0L) {
-            report.setUser(user);
-            report.setAnimal(user.getAnimal());
-            report.setDate(LocalDateTime.now());
-            reportService.create(report);
-        }
-        return report;
+    private Map<String, String> findShelters() {
+        return shelterService.findAll().stream()
+                .collect(Collectors.toMap(
+                        shelter -> Long.toString(shelter.getId()),
+                        Shelter::getName));
     }
 }
