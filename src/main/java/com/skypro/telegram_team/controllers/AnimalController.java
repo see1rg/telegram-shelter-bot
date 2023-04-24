@@ -177,7 +177,7 @@ public class AnimalController {
 
     @Operation(
             summary = "Изменение данных о животном по личному идентификатору"
-            , tags = "Dogs",
+            , tags = "Animals",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Ввод новых данных о животном",
                     content = @Content(

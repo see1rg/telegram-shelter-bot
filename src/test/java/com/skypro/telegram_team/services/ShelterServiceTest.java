@@ -38,7 +38,7 @@ public class ShelterServiceTest {
     public void findById() {
         when(shelterRepository.findById(any())).thenReturn(Optional.ofNullable(expectedShelter));
         Shelter actualShelter = shelterService.findById(expectedShelter.getId());
-        assertEquals(expectedShelter,actualShelter);
+        Assertions.assertEquals(expectedShelter, actualShelter);
         verify(shelterRepository, times(1)).findById(any());
     }
 
@@ -47,7 +47,7 @@ public class ShelterServiceTest {
         List<Shelter> expectedShelters = List.of(expectedShelter);
         when(shelterRepository.findAll()).thenReturn(expectedShelters);
         Collection<Shelter> actualShelters = shelterService.findAll();
-        assertEquals(expectedShelters, actualShelters);
+        Assertions.assertEquals(expectedShelters, actualShelters);
         verify(shelterRepository, times(1)).findAll();
     }
 
@@ -55,7 +55,7 @@ public class ShelterServiceTest {
     public void create() {
         when(shelterRepository.save(any())).thenReturn(expectedShelter);
         Shelter actualShelter = shelterService.create(expectedShelter);
-        assertEquals(expectedShelter,actualShelter);
+        Assertions.assertEquals(expectedShelter, actualShelter);
         verify(shelterRepository, times(1)).save(any());
 
     }
@@ -65,10 +65,10 @@ public class ShelterServiceTest {
         when(shelterRepository.save(any())).thenReturn(expectedShelter);
         when(shelterRepository.findById(any())).thenReturn(Optional.ofNullable(expectedShelter));
         Shelter updatedShelter = new Shelter();
-        updatedShelter.setName("приют для кошек");
+        updatedShelter.setName("приют для собак");
         Shelter actualShelter = shelterService.update(updatedShelter, expectedShelter.getId());
-        assertEquals(expectedShelter.getId(), actualShelter.getId());
-        assertEquals(updatedShelter.getName(), actualShelter.getName());
+        Assertions.assertEquals(expectedShelter.getId(), actualShelter.getId());
+        Assertions.assertEquals(updatedShelter.getName(), actualShelter.getName());
         verify(shelterRepository, times(1)).findById(any());
         verify(shelterRepository, times(1)).save(any());
     }
@@ -78,7 +78,7 @@ public class ShelterServiceTest {
         when(shelterRepository.findById(any())).thenReturn(Optional.ofNullable(expectedShelter));
         Shelter actualShelter = shelterService.delete(expectedShelter.getId());
         Shelter shelter = mock(Shelter.class);
-        assertEquals(expectedShelter, actualShelter);
+        Assertions.assertEquals(expectedShelter, actualShelter);
         verify(shelterRepository, times(1)).findById(any());
     }
 

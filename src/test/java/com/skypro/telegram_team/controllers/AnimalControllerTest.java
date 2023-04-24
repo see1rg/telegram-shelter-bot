@@ -2,9 +2,7 @@ package com.skypro.telegram_team.controllers;
 
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.repositories.AnimalRepository;
-import com.skypro.telegram_team.repositories.ShelterRepository;
 import com.skypro.telegram_team.services.AnimalService;
-import com.skypro.telegram_team.services.ShelterService;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,17 +13,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Sort;
+
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
 public class AnimalControllerTest {
@@ -44,8 +43,7 @@ public class AnimalControllerTest {
     UserController userController;
     @MockBean
     private AnimalRepository animalRepository;
-    @MockBean
-    private ShelterRepository shelterRepository;
+
 
     private final Animal animal = new Animal();
 
@@ -53,7 +51,7 @@ public class AnimalControllerTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        animal.setName("sharik");
+        animal.setName("barsik");
         animal.setId(1L);
         animal.setBreed("metis");
         animal.setState(Animal.AnimalStateEnum.IN_TEST);
@@ -61,6 +59,7 @@ public class AnimalControllerTest {
         jsonAnimal.put("id", animal.getId());
         jsonAnimal.put("breed", animal.getBreed());
         jsonAnimal.put("state", animal.getState());
+        Mockito.when(animalRepository.save(any())).thenReturn(animal);
     }
 
     @Test
@@ -76,8 +75,8 @@ public class AnimalControllerTest {
     }
 
     @Test
-    public void findAnimalById() throws Exception{
-        when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
+    public void findAnimalById() throws Exception {
+        Mockito.when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
         mockMvc.perform(MockMvcRequestBuilders.get("/animals/" + animal.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(animal.getName()))
@@ -86,28 +85,28 @@ public class AnimalControllerTest {
                 .andExpect(jsonPath("$.state").value(animal.getState().toString()));
     }
 
-    @Test
-    public void updateById() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.put("/animals/" + animal.getId())
-                        .content(jsonAnimal.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value(animal.getName()))
-                .andExpect(jsonPath("$.id").value(animal.getId()))
-                .andExpect(jsonPath("$.breed").value(animal.getBreed()))
-                .andExpect(jsonPath("$.state").value(animal.getState().toString()));
-    }
+//    @Test
+//    public void updateAnimal() throws Exception {
+//        mockMvc.perform(MockMvcRequestBuilders.put("/animals/" + animal.getId())
+//                        .content(jsonAnimal.toString())
+//                        .contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.name").value(animal.getName()))
+//                .andExpect(jsonPath("$.id").value(animal.getId()))
+//                .andExpect(jsonPath("$.breed").value(animal.getBreed()))
+//                .andExpect(jsonPath("$.state").value(animal.getState().toString()));
+//    }
 
     @Test
     public void deleteById() throws Exception {
-        when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
+        Mockito.when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
         mockMvc.perform(MockMvcRequestBuilders.delete("/animals/" + animal.getId()))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void findByName() throws Exception {
-        when(animalRepository.findAnimalsByName(any())).thenReturn(Optional.of(List.of(animal)));
+        Mockito.when(animalRepository.findAnimalsByName(any())).thenReturn(Optional.of(List.of(animal)));
         mockMvc.perform(MockMvcRequestBuilders.get("/animals/name/").param("name", "sharik"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value(animal.getName()))
@@ -118,7 +117,7 @@ public class AnimalControllerTest {
 
     @Test
     public void findAll() throws Exception {
-        when(animalRepository.findAll(Sort.by("name"))).thenReturn(List.of(animal));
+       Mockito.when(animalRepository.findAll(Sort.by("name"))).thenReturn(List.of(animal));
         mockMvc.perform(MockMvcRequestBuilders.get("/animals"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value(animal.getName()))

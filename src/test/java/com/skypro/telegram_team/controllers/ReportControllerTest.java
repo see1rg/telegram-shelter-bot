@@ -52,8 +52,6 @@ public class ReportControllerTest {
     @MockBean
     private AnimalRepository animalRepository;
     @MockBean
-    private ShelterController shelterController;
-    @MockBean
     private ShelterRepository shelterRepository;
     private final Report report = new Report();
     private final JSONObject jsonReport = new JSONObject();
