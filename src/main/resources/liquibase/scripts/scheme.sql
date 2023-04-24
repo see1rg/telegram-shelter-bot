@@ -136,4 +136,31 @@ ALTER TABLE reports
     ADD COLUMN cat_id BIGINT REFERENCES cats(id),
     ADD COLUMN dog_id BIGINT REFERENCES dogs(id);
 
+-- changeSet 11th:7
+CREATE TABLE IF NOT EXISTS shelters
+(
+    id                       BIGSERIAL PRIMARY KEY NOT NULL,
+    name                     VARCHAR(50)           NOT NULL,
+    type                     VARCHAR(10),
+    address                  VARCHAR(100),
+    schedule                 VARCHAR(100),
+    scheme                   VARCHAR(100),
+    safety                   TEXT,
+    docs                     TEXT,
+    rules                    TEXT,
+    arrangements             TEXT,
+    arrangements_for_puppy   TEXT,
+    arrangements_for_cripple TEXT,
+    movement                 TEXT,
+    expert_advices_first     TEXT,
+    expert_advices_next      TEXT,
+    reject_reasons           TEXT
+);
+
+ALTER TABLE users
+    ADD COLUMN shelter_id BIGINT REFERENCES shelters(id);
+
+ALTER TABLE animals
+    ADD COLUMN shelter_id BIGINT REFERENCES shelters(id);
+
 
