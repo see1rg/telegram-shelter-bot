@@ -98,9 +98,6 @@ public class UserController {
     @PutMapping("/{id}/state")
     public User updateState(@PathVariable Long id, @RequestParam("state") User.OwnerStateEnum state,
                             @RequestParam(required = false) Long daysForTest ) {
-    if (daysForTest == null) {
-        daysForTest = -1L;
-    }
         return userService.updateState(id, state, daysForTest);
     }
 }

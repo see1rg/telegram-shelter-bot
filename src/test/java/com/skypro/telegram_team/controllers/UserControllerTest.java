@@ -2,10 +2,9 @@ package com.skypro.telegram_team;
 
 import com.skypro.telegram_team.controllers.AnimalController;
 import com.skypro.telegram_team.controllers.ReportController;
+import com.skypro.telegram_team.controllers.ShelterController;
 import com.skypro.telegram_team.controllers.UserController;
-import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Cat;
 import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
@@ -24,12 +23,8 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,6 +39,8 @@ public class UserControllerTest {
     private AnimalController animalController;
     @MockBean
     private ReportController reportController;
+    @MockBean
+    ShelterController shelterController;
     @InjectMocks
     private UserController userController;
     @MockBean
