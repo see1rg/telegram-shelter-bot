@@ -14,8 +14,7 @@ import java.util.Objects;
 @Setter
 @Table(name = "animals")
 @Entity
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
-public abstract class Animal {
+public class Animal {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE)
     @Column(nullable = false)

@@ -1,9 +1,10 @@
 package com.skypro.telegram_team.controllers;
 
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Cat;
 import com.skypro.telegram_team.repositories.AnimalRepository;
+import com.skypro.telegram_team.repositories.ShelterRepository;
 import com.skypro.telegram_team.services.AnimalService;
+import com.skypro.telegram_team.services.ShelterService;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,15 +35,21 @@ public class AnimalControllerTest {
     private AnimalController animalController;
     @SpyBean
     private AnimalService animalService;
+    @SpyBean
+    private ShelterService shelterService;
     @MockBean
-    ReportController reportController;
+    private ReportController reportController;
 
     @MockBean
-    UserController userController;
+    private UserController userController;
     @MockBean
     private AnimalRepository animalRepository;
+    @MockBean
+    private ShelterController shelterController;
+    @MockBean
+    private ShelterRepository shelterRepository;
 
-    private final Animal animal = new Cat();
+    private final Animal animal = new Animal();
 
     private final JSONObject jsonAnimal = new JSONObject();
 
@@ -62,17 +69,17 @@ public class AnimalControllerTest {
         Mockito.when(animalRepository.findAll(Sort.by("name"))).thenReturn(List.of(animal));
     }
 
-//    @Test
-//    public void createAnimal() throws Exception {
-//        mockMvc.perform(MockMvcRequestBuilders.post("/animals")
-//                        .content(jsonAnimal.toString())
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.name").value(animal.getName()))
-//                .andExpect(jsonPath("$.id").value(animal.getId()))
-//                .andExpect(jsonPath("$.breed").value(animal.getBreed()))
-//                .andExpect(jsonPath("$.state").value(animal.getState().toString()));
-//    }
+    @Test
+    public void createAnimal() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/animals")
+                        .content(jsonAnimal.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(animal.getName()))
+                .andExpect(jsonPath("$.id").value(animal.getId()))
+                .andExpect(jsonPath("$.breed").value(animal.getBreed()))
+                .andExpect(jsonPath("$.state").value(animal.getState().toString()));
+    }
 
     @Test
     public void findAnimalById() throws Exception {
@@ -84,17 +91,17 @@ public class AnimalControllerTest {
                 .andExpect(jsonPath("$.state").value(animal.getState().toString()));
     }
 
-//    @Test
-//    public void updateById() throws Exception {
-//        mockMvc.perform(MockMvcRequestBuilders.put("/animals/" + animal.getId())
-//                        .content(jsonAnimal.toString())
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.name").value(animal.getName()))
-//                .andExpect(jsonPath("$.id").value(animal.getId()))
-//                .andExpect(jsonPath("$.breed").value(animal.getBreed()))
-//                .andExpect(jsonPath("$.state").value(animal.getState().toString()));
-//    }
+    @Test
+    public void updateById() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.put("/animals/" + animal.getId())
+                        .content(jsonAnimal.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(animal.getName()))
+                .andExpect(jsonPath("$.id").value(animal.getId()))
+                .andExpect(jsonPath("$.breed").value(animal.getBreed()))
+                .andExpect(jsonPath("$.state").value(animal.getState().toString()));
+    }
 
     @Test
     public void deleteById() throws Exception {

@@ -1,22 +1,17 @@
 package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Cat;
-import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Сервис для работы с животными приюта
@@ -134,30 +129,5 @@ public class AnimalService {
     public List<Animal> findByUserState(User.OwnerStateEnum ownerStateEnum) {
         log.info("Finding animals by user state - " + ownerStateEnum);
         return animalRepository.findByUserContainsOrderByState(ownerStateEnum);
-    }
-
-    public Animal createCat(Cat cat) {
-        log.info("Saving cat: " + cat);
-        return animalRepository.save(cat);
-    }
-
-    public Animal createDog(Dog dog) {
-        log.info("Saving dog: " + dog);
-        return animalRepository.save(dog);
-    }
-
-
-    public List<Dog> getAllDogs() {
-        return findAll().stream()
-                .filter(animal -> animal instanceof Dog)
-                .map(animal -> (Dog) animal)
-                .collect(Collectors.toList());
-    }
-
-    public List<Cat> getAllCats() {
-        return findAll().stream()
-                .filter(animal -> animal instanceof Cat)
-                .map(animal -> (Cat) animal)
-                .collect(Collectors.toList());
     }
 }

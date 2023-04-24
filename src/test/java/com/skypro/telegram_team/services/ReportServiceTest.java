@@ -1,7 +1,6 @@
 package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.ReportRepository;
@@ -36,7 +35,7 @@ public class ReportServiceTest {
         expectedReport = new Report();
         expectedReport.setId(1L);
         expectedReport.setDate(LocalDateTime.now());
-        Animal animal = new Dog();
+        Animal animal = new Animal();
         animal.setId(1L);
         User user = new User();
         user.setId(1L);

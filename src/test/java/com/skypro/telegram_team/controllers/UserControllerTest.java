@@ -1,16 +1,12 @@
-package com.skypro.telegram_team;
+package com.skypro.telegram_team.controllers;
 
-import com.skypro.telegram_team.controllers.AnimalController;
-import com.skypro.telegram_team.controllers.ReportController;
-import com.skypro.telegram_team.controllers.UserController;
-import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Cat;
-import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
+import com.skypro.telegram_team.repositories.ShelterRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
 import com.skypro.telegram_team.services.AnimalService;
+import com.skypro.telegram_team.services.ShelterService;
 import com.skypro.telegram_team.services.UserService;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,11 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -46,6 +40,8 @@ public class UserControllerTest {
     private ReportController reportController;
     @InjectMocks
     private UserController userController;
+    @SpyBean
+    private ShelterService shelterService;
     @MockBean
     private UserRepository userRepository;
     @SpyBean
@@ -54,9 +50,13 @@ public class UserControllerTest {
     private AnimalService animalService;
     @MockBean
     private AnimalRepository animalRepository;
+    @MockBean
+    private ShelterController shelterController;
+    @MockBean
+    private ShelterRepository shelterRepository;
     private final User user = new User();
     private final JSONObject jsonUser = new JSONObject();
-    private final Animal animal = new Dog();
+    private final Animal animal = new Animal();
 
     @BeforeEach
     public void setup() throws JSONException {

@@ -2,8 +2,6 @@ package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Cat;
-import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
@@ -135,7 +133,7 @@ public class UserServiceTest {
 
     @Test
     public void joinAnimalAndUser() {
-        Animal animal = new Dog();
+        Animal animal = new Animal();
         animal.setId(1L);
         when(userRepository.findById(any())).thenReturn(Optional.ofNullable(expectedUser));
         when(userRepository.save(any())).thenReturn(expectedUser);
@@ -201,7 +199,7 @@ public class UserServiceTest {
 
     @Test
     public void shouldThrowsEntityNotFoundExceptionWhenRunMethodJoinAnimalAndUser() {
-        Animal animal = new Cat();
+        Animal animal = new Animal();
         when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
         when(userRepository.findById(any())).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class,
