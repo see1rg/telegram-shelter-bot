@@ -32,9 +32,17 @@ public class Report {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToOne
-    @JoinColumn(name = "animal_id", referencedColumnName = "id")
+    @ManyToOne
+    @PrimaryKeyJoinColumn(name = "animal_id", referencedColumnName = "id")
     private Animal animal;
+
+    @ManyToOne
+    @JoinColumn(name = "cat_id")
+    private Cat cat;
+
+    @ManyToOne
+    @JoinColumn(name = "dog_id")
+    private Dog dog;
 
     @Override
     public boolean equals(Object o) {

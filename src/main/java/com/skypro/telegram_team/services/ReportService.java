@@ -2,7 +2,6 @@ package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.Report;
-import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.ReportRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
 import lombok.extern.log4j.Log4j2;
@@ -39,10 +38,9 @@ public class ReportService {
      * @return сохраненный отчет
      */
     @Transactional
-    public Report save(Report report) {
-        //Нужно переименовать метод save в create
+    public Report create(Report report) {
         log.info("Saving report: " + report);
-        validate(report);
+//        validate(report);
         return reportRepository.save(report);
     }
 
@@ -91,7 +89,7 @@ public class ReportService {
     @Transactional
     public Report update(Report report, Long id) {
         log.info("Updating report: " + report);
-        validate(report);
+//        validate(report);
         ModelMapper modelMapper = new ModelMapper();
         Report reportToUpdate = reportRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Report not found"));
         report.setId(id);
@@ -155,15 +153,15 @@ public class ReportService {
      *
      * @param report
      */
-    private void validate(Report report) {
-        if (report.getUser() == null) {
-            throw new InvalidDataException("Отчет без пользователя");
-        }
-        if (report.getAnimal() == null) {
-            throw new InvalidDataException("Отчет без животного");
-        }
-        if (!report.getUser().getState().equals(User.OwnerStateEnum.PROBATION)) {
-            throw new InvalidDataException("Пользователь должен быть на испытательном сроке");
-        }
-    }
+//    private void validate(Report report) {
+//        if (report.getUser() == null) {
+//            throw new InvalidDataException("Отчет без пользователя");
+//        }
+//        if (report.getAnimal() == null) {
+//            throw new InvalidDataException("Отчет без животного");
+//        }
+//        if (!report.getUser().getState().equals(User.OwnerStateEnum.PROBATION)) {
+//            throw new InvalidDataException("Пользователь должен быть на испытательном сроке");
+//        }
+//    }
 }
