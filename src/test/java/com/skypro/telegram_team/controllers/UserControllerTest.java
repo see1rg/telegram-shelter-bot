@@ -2,6 +2,7 @@ package com.skypro.telegram_team;
 
 import com.skypro.telegram_team.controllers.AnimalController;
 import com.skypro.telegram_team.controllers.ReportController;
+import com.skypro.telegram_team.controllers.ShelterController;
 import com.skypro.telegram_team.controllers.UserController;
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.Dog;
@@ -38,6 +39,8 @@ public class UserControllerTest {
     private AnimalController animalController;
     @MockBean
     private ReportController reportController;
+    @MockBean
+    ShelterController shelterController;
     @InjectMocks
     private UserController userController;
     @MockBean

@@ -1,7 +1,6 @@
 package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.ReportRepository;
@@ -21,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ReportServiceTest {
@@ -36,7 +35,7 @@ public class ReportServiceTest {
         expectedReport = new Report();
         expectedReport.setId(1L);
         expectedReport.setDate(LocalDateTime.now());
-        Animal animal = new Dog();
+        Animal animal = new Animal();
         animal.setId(1L);
         User user = new User();
         user.setId(1L);
@@ -49,6 +48,7 @@ public class ReportServiceTest {
         when(reportRepository.save(any())).thenReturn(expectedReport);
         Report actualReport = reportService.create(expectedReport);
         assertEquals(expectedReport, actualReport);
+        verify(reportRepository, times(1)).save(any());
     }
 
     @Test
@@ -56,6 +56,7 @@ public class ReportServiceTest {
         when(reportRepository.findById(any())).thenReturn(Optional.ofNullable(expectedReport));
         Report actualReport = reportService.findById(expectedReport.getId());
         assertEquals(expectedReport, actualReport);
+        verify(reportRepository, times(1)).findById(any());
     }
 
     @Test
@@ -63,6 +64,7 @@ public class ReportServiceTest {
         when(reportRepository.findById(any())).thenReturn(Optional.ofNullable(expectedReport));
         Report actualReport = reportService.deleteById(expectedReport.getId());
         assertEquals(expectedReport, actualReport);
+        verify(reportRepository, times(1)).findById(any());
     }
 
     @Test
@@ -70,6 +72,7 @@ public class ReportServiceTest {
         when(reportRepository.findAll()).thenReturn(List.of(expectedReport));
         List<Report> actualReports = reportService.findAll();
         assertTrue(actualReports.size() != 0);
+        verify(reportRepository, times(1)).findAll();
     }
 
     @Test
@@ -85,6 +88,8 @@ public class ReportServiceTest {
         Report actualReport = reportService.update(updatedReport, reportInDB.getId());
         assertEquals(actualReport.getId(), reportInDB.getId());
         assertEquals(actualReport.getDiet(), updatedReport.getDiet());
+        verify(reportRepository, times(1)).save(any());
+        verify(reportRepository, times(1)).findById(any());
     }
 
     @Test
@@ -93,6 +98,7 @@ public class ReportServiceTest {
         when(reportRepository.findByAnimalId(anyLong())).thenReturn(expectedReports);
         List<Report> actualReports = reportService.findByAnimalId(expectedReport.getAnimal().getId());
         assertEquals(expectedReports, actualReports);
+        verify(reportRepository, times(1)).findByAnimalId(anyLong());
     }
 
     @Test
@@ -101,6 +107,7 @@ public class ReportServiceTest {
         when(reportRepository.findByUserId(any())).thenReturn(expectedReports);
         Collection<Report> actualReports = reportService.findByUserId(expectedReport.getUser().getId());
         assertEquals(expectedReports, actualReports);
+        verify(reportRepository, times(1)).findByUserId(any());
     }
 
     @Test
@@ -110,6 +117,7 @@ public class ReportServiceTest {
         Collection<Report> actualReports = reportService.findByUserIdAndDate(expectedReport.getUser().getId(),
                 expectedReport.getDate());
         assertEquals(expectedReports, actualReports);
+        verify(reportRepository, times(1)).findByUserIdAndDate(any(), any());
     }
 
     @Test
@@ -119,5 +127,6 @@ public class ReportServiceTest {
         Report actualReport = reportService.findFirstByUserIdAndDate(expectedReport.getUser().getId(),
                 expectedReport.getDate());
         assertEquals(expectedReports.get(0), actualReport);
+        verify(reportRepository, times(1)).findAll();
     }
 }

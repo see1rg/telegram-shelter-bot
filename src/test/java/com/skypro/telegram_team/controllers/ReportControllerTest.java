@@ -38,6 +38,8 @@ public class ReportControllerTest {
     private AnimalController animalController;
     @MockBean
     private UserController userController;
+    @MockBean
+    private ShelterController shelterController;
     @SpyBean
     private ReportService reportService;
     @MockBean
@@ -51,7 +53,7 @@ public class ReportControllerTest {
     private final JSONObject jsonAnimal = new JSONObject();
     private final JSONObject jsonUser = new JSONObject();
     private final User user = new User();
-    private final Animal animal = new Dog();
+    private final Animal animal = new Animal();
 
     @BeforeEach
     public void setup() throws Exception {
@@ -93,22 +95,22 @@ public class ReportControllerTest {
         when(reportRepository.save(any())).thenReturn(report);
     }
 
-//    @Test
-//    public void findReportById() throws Exception {
-//        mockMvc.perform(MockMvcRequestBuilders.get("/reports/" + report.getId()))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.diet").value(report.getDiet()))
-//                .andExpect(jsonPath("$.id").value(report.getId()))
-//                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
-//                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
-//                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
-//                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
-//                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
-//                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
-//                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
-//                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
-//                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
-//    }
+    @Test
+    public void findReportById() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/reports/" + report.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.diet").value(report.getDiet()))
+                .andExpect(jsonPath("$.id").value(report.getId()))
+                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
+                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
+                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
+                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
+                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
+                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
+                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
+                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
+                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
+    }
 
     @Test
     public void deleteById() throws Exception {
@@ -133,42 +135,42 @@ public class ReportControllerTest {
                 .andExpect(jsonPath("$[0].animal.state").value(report.getAnimal().getState().toString()));
     }
 
-//    @Test
-//    public void createReport() throws Exception {
-//        mockMvc.perform(MockMvcRequestBuilders.post("/reports")
-//                        .content(jsonReport.toString())
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.diet").value(report.getDiet()))
-//                .andExpect(jsonPath("$.id").value(report.getId()))
-//                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
-//                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
-//                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
-//                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
-//                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
-//                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
-//                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
-//                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
-//                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
-//    }
+    @Test
+    public void createReport() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/reports")
+                        .content(jsonReport.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.diet").value(report.getDiet()))
+                .andExpect(jsonPath("$.id").value(report.getId()))
+                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
+                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
+                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
+                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
+                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
+                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
+                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
+                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
+                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
+    }
 
-//    @Test
-//    public void updateReport() throws Exception {
-//        mockMvc.perform(MockMvcRequestBuilders.put("/reports/" + report.getId())
-//                        .content(jsonReport.toString())
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.diet").value(report.getDiet()))
-//                .andExpect(jsonPath("$.id").value(report.getId()))
-//                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
-//                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
-//                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
-//                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
-//                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
-//                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
-//                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
-//                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
-//                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
-//    }
+    @Test
+    public void updateReport() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.put("/reports/" + report.getId())
+                        .content(jsonReport.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.diet").value(report.getDiet()))
+                .andExpect(jsonPath("$.id").value(report.getId()))
+                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
+                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
+                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
+                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
+                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
+                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
+                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
+                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
+                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
+    }
 }
