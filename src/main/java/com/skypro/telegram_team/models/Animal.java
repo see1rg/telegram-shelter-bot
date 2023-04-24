@@ -25,8 +25,6 @@ public abstract class Animal {
     private String breed;
     private String description;
 
-
-
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonIgnore
