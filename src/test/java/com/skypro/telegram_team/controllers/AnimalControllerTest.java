@@ -19,33 +19,31 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
 public class AnimalControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
     @InjectMocks
     private AnimalController animalController;
     @SpyBean
     private AnimalService animalService;
-    @SpyBean
-    private ShelterService shelterService;
-    @MockBean
-    private ReportController reportController;
-
-    @MockBean
-    private UserController userController;
-    @MockBean
-    private AnimalRepository animalRepository;
     @MockBean
     private ShelterController shelterController;
+    @MockBean
+    ReportController reportController;
+
+    @MockBean
+    UserController userController;
+    @MockBean
+    private AnimalRepository animalRepository;
     @MockBean
     private ShelterRepository shelterRepository;
 
@@ -63,10 +61,6 @@ public class AnimalControllerTest {
         jsonAnimal.put("id", animal.getId());
         jsonAnimal.put("breed", animal.getBreed());
         jsonAnimal.put("state", animal.getState());
-        Mockito.when(animalRepository.save(any())).thenReturn(animal);
-        Mockito.when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
-        Mockito.when(animalRepository.findAnimalsByName(any())).thenReturn(Optional.of(List.of(animal)));
-        Mockito.when(animalRepository.findAll(Sort.by("name"))).thenReturn(List.of(animal));
     }
 
     @Test
@@ -82,7 +76,8 @@ public class AnimalControllerTest {
     }
 
     @Test
-    public void findAnimalById() throws Exception {
+    public void findAnimalById() throws Exception{
+        when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
         mockMvc.perform(MockMvcRequestBuilders.get("/animals/" + animal.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(animal.getName()))
@@ -105,12 +100,14 @@ public class AnimalControllerTest {
 
     @Test
     public void deleteById() throws Exception {
+        when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
         mockMvc.perform(MockMvcRequestBuilders.delete("/animals/" + animal.getId()))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void findByName() throws Exception {
+        when(animalRepository.findAnimalsByName(any())).thenReturn(Optional.of(List.of(animal)));
         mockMvc.perform(MockMvcRequestBuilders.get("/animals/name/").param("name", "sharik"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value(animal.getName()))
@@ -121,6 +118,7 @@ public class AnimalControllerTest {
 
     @Test
     public void findAll() throws Exception {
+        when(animalRepository.findAll(Sort.by("name"))).thenReturn(List.of(animal));
         mockMvc.perform(MockMvcRequestBuilders.get("/animals"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value(animal.getName()))

@@ -38,10 +38,10 @@ public class UserControllerTest {
     private AnimalController animalController;
     @MockBean
     private ReportController reportController;
+    @MockBean
+    ShelterController shelterController;
     @InjectMocks
     private UserController userController;
-    @SpyBean
-    private ShelterService shelterService;
     @MockBean
     private UserRepository userRepository;
     @SpyBean
@@ -50,10 +50,6 @@ public class UserControllerTest {
     private AnimalService animalService;
     @MockBean
     private AnimalRepository animalRepository;
-    @MockBean
-    private ShelterController shelterController;
-    @MockBean
-    private ShelterRepository shelterRepository;
     private final User user = new User();
     private final JSONObject jsonUser = new JSONObject();
     private final Animal animal = new Animal();

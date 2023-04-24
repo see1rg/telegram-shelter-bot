@@ -1,6 +1,5 @@
 package com.skypro.telegram_team.services;
 
-
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
@@ -18,7 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AnimalServiceTest {
@@ -46,6 +45,7 @@ public class AnimalServiceTest {
         when(animalRepository.save(any())).thenReturn(expectedAnimal);
         Animal actualAnimal = animalService.create(expectedAnimal);
         assertEquals(expectedAnimal, actualAnimal);
+        verify(animalRepository, times(1)).save(any());
     }
 
     @Test
@@ -54,6 +54,7 @@ public class AnimalServiceTest {
         Animal actualAnimal = animalService.findById(expectedAnimal.getId());
         assertEquals(expectedAnimal, actualAnimal);
         assertEquals(expectedAnimal.getId(), actualAnimal.getId());
+        verify(animalRepository, times(1)).findById(any());
     }
 
     @Test
@@ -61,6 +62,7 @@ public class AnimalServiceTest {
         when(animalRepository.findById(any())).thenReturn(Optional.ofNullable(expectedAnimal));
         Animal actualAnimal = animalService.deleteById(expectedAnimal.getId());
         assertEquals(expectedAnimal, actualAnimal);
+        verify(animalRepository, times(1)).findById(any());
     }
 
     @Test
@@ -75,9 +77,10 @@ public class AnimalServiceTest {
         Animal actualAnimal = animalService.update(updatedAnimal, animalInDB.getId());
         assertEquals(actualAnimal.getId(), animalInDB.getId());
         assertEquals(actualAnimal.getName(), updatedAnimal.getName());
+        verify(animalRepository, times(1)).save(any());
+        verify(animalRepository, times(1)).findById(any());
     }
 
-    //не протестирована сортировка по имени
     @Test
     public void findAll() {
         Animal animal1 = new Animal();
@@ -89,6 +92,7 @@ public class AnimalServiceTest {
         when(animalRepository.findAll(Sort.by("name"))).thenReturn(List.of(animal1, animal2, animal3));
         List<Animal> allAnimals = animalService.findAll();
         assertTrue(allAnimals.size() != 0);
+        verify(animalRepository, times(1)).findAll(Sort.by("name"));
     }
 
     @Test
@@ -97,6 +101,7 @@ public class AnimalServiceTest {
         when(animalRepository.findAnimalsByName(any())).thenReturn(Optional.of(expectedAnimals));
         List<Animal> actualAnimals = animalService.findByName(expectedAnimal.getName());
         assertEquals(expectedAnimals, actualAnimals);
+        verify(animalRepository, times(1)).findAnimalsByName(any());
     }
 
     @Test
@@ -104,6 +109,7 @@ public class AnimalServiceTest {
         when(animalRepository.findAnimalsByUserId(any())).thenReturn(expectedAnimal);
         Animal actualAnimal = animalService.findByUserId(expectedAnimal.getUser().getId());
         assertEquals(expectedAnimal, actualAnimal);
+        verify(animalRepository, times(1)).findAnimalsByUserId(any());
     }
 
     @Test
@@ -112,6 +118,7 @@ public class AnimalServiceTest {
         when(animalRepository.findAllByUserIdNotNullAndState(any())).thenReturn(expectedAnimals);
         List<Animal> actualAnimals = animalService.findAllByUserIdNotNullAndState(expectedAnimal.getState());
         assertEquals(expectedAnimals, actualAnimals);
+        verify(animalRepository, times(1)).findAllByUserIdNotNullAndState(any());
     }
 
     @Test
@@ -120,6 +127,7 @@ public class AnimalServiceTest {
         when(animalRepository.findByUserContainsOrderByState(any())).thenReturn(expectedAnimals);
         List<Animal> actualAnimals = animalService.findByUserState(expectedAnimal.getUser().getState());
         assertEquals(expectedAnimals, actualAnimals);
+        verify(animalRepository, times(1)).findByUserContainsOrderByState(any());
     }
 
 }
