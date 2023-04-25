@@ -1,13 +1,14 @@
 package com.skypro.telegram_team.controllers;
 
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.repositories.ReportRepository;
+import com.skypro.telegram_team.repositories.ShelterRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
 import com.skypro.telegram_team.services.ReportService;
+import com.skypro.telegram_team.services.ShelterService;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,10 +20,12 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -42,12 +45,16 @@ public class ReportControllerTest {
     private ShelterController shelterController;
     @SpyBean
     private ReportService reportService;
+    @SpyBean
+    private ShelterService shelterService;
     @MockBean
     private ReportRepository reportRepository;
     @MockBean
     private UserRepository userRepository;
     @MockBean
     private AnimalRepository animalRepository;
+    @MockBean
+    private ShelterRepository shelterRepository;
     private final Report report = new Report();
     private final JSONObject jsonReport = new JSONObject();
     private final JSONObject jsonAnimal = new JSONObject();

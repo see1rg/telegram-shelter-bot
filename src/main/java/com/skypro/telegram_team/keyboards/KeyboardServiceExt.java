@@ -125,7 +125,6 @@ public class KeyboardServiceExt {
      * Обработка отдельного Update
      *
      * @param update отдельный update для обработки
-     * @return сообщение для отправки пользователю
      */
     public void processUpdate(Update update) {
         Optional<SendMessage> sendMessage;

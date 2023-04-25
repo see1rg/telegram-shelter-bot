@@ -2,7 +2,9 @@ package com.skypro.telegram_team.timer;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
-import com.skypro.telegram_team.models.*;
+import com.skypro.telegram_team.models.Animal;
+import com.skypro.telegram_team.models.Report;
+import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.services.AnimalService;
 import com.skypro.telegram_team.services.ReportService;
 import com.skypro.telegram_team.services.UserService;
@@ -69,7 +71,7 @@ public class TimerTest {
         Assertions.assertThat(actual.get(1).getParameters().get("chat_id")).isEqualTo(0L);
         Assertions.assertThat(actual.get(1).getParameters().get("text"))
                 .isEqualTo(String.format("Одобрение на усыновление подтверждено у %s %s.",
-                user.getName(), user.getSurname()));
+                        user.getName(), user.getSurname()));
 
         assertEquals(1, result.size());
         User updatedUser = result.get(0);
@@ -105,11 +107,11 @@ public class TimerTest {
         Assertions.assertThat(actual.get(0).getParameters().get("chat_id")).isEqualTo(1L);
         Assertions.assertThat(actual.get(0).getParameters().get("text"))
                 .isEqualTo(String.format("Уважаемый %s %s Вы НЕ прошли пробный период! " +
-                "Пожалуйста сдайте собаку в приют!", user.getName(), user.getSurname()));
+                        "Пожалуйста сдайте собаку в приют!", user.getName(), user.getSurname()));
         Assertions.assertThat(actual.get(1).getParameters().get("chat_id")).isEqualTo(0L);
         Assertions.assertThat(actual.get(1).getParameters().get("text"))
-                .isEqualTo( String.format("Отказ подтвержден у %s %s.",
-                user.getName(), user.getSurname()));
+                .isEqualTo(String.format("Отказ подтвержден у %s %s.",
+                        user.getName(), user.getSurname()));
     }
 
 
@@ -184,7 +186,7 @@ public class TimerTest {
         user.setSurname("Doe");
         user.setState(User.OwnerStateEnum.BLACKLIST);
 
-        Animal animal = new Cat();
+        Animal animal = new Animal();
         animal.setId(1L);
         animal.setName("Animal");
         animal.setState(Animal.AnimalStateEnum.IN_TEST);
@@ -215,7 +217,7 @@ public class TimerTest {
         user.setSurname("Doe");
         user.setState(User.OwnerStateEnum.ADOPTED);
 
-        Animal animal = new Cat();
+        Animal animal = new Animal();
         animal.setId(1L);
         animal.setName("Animal");
         animal.setState(Animal.AnimalStateEnum.IN_TEST);
@@ -257,12 +259,12 @@ public class TimerTest {
         user2.setState(User.OwnerStateEnum.PROBATION);
 
         // Create two animals belonging to user1 and user2
-        Animal animal1 = new Dog();
+        Animal animal1 = new Animal();
         animal1.setUser(user1);
         animal1.setName("Buddy");
         animal1.setState(Animal.AnimalStateEnum.IN_TEST);
 
-        Animal animal2 = new Dog();
+        Animal animal2 = new Animal();
         animal2.setUser(user2);
         animal2.setName("Max");
         animal2.setState(Animal.AnimalStateEnum.IN_TEST);

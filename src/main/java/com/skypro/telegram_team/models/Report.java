@@ -36,14 +36,6 @@ public class Report {
     @PrimaryKeyJoinColumn(name = "animal_id", referencedColumnName = "id")
     private Animal animal;
 
-    @ManyToOne
-    @JoinColumn(name = "cat_id")
-    private Cat cat;
-
-    @ManyToOne
-    @JoinColumn(name = "dog_id")
-    private Dog dog;
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
