@@ -10,6 +10,7 @@ import com.skypro.telegram_team.keyboards.buffers.Question;
 import com.skypro.telegram_team.keyboards.buffers.QuestionsBuffer;
 import com.skypro.telegram_team.keyboards.buffers.Request;
 import com.skypro.telegram_team.keyboards.buffers.RequestsBuffer;
+import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.Shelter;
 import com.skypro.telegram_team.models.User;
@@ -368,7 +369,7 @@ class KeyboardServiceExtTest {
     private static Shelter mockShelter() {
         Shelter shelter = new Shelter();
         shelter.setId(1L);
-        shelter.setType(Shelter.Type.DOGS);
+        shelter.setType(Animal.TypeAnimal.DOG);
         shelter.setAddress("address");
         shelter.setSchedule("schedule");
         shelter.setScheme("scheme");
