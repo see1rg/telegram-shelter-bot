@@ -26,6 +26,7 @@ public class User {
     private String surname;
     private String phone;
     private String email;
+    @JsonIgnore
     private int daysForTest;
     private LocalDateTime endTest;
 

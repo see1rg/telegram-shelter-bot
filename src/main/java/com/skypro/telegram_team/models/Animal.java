@@ -29,12 +29,24 @@ public class Animal {
     @JsonIgnore
     private User user;
 
+    @OneToOne
+    @JoinColumn(name = "shelter_id", referencedColumnName = "id")
+    @JsonIgnore
+    private Shelter shelter;
+
     @Lob
     @JsonIgnore
     private byte[] photo;
 
     @Enumerated(EnumType.STRING)
     private AnimalStateEnum state;
+
+    @Enumerated(EnumType.STRING)
+    private TypeAnimal type;
+
+    public enum TypeAnimal {
+        DOG, CAT
+    }
 
     public enum AnimalStateEnum {
         IN_SHELTER, IN_TEST, HAPPY_END

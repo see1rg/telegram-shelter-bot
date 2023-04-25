@@ -236,8 +236,8 @@ public class AnimalController {
 
     @Operation(summary = "Создание животного.", tags = "Animals")
     @PostMapping
-    public Animal createAnimal(@RequestBody Animal animal) {
-        return animalService.create(animal);
+    public Animal createAnimal(@RequestBody Animal animal, @RequestParam("type") Animal.TypeAnimal type) {
+        return animalService.create(animal, type);
     }
 
 }

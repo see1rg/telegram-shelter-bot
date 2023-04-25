@@ -1,5 +1,6 @@
 package com.skypro.telegram_team.controllers;
 
+import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.Shelter;
 import com.skypro.telegram_team.services.ShelterService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,8 +53,8 @@ public class ShelterController {
             })
     })
     @PostMapping
-    public Shelter create(@Parameter(description = "Данные приюта") @RequestBody Shelter shelter) {
-        return shelterService.create(shelter);
+    public Shelter create(@Parameter(description = "Данные приюта") @RequestBody Shelter shelter, @RequestParam("type") Animal.TypeAnimal typeAnimal) {
+        return shelterService.create(shelter, typeAnimal);
     }
 
     @Operation(summary = "Обновление данных приюта", tags = "Shelters")
@@ -77,5 +78,16 @@ public class ShelterController {
     @DeleteMapping("/{id}")
     public Shelter delete(@Parameter(description = "Id приюта") @PathVariable Long id) {
         return shelterService.delete(id);
+    }
+
+    @Operation(summary = "Присвоить животных соответствующему приюту", tags = "Shelters")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Животное присвоено", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = Shelter.class))
+            })
+    })
+    @PutMapping
+    public void assignAnimalsToShelters(@RequestParam("shelterId") Long shelterId, @RequestParam("animalId") Long animalId) {
+        shelterService.assignAnimalsToShelters(shelterId, animalId);
     }
 }

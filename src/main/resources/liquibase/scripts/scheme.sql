@@ -168,3 +168,7 @@ ALTER TABLE reports
     DROP COLUMN dog_id,
     DROP COLUMN cat_id;
 
+-- changSet slyubimov:9
+ALTER TABLE animals
+    ADD COLUMN type VARCHAR(10);
+
