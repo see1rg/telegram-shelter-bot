@@ -13,8 +13,6 @@ import java.util.Objects;
 @Setter
 @Table(name = "shelters")
 public class Shelter {
-    public enum Type {CATS, DOGS}
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)

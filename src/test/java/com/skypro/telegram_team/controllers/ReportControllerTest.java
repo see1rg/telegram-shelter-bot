@@ -146,8 +146,7 @@ public class ReportControllerTest {
     public void createReport() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/reports")
                         .content(jsonReport.toString())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.diet").value(report.getDiet()))
                 .andExpect(jsonPath("$.id").value(report.getId()))

@@ -1,6 +1,8 @@
 package com.skypro.telegram_team.controllers;
 
+import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.Shelter;
+import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.repositories.ShelterRepository;
 import com.skypro.telegram_team.services.ShelterService;
 import org.json.JSONObject;
@@ -39,6 +41,8 @@ public class ShelterControllerTest {
     private ShelterService shelterService;
     @MockBean
     private ShelterRepository shelterRepository;
+    @MockBean
+    private AnimalRepository animalRepository;
     private Shelter shelter;
     private JSONObject jsonShelter;
 
@@ -46,7 +50,7 @@ public class ShelterControllerTest {
     public void setup() throws Exception {
         shelter = new Shelter();
         shelter.setId(1L);
-        shelter.setType(Shelter.Type.DOGS);
+        shelter.setType(Animal.TypeAnimal.DOG);
         jsonShelter = new JSONObject();
         jsonShelter.put("id", shelter.getId());
         jsonShelter.put("type", shelter.getType());
@@ -74,7 +78,7 @@ public class ShelterControllerTest {
     @Test
     public void create() throws Exception {
         when(shelterRepository.save(any())).thenReturn(shelter);
-        mockMvc.perform(MockMvcRequestBuilders.post("/shelters")
+        mockMvc.perform(MockMvcRequestBuilders.post("/shelters?type=" + shelter.getType())
                         .content(jsonShelter.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -99,5 +103,22 @@ public class ShelterControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(shelter.getId()))
                 .andExpect(jsonPath("$.type").value(shelter.getType().toString()));
+    }
+
+    @Test
+    public void assignAnimalsToShelters() throws Exception {
+        Animal animal = new Animal();
+        animal.setType(Animal.TypeAnimal.DOG);
+        animal.setId(1L);
+        when(shelterRepository.findById(any())).thenReturn(Optional.ofNullable(shelter));
+        when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
+        when(animalRepository.save(any())).thenReturn(animal);
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/shelters?shelterId=" + shelter.getId() + "&animalId=" + animal.getId())
+                .content(jsonShelter.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+
     }
 }

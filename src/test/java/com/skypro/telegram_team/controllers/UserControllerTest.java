@@ -1,6 +1,7 @@
 package com.skypro.telegram_team.controllers;
 
 import com.skypro.telegram_team.models.Animal;
+import com.skypro.telegram_team.models.Shelter;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
@@ -55,6 +56,7 @@ public class UserControllerTest {
     @BeforeEach
     public void setup() throws JSONException {
         animal.setId(1L);
+        animal.setShelter(new Shelter());
         user.setId(1L);
         user.setTelegramId(1L);
         user.setName("dima");
