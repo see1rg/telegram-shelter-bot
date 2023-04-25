@@ -34,8 +34,9 @@ public class AnimalService {
      * @return Animal
      */
     @Transactional
-    public Animal create(Animal animal) {
+    public Animal create(Animal animal, Animal.TypeAnimal type) {
         log.info("Saving animal: " + animal);
+        animal.setType(type);
         return animalRepository.save(animal);
     }
 
@@ -107,11 +108,15 @@ public class AnimalService {
      * @param id     идентификатор животного, которое нужно обновить
      * @return Animal
      * @throws EntityNotFoundException если животное не найдено в базе данных
+     * @throws IllegalStateException   если тип животного не совпадает с типом приюта
      */
     @Transactional
     public Animal update(Animal animal, Long id) {
         log.info("Updating animal: " + animal);
         ModelMapper modelMapper = new ModelMapper();
+        if (animal.getType() != animal.getShelter().getType()) {
+            throw new IllegalStateException("Animal type does not match shelter type.");
+        }
         Animal animalToUpdate = animalRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Animal not found"));
         animal.setId(id);

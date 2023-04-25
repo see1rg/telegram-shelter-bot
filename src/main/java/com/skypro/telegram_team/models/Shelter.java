@@ -22,32 +22,19 @@ public class Shelter {
     @Column(nullable = false)
     private String name;
     @Enumerated(EnumType.STRING)
-    private Type type;
-    @Column
+    private Animal.TypeAnimal type;
     private String address;
-    @Column
     private String schedule;
-    @Column
     private String scheme;
-    @Column
     private String safety;
-    @Column
     private String docs;
-    @Column
     private String rules;
-    @Column
     private String arrangements;
-    @Column
     private String arrangementsForPuppy;
-    @Column
     private String arrangementsForCripple;
-    @Column
     private String movement;
-    @Column
     private String expertAdvicesFirst;
-    @Column
     private String expertAdvicesNext;
-    @Column
     private String rejectReasons;
 
     @Override

@@ -1,6 +1,8 @@
 package com.skypro.telegram_team.services;
 
+import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.Shelter;
+import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.repositories.ShelterRepository;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -21,9 +23,11 @@ import java.util.Collection;
 @Service
 public class ShelterService {
     private final ShelterRepository shelterRepository;
+    private final AnimalRepository animalRepository;
 
-    public ShelterService(ShelterRepository shelterRepository) {
+    public ShelterService(ShelterRepository shelterRepository, AnimalRepository animalRepository) {
         this.shelterRepository = shelterRepository;
+        this.animalRepository = animalRepository;
     }
 
     /**
@@ -52,12 +56,14 @@ public class ShelterService {
     /**
      * Создает новый приют и сохраняет его в БД.
      *
-     * @param shelter Объект типа Shelter с данными нового приюта.
+     * @param shelter    Объект типа Shelter с данными нового приюта.
+     * @param typeAnimal Тип животных в приюте.
      * @return Объект типа Shelter, сохраненный в БД.
      */
     @Transactional
-    public Shelter create(Shelter shelter) {
+    public Shelter create(Shelter shelter, Animal.TypeAnimal typeAnimal) {
         log.info("Saving shelter: " + shelter.getName());
+        shelter.setType(typeAnimal);
         return shelterRepository.save(shelter);
     }
 
@@ -96,5 +102,28 @@ public class ShelterService {
                 .orElseThrow(() -> new EntityNotFoundException("Shelter not found"));
         shelterRepository.delete(shelter);
         return shelter;
+    }
+
+    /**
+     * Назначает животное приюту с заданными идентификаторами.
+     *
+     * @param shelterId идентификатор приюта, куда нужно назначить животное
+     * @param animalId  идентификатор животного, которое нужно назначить в приют
+     * @throws EntityNotFoundException если приют или животное не найдены по заданным идентификаторам
+     * @throws IllegalStateException   если тип животного не соответствует типу приюта
+     */
+    @Transactional
+    public void assignAnimalsToShelters(Long shelterId, Long animalId) {
+        log.info("Assigning animals id: " + animalId + " to shelter id: " + shelterId);
+        Shelter shelter = shelterRepository.findById(shelterId)
+                .orElseThrow(() -> new EntityNotFoundException("Shelter not found"));
+        Animal animal = animalRepository.findById(animalId)
+                .orElseThrow(() -> new EntityNotFoundException("Animal not found"));
+        if (animal.getType() != shelter.getType()) {
+            throw new IllegalStateException("Animal type does not match shelter type.");
+        }
+
+        animal.setShelter(shelter);
+        animalRepository.save(animal);
     }
 }
