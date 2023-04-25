@@ -7,15 +7,14 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.skypro.telegram_team.listener.TelegramBotUpdatesListener;
+import com.vdurmont.emoji.EmojiParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import static com.skypro.telegram_team.keyboards.Command.*;
-
-import com.vdurmont.emoji.*;
-
 import java.util.List;
+
+import static com.skypro.telegram_team.keyboards.Command.*;
 
 /**
  * Класс для работы с апдэйтами и клавиатурой в телеграмботе
@@ -25,12 +24,12 @@ public class KeyboardService {
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     /**
-     * метод для прослушивания апдэйтов и ответа на них с использованием клавиатуры
+     * Метод для прослушивания апдэйтов и ответа на них с использованием клавиатуры
      * использует методы TelegramBot {@link TelegramBot#execute(BaseRequest)}
      * {@link SendMessage#replyMarkup(Keyboard)}
      *
-     * @param updates
-     * @param telegramBot
+     * @param updates список объектов типа Update, содержащих информацию о новых сообщениях от пользователей
+     * @param telegramBot объект типа TelegramBot, используемый для отправки сообщений в Telegram
      */
     public void getResponse(List<Update> updates, TelegramBot telegramBot) {
         try {
@@ -103,7 +102,7 @@ public class KeyboardService {
                                         .callbackData(CALL_VOLUNTEER.getCallBack()));
                         String dogEmoji = EmojiParser.parseToUnicode(":dog:");
                         SendMessage sendMessage = new SendMessage(update.message().chat().id(),
-                                dogEmoji +"Выбери нужное");
+                                dogEmoji + "Выбери нужное");
                         sendMessage.replyMarkup(markup);
                         SendResponse sendResponse = telegramBot.execute(sendMessage);
                     } else if (Command.CALL_VOLUNTEER.getCommandName().equals(update.message().text())) {

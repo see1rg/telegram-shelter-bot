@@ -165,7 +165,7 @@ class KeyboardServiceExtTest {
         Update update = generateUpdateWithCallback(KeyboardServiceExt.Command.SAVE_SHELTER.name() + "1");
         //When
         when(shelterService.findById(any())).thenReturn(mockShelter());
-        when(userService.update(any(),any())).thenReturn(mockUser());
+        when(userService.update(any(), any())).thenReturn(mockUser());
         out.processUpdate(update);
         //Then
         SendMessage actual = getActualSendMessage();
@@ -180,7 +180,7 @@ class KeyboardServiceExtTest {
         Update update = generateUpdateWithCallback(KeyboardServiceExt.Command.SAVE_SHELTER.name() + "1");
         //When
         when(shelterService.findById(any())).thenReturn(null);
-        when(userService.update(any(),any())).thenReturn(mockUser());
+        when(userService.update(any(), any())).thenReturn(mockUser());
         out.processUpdate(update);
         //Then
         SendMessage actual = getActualSendMessage();

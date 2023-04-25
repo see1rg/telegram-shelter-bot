@@ -229,12 +229,12 @@ public class AnimalController {
     )
     @PutMapping("/{id}")
     public Animal updateAnimal(@RequestBody Animal animal,
-                               @Parameter(description = "Личный идентификатор собаки", example = "1") @PathVariable Long id) {
+                               @Parameter(description = "Личный идентификатор животного.", example = "1") @PathVariable Long id) {
         return animalService.update(animal, id);
     }
 
 
-    @Operation(summary = "Создание собаки.", tags = "Animals")
+    @Operation(summary = "Создание животного.", tags = "Animals")
     @PostMapping
     public Animal createAnimal(@RequestBody Animal animal) {
         return animalService.create(animal);

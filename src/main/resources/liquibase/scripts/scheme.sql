@@ -163,4 +163,8 @@ ALTER TABLE users
 ALTER TABLE animals
     ADD COLUMN shelter_id BIGINT REFERENCES shelters(id);
 
+-- changeSet slyubimov:8
+ALTER TABLE reports
+    DROP COLUMN dog_id,
+    DROP COLUMN cat_id;
 

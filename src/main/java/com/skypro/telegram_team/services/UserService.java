@@ -229,11 +229,11 @@ public class UserService {
      * {@link User.OwnerStateEnum#PROBATION} и конец испытательного срока {@link User#setEndTest} у пользователя
      * и у животного статус {@link Animal.AnimalStateEnum#IN_TEST}.
      * <p>
+     *
      * @param animalId идентификатор животного, которую нужно связать с пользователем
      * @param userId   идентификатор пользователя, который будет связан с животным
      * @throws EntityNotFoundException если животное или пользователь не найдены в базе данных
      */
-
     @Transactional
     public void joinAnimalAndUser(long animalId, long userId) {
         log.info("Joining animal and user with animal id: " + animalId + " and user id: " + userId);
@@ -251,6 +251,15 @@ public class UserService {
 
     }
 
+    /**
+     * Обновляет статус пользователя по его идентификатору и проверяет, что в случае если его статус
+     * меняется на User.OwnerStateEnum.PROBATION, что установлено количество дней для теста
+     *
+     * @param userId      идентификатор пользователя
+     * @param state       статус пользователя
+     * @param daysForTest количество дней для теста
+     * @return пользователя с измененным статусом и его id
+     */
     @Transactional
     public User updateState(long userId, User.OwnerStateEnum state, Long daysForTest) {
         String exceptionMessage = "Для продления тестового периода усыновителя" +
@@ -259,7 +268,7 @@ public class UserService {
             if (state == User.OwnerStateEnum.PROLONGED && daysForTest == 0) {
                 throw new IllegalArgumentException(exceptionMessage);
             }
-        } else if (state == User.OwnerStateEnum.PROLONGED){
+        } else if (state == User.OwnerStateEnum.PROLONGED) {
             throw new IllegalArgumentException(exceptionMessage);
         }
         User user = findById(userId);

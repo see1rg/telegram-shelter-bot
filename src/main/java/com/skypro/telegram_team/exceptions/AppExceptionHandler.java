@@ -17,7 +17,7 @@ public class AppExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Object> handlerBadRequestException(RuntimeException e, WebRequest request){
+    public ResponseEntity<Object> handlerBadRequestException(RuntimeException e, WebRequest request) {
         return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 }

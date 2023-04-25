@@ -13,7 +13,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Sort;
-
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -22,7 +21,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -85,17 +83,18 @@ public class AnimalControllerTest {
                 .andExpect(jsonPath("$.state").value(animal.getState().toString()));
     }
 
-//    @Test
-//    public void updateAnimal() throws Exception {
-//        mockMvc.perform(MockMvcRequestBuilders.put("/animals/" + animal.getId())
-//                        .content(jsonAnimal.toString())
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.name").value(animal.getName()))
-//                .andExpect(jsonPath("$.id").value(animal.getId()))
-//                .andExpect(jsonPath("$.breed").value(animal.getBreed()))
-//                .andExpect(jsonPath("$.state").value(animal.getState().toString()));
-//    }
+    @Test
+    public void updateAnimal() throws Exception {
+        Mockito.when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
+        mockMvc.perform(MockMvcRequestBuilders.put("/animals/" + animal.getId())
+                        .content(jsonAnimal.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(animal.getName()))
+                .andExpect(jsonPath("$.id").value(animal.getId()))
+                .andExpect(jsonPath("$.breed").value(animal.getBreed()))
+                .andExpect(jsonPath("$.state").value(animal.getState().toString()));
+    }
 
     @Test
     public void deleteById() throws Exception {
@@ -117,7 +116,7 @@ public class AnimalControllerTest {
 
     @Test
     public void findAll() throws Exception {
-       Mockito.when(animalRepository.findAll(Sort.by("name"))).thenReturn(List.of(animal));
+        Mockito.when(animalRepository.findAll(Sort.by("name"))).thenReturn(List.of(animal));
         mockMvc.perform(MockMvcRequestBuilders.get("/animals"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value(animal.getName()))

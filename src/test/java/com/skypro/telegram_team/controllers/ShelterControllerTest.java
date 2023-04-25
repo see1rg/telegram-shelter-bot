@@ -8,19 +8,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.JsonParser;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
 public class ShelterControllerTest {
@@ -74,8 +75,8 @@ public class ShelterControllerTest {
     public void create() throws Exception {
         when(shelterRepository.save(any())).thenReturn(shelter);
         mockMvc.perform(MockMvcRequestBuilders.post("/shelters")
-                .content(jsonShelter.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                        .content(jsonShelter.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(shelter.getId()))
                 .andExpect(jsonPath("$.type").value(shelter.getType().toString()));
