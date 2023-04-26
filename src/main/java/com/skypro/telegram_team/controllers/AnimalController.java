@@ -9,7 +9,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -240,4 +242,16 @@ public class AnimalController {
         return animalService.create(animal, type);
     }
 
+    @Operation(summary = "загрузить фото животного по id", tags = "Animals")
+    @PostMapping(value = "/photo/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> downloadPhoto(@PathVariable("id") Long animalId, @RequestParam MultipartFile file) throws Exception {
+        animalService.downloadPhoto(animalId, file);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "получить фото животного по id животного", tags = "Animals")
+    @GetMapping(value = "/photo/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public byte[] getPhoto(@PathVariable("id") Long animalId) {
+        return animalService.getPhoto(animalId);
+    }
 }

@@ -5,13 +5,21 @@ import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
+
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 /**
  * Сервис для работы с животными приюта
@@ -19,6 +27,9 @@ import java.util.List;
 @Log4j2
 @Service
 public class AnimalService {
+    @Value("${dir.for.animal.photo}")
+    private String animalPhotoDir;
+
     private final AnimalRepository animalRepository;
 
 
@@ -114,8 +125,10 @@ public class AnimalService {
     public Animal update(Animal animal, Long id) {
         log.info("Updating animal: " + animal);
         ModelMapper modelMapper = new ModelMapper();
-        if (animal.getType() != animal.getShelter().getType()) {
-            throw new IllegalStateException("Animal type does not match shelter type.");
+        if (animal.getShelter() != null) {
+            if (animal.getType() != animal.getShelter().getType()) {
+                throw new IllegalStateException("Animal type does not match shelter type.");
+            }
         }
         Animal animalToUpdate = animalRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Animal not found"));
@@ -146,5 +159,50 @@ public class AnimalService {
     public List<Animal> findByUserState(User.OwnerStateEnum ownerStateEnum) {
         log.info("Finding animals by user state - " + ownerStateEnum);
         return animalRepository.findByUserContainsOrderByState(ownerStateEnum);
+    }
+
+    /**
+     * Метод по загрузке фото животного по его id
+     * @param animalId
+     * @param file
+     * @throws Exception
+     */
+    public void downloadPhoto(Long animalId, MultipartFile file) throws Exception  {
+        Optional<Animal> animal = animalRepository.findById(animalId);
+        if (animal.isPresent()) {
+            Path path = Path.of(animalPhotoDir, animal.get().getType().toString()
+                    + animal.get().getName() + animalId + "." + getExtension(file.getOriginalFilename()));
+            Files.createDirectories(path.getParent());
+            Files.deleteIfExists(path);
+            try (InputStream is = file.getInputStream();
+                 OutputStream os = Files.newOutputStream(path, CREATE_NEW);
+                 BufferedInputStream bis = new BufferedInputStream(is, 1024);
+                 BufferedOutputStream bos = new BufferedOutputStream(os, 1024);) {
+                bis.transferTo(bos);
+            }
+            animal.get().setPhoto(file.getBytes());
+            animalRepository.save(animal.get());
+        } else {
+            throw new EntityNotFoundException("animal with " + animalId + " not exist");
+        }
+    }
+
+    /**
+     * Приватный метод для получения расширения файла
+     * @param fileName
+     * @return
+     */
+    private String getExtension(String fileName) {
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+
+    /**
+     * Метод для получения фото животного по его id
+     * @param id
+     * @return
+     */
+    public byte[] getPhoto(Long id) {
+        Optional<Animal> animal = animalRepository.findById(id);
+        return animal.get().getPhoto();
     }
 }
