@@ -8,9 +8,14 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -233,11 +238,27 @@ public class AnimalController {
         return animalService.update(animal, id);
     }
 
-
     @Operation(summary = "Создание животного.", tags = "Animals")
     @PostMapping
     public Animal createAnimal(@RequestBody Animal animal, @RequestParam("type") Animal.TypeAnimal type) {
         return animalService.create(animal, type);
     }
 
+    @Operation(summary = "Загрузка фото животного", tags = "Animals")
+    @PostMapping(value = "/{id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> photoUpload(@PathVariable("id") Long id,
+                                              @RequestParam("photo") MultipartFile file) throws IOException {
+        animalService.photoUpload(id, file);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Выгрузка фото животного", tags = "Animals")
+    @GetMapping("/{id}/photo")
+    public ResponseEntity<byte[]> photoDownload(@PathVariable("id") Long id) {
+        var photo = animalService.photoDownload(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentLength(photo.length);
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(photo);
+    }
 }

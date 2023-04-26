@@ -1,0 +1,23 @@
+### Create Cat
+POST http://localhost:8080/animals?type=CAT
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Дизель",
+  "breed": "",
+  "description": "",
+  "state": "IN_SHELTER"
+}
+
+### Create Dog
+POST http://localhost:8080/animals?type=DOG
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Вайфай",
+  "breed": "",
+  "description": "",
+  "state": "IN_SHELTER"
+}
