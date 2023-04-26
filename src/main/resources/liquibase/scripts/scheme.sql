@@ -172,3 +172,8 @@ ALTER TABLE reports
 ALTER TABLE animals
     ADD COLUMN type VARCHAR(10);
 
+-- changSet slyubimov:10
+DROP TABLE dogs;
+DROP TABLE cats;
+DROP TABLE hibernate_sequences;
+
