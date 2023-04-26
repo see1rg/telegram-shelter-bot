@@ -11,10 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
-
 import java.util.List;
 import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -38,7 +36,6 @@ public class AnimalServiceTest {
         user.setId(1L);
         user.setState(User.OwnerStateEnum.PROBATION);
         expectedAnimal.setUser(user);
-
     }
 
     @Test
@@ -87,10 +84,13 @@ public class AnimalServiceTest {
     @Test
     public void findAll() {
         Animal animal1 = new Animal();
+        animal1.setId(1L);
         animal1.setName("рекс");
         Animal animal2 = new Animal();
+        animal2.setId(2L);
         animal2.setName("хатико");
         Animal animal3 = new Animal();
+        animal3.setId(3L);
         animal3.setName("бетховен");
         when(animalRepository.findAll(Sort.by("name"))).thenReturn(List.of(animal1, animal2, animal3));
         List<Animal> allAnimals = animalService.findAll();
