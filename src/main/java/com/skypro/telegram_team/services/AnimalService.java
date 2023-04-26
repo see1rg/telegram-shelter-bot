@@ -114,7 +114,7 @@ public class AnimalService {
     public Animal update(Animal animal, Long id) {
         log.info("Updating animal: " + animal);
         ModelMapper modelMapper = new ModelMapper();
-        if (animal.getType() != animal.getShelter().getType()) {
+        if (animal.getShelter() != null && animal.getType() != animal.getShelter().getType()) {
             throw new IllegalStateException("Animal type does not match shelter type.");
         }
         Animal animalToUpdate = animalRepository.findById(id)

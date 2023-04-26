@@ -16,7 +16,7 @@ import java.util.Objects;
 @Entity
 public class Animal {
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private long id;
     @Column(nullable = false)
@@ -42,6 +42,7 @@ public class Animal {
     private AnimalStateEnum state;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TypeAnimal type;
 
     public enum TypeAnimal {
