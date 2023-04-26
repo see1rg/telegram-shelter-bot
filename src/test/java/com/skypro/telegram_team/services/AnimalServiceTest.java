@@ -4,15 +4,27 @@ import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.Shelter;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -146,4 +158,34 @@ public class AnimalServiceTest {
         assertThrows(IllegalStateException.class, () -> animalService.update(updatedAnimal, animalInDB.getId()));
     }
 
+    @Test
+    public void photoUpload() throws Exception {
+        //Given
+        Resource resource = new ClassPathResource("photo/cat.jpeg");
+        MockMultipartFile multipartFile = new MockMultipartFile("file", "file.jpeg", "", resource.getInputStream());
+        Animal animal = new Animal();
+        animal.setId(1L);
+        animal.setPhoto(Files.readAllBytes(resource.getFile().toPath()));
+        //When
+        when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
+        when(animalRepository.save(animal)).thenReturn(animal);
+        animalService.photoUpload(1L, multipartFile);
+        //Then
+        verify(animalRepository, times(1)).save(animal);
+    }
+
+    @Test
+    public void photoDownload() throws Exception {
+        //Given
+        Resource resource = new ClassPathResource("photo/cat.jpeg");
+        Animal expected = new Animal();
+        expected.setId(1L);
+        expected.setPhoto(Files.readAllBytes(resource.getFile().toPath()));
+        //When
+        when(animalRepository.findById(any())).thenReturn(Optional.of(expected));
+        var actual = animalService.photoDownload(1L);
+        //Then
+        Assertions.assertThat(actual).isNotEmpty();
+        Assertions.assertThat(Arrays.toString(actual)).isEqualTo(Arrays.toString(expected.getPhoto()));
+    }
 }

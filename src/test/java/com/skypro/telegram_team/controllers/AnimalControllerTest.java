@@ -11,18 +11,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
 public class AnimalControllerTest {
@@ -42,6 +48,9 @@ public class AnimalControllerTest {
     private AnimalRepository animalRepository;
     private final Animal animal = new Animal();
     private final JSONObject jsonAnimal = new JSONObject();
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
     @BeforeEach
     public void setup() throws Exception {
@@ -126,4 +135,35 @@ public class AnimalControllerTest {
                 .andExpect(jsonPath("$[0].type").value(animal.getType().toString()));
     }
 
+    @Test
+    public void photoUpload() throws Exception {
+        //Given
+        Resource resource = new ClassPathResource("photo/cat.jpeg");
+        MockMultipartFile file = new MockMultipartFile(
+                "photo",
+                "cat.jpeg",
+                MediaType.IMAGE_JPEG_VALUE,
+                Files.readAllBytes(resource.getFile().toPath())
+        );
+        //Then
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        mockMvc.perform(multipart("/animals/1/photo").file(file))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void photoDownload() throws Exception {
+        //Given
+        Resource resource = new ClassPathResource("photo/cat.jpeg");
+        byte[] photo = Files.readAllBytes(resource.getFile().toPath());
+        Animal expected = new Animal();
+        expected.setId(1L);
+        expected.setPhoto(photo);
+        //When
+        when(animalRepository.findById(1L)).thenReturn(Optional.of(expected));
+        //Then
+        mockMvc.perform(MockMvcRequestBuilders.get("/animals/1/photo"))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expected.getPhoto()));
+    }
 }

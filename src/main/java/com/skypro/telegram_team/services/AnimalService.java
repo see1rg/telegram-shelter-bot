@@ -172,6 +172,7 @@ public class AnimalService {
     }
 
     public byte[] photoDownload(Long id) {
+        log.info("Was invoked method to download photo from animal {}", id);
         var animal = animalRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Animal not found"));
         if (animal.getPhoto() == null) {
