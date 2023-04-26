@@ -54,12 +54,13 @@ public class ShelterControllerTest {
         jsonShelter = new JSONObject();
         jsonShelter.put("id", shelter.getId());
         jsonShelter.put("type", shelter.getType());
-
+        when(shelterRepository.findById(any())).thenReturn(Optional.ofNullable(shelter));
+        when(shelterRepository.findAll()).thenReturn(List.of(shelter));
+        when(shelterRepository.save(any())).thenReturn(shelter);
     }
 
     @Test
     public void findById() throws Exception {
-        when(shelterRepository.findById(any())).thenReturn(Optional.ofNullable(shelter));
         mockMvc.perform(MockMvcRequestBuilders.get("/shelters/" + shelter.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(shelter.getId()))
@@ -68,7 +69,6 @@ public class ShelterControllerTest {
 
     @Test
     public void findAll() throws Exception {
-        when(shelterRepository.findAll()).thenReturn(List.of(shelter));
         mockMvc.perform(MockMvcRequestBuilders.get("/shelters"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(shelter.getId()))
@@ -77,7 +77,6 @@ public class ShelterControllerTest {
 
     @Test
     public void create() throws Exception {
-        when(shelterRepository.save(any())).thenReturn(shelter);
         mockMvc.perform(MockMvcRequestBuilders.post("/shelters?type=" + shelter.getType())
                         .content(jsonShelter.toString())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -88,15 +87,12 @@ public class ShelterControllerTest {
 
     @Test
     public void delete() throws Exception {
-        when(shelterRepository.findById(any())).thenReturn(Optional.ofNullable(shelter));
         mockMvc.perform(MockMvcRequestBuilders.delete("/shelters/" + shelter.getId()))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void update() throws Exception {
-        when(shelterRepository.findById(any())).thenReturn(Optional.ofNullable(shelter));
-        when(shelterRepository.save(any())).thenReturn(shelter);
         mockMvc.perform(MockMvcRequestBuilders.put("/shelters/" + shelter.getId())
                         .content(jsonShelter.toString())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -110,7 +106,6 @@ public class ShelterControllerTest {
         Animal animal = new Animal();
         animal.setType(Animal.TypeAnimal.DOG);
         animal.setId(1L);
-        when(shelterRepository.findById(any())).thenReturn(Optional.ofNullable(shelter));
         when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
         when(animalRepository.save(any())).thenReturn(animal);
         mockMvc.perform(MockMvcRequestBuilders
