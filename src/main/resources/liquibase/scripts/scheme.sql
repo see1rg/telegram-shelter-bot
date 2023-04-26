@@ -177,3 +177,14 @@ DROP TABLE dogs;
 DROP TABLE cats;
 DROP TABLE hibernate_sequences;
 
+-- changSet slyubimov:11
+CREATE TABLE IF NOT EXISTS photo
+(
+    id                       BIGSERIAL PRIMARY KEY NOT NULL,
+    file_path VARCHAR(30),
+    file_size BIGINT,
+    media_type TEXT,
+    preview OID,
+    animal_id BIGINT REFERENCES animals(id)
+);
+
