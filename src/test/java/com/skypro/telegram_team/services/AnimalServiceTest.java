@@ -1,6 +1,7 @@
 package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.models.Animal;
+import com.skypro.telegram_team.models.Shelter;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,8 +15,7 @@ import org.springframework.data.domain.Sort;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -32,6 +32,7 @@ public class AnimalServiceTest {
         expectedAnimal = new Animal();
         expectedAnimal.setId(1L);
         expectedAnimal.setName("sharik");
+        expectedAnimal.setType(Animal.TypeAnimal.DOG);
         expectedAnimal.setState(Animal.AnimalStateEnum.IN_TEST);
         User user = new User();
         user.setId(1L);
@@ -43,7 +44,7 @@ public class AnimalServiceTest {
     @Test
     public void createAnimal() {
         when(animalRepository.save(any())).thenReturn(expectedAnimal);
-        Animal actualAnimal = animalService.create(expectedAnimal);
+        Animal actualAnimal = animalService.create(expectedAnimal, expectedAnimal.getType());
         assertEquals(expectedAnimal, actualAnimal);
         verify(animalRepository, times(1)).save(any());
     }
@@ -67,11 +68,13 @@ public class AnimalServiceTest {
 
     @Test
     public void updateAnimal() {
+        Shelter shelter = new Shelter();
         Animal animalInDB = new Animal();
         animalInDB.setName("sharik");
         animalInDB.setId(1L);
         Animal updatedAnimal = new Animal();
         updatedAnimal.setName("pushok");
+        updatedAnimal.setShelter(shelter);
         when(animalRepository.findById(any())).thenReturn(Optional.of(animalInDB));
         when(animalRepository.save(any())).thenReturn(updatedAnimal);
         Animal actualAnimal = animalService.update(updatedAnimal, animalInDB.getId());
@@ -128,6 +131,19 @@ public class AnimalServiceTest {
         List<Animal> actualAnimals = animalService.findByUserState(expectedAnimal.getUser().getState());
         assertEquals(expectedAnimals, actualAnimals);
         verify(animalRepository, times(1)).findByUserContainsOrderByState(any());
+    }
+
+    @Test
+    public void ShouldThrowsIllegalStateExceptionWhenMethodUpdateRuns() {
+        Animal animalInDB = new Animal();
+        animalInDB.setId(1L);
+        Shelter shelter = new Shelter();
+        shelter.setType(Animal.TypeAnimal.DOG);
+        Animal updatedAnimal = new Animal();
+        updatedAnimal.setName("pushok");
+        updatedAnimal.setShelter(shelter);
+        updatedAnimal.setType(Animal.TypeAnimal.CAT);
+        assertThrows(IllegalStateException.class, () -> animalService.update(updatedAnimal, animalInDB.getId()));
     }
 
 }

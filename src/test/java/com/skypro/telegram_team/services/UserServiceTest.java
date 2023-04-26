@@ -2,6 +2,7 @@ package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.Animal;
+import com.skypro.telegram_team.models.Shelter;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
@@ -148,6 +149,8 @@ public class UserServiceTest {
     public void joinAnimalAndUser() {
         Animal animal = new Animal();
         animal.setId(1L);
+        Shelter shelter = new Shelter();
+        animal.setShelter(shelter);
         when(userRepository.findById(any())).thenReturn(Optional.ofNullable(expectedUser));
         when(userRepository.save(any())).thenReturn(expectedUser);
         when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
@@ -238,11 +241,23 @@ public class UserServiceTest {
     }
 
     @Test
-    public void shouldIllegalArgumentExceptionWhenRunMethodSetUpdate() {
+    public void shouldThrowsIllegalArgumentExceptionWhenRunMethodSetUpdate() {
         User userForTest = new User();
         userForTest.setState(User.OwnerStateEnum.PROLONGED);
         userForTest.setId(100L);
         assertThrows(IllegalArgumentException.class,
                 () -> userService.updateState(userForTest.getId(), userForTest.getState(), null));
+    }
+
+    @Test
+    public void shouldThrowsIllegalArgumentExceptionWhenMethodUpdateStateRunsWhereDaysForTestIsZero() {
+        User updatedUser = new User();
+        updatedUser.setId(1L);
+        updatedUser.setName("dima");
+        updatedUser.setTelegramId(100L);
+        updatedUser.setState(User.OwnerStateEnum.PROLONGED);
+        Long daysForTest = 0L;
+        assertThrows(IllegalArgumentException.class, () -> userService
+                .updateState(updatedUser.getId(), updatedUser.getState(), daysForTest));
     }
 }
