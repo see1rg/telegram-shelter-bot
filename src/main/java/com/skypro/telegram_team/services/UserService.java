@@ -262,23 +262,22 @@ public class UserService {
      */
     @Transactional
     public User updateState(long userId, User.OwnerStateEnum state, Long daysForTest) {
-        String exceptionMessage = "Для продления тестового периода усыновителя" +
-                " необходимо задать количество дней для теста";
-        if (daysForTest != null) {
-            if (state == User.OwnerStateEnum.PROLONGED && daysForTest == 0) {
-                throw new IllegalArgumentException(exceptionMessage);
-            }
-        } else if (state == User.OwnerStateEnum.PROLONGED) {
-            throw new IllegalArgumentException(exceptionMessage);
+
+        if (state == User.OwnerStateEnum.PROLONGED && (daysForTest == null || daysForTest <= 0)) {
+            throw new IllegalArgumentException("To extend the adopter's trial period, you need to specify the number of days for the trial.");
         }
+
         User user = findById(userId);
         user.setState(state);
+
         if (daysForTest != null && daysForTest > 0) {
             LocalDateTime dateEndTest = LocalDateTime.now().plusDays(daysForTest);
             user.setEndTest(dateEndTest);
         }
+
         return update(user, userId);
     }
+
 
 }
 

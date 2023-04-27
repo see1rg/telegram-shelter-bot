@@ -27,7 +27,7 @@ public class User {
     private String phone;
     private String email;
     @JsonIgnore
-    private int daysForTest;
+    private Long daysForTest;
     private LocalDateTime endTest;
 
     @OneToOne
