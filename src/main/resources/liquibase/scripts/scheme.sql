@@ -188,3 +188,8 @@ CREATE TABLE IF NOT EXISTS photo
     animal_id BIGINT REFERENCES animals(id)
 );
 
+-- changSet slyubimov:12
+ALTER TABLE users
+    DROP COLUMN days_for_test,
+ADD COLUMN days_for_test BIGINT;
+
