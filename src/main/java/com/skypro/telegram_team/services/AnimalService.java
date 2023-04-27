@@ -1,5 +1,6 @@
 package com.skypro.telegram_team.services;
 
+import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
@@ -7,11 +8,15 @@ import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Сервис для работы с животными приюта
@@ -146,5 +151,43 @@ public class AnimalService {
     public List<Animal> findByUserState(User.OwnerStateEnum ownerStateEnum) {
         log.info("Finding animals by user state - " + ownerStateEnum);
         return animalRepository.findByUserContainsOrderByState(ownerStateEnum);
+    }
+
+    /**
+     * Загрузка фото животного
+     *
+     * @param id   идентификатор животного
+     * @param file фото
+     */
+    public void photoUpload(Long id, MultipartFile file) throws IOException {
+        log.info("Was invoked method to upload photo to animal {}", id);
+        var fileExt = getFileExtensions(Objects.requireNonNull(file.getOriginalFilename()));
+        if (!fileExt.equals(MediaType.IMAGE_JPEG.getSubtype())) {
+            throw new InvalidDataException("Only JPEG files allowed");
+        }
+        var animal = animalRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Animal not found"));
+        animal.setPhoto(file.getBytes());
+        animalRepository.save(animal);
+    }
+
+    public byte[] photoDownload(Long id) {
+        log.info("Was invoked method to download photo from animal {}", id);
+        var animal = animalRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Animal not found"));
+        if (animal.getPhoto() == null) {
+            throw new EntityNotFoundException("Animal photo not found");
+        }
+        return animal.getPhoto();
+    }
+
+    /**
+     * Получение расширения файла
+     *
+     * @param fileName полное имя файла
+     * @return расширение
+     */
+    private String getFileExtensions(String fileName) {
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 }

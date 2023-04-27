@@ -20,4 +20,9 @@ public class AppExceptionHandler {
     public ResponseEntity<Object> handlerBadRequestException(RuntimeException e, WebRequest request) {
         return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(InvalidDataException.class)
+    public ResponseEntity<Object> handlerInvalidDataException(RuntimeException e, WebRequest request) {
+        return new ResponseEntity<>(e.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
 }
