@@ -2,13 +2,14 @@ package com.skypro.telegram_team.controllers;
 
 import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.services.AnimalService;
-import com.skypro.telegram_team.services.PhotoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,13 +22,10 @@ import java.util.List;
 @RequestMapping("/animals")
 public class AnimalController {
     private final AnimalService animalService;
-    private final PhotoService photoService;
 
-    public AnimalController(AnimalService animalService, PhotoService photoService) {
+    public AnimalController(AnimalService animalService) {
         this.animalService = animalService;
-        this.photoService = photoService;
     }
-
 
     @Operation(summary = "поиск животного в БД по личному идентификатору", tags = "Animals"
             , responses = {@ApiResponse(
@@ -246,12 +244,21 @@ public class AnimalController {
         return animalService.create(animal, type);
     }
 
-    @Operation(summary = "Загрузка фото животного.", tags = "Animals")
-    @PostMapping(value = "/{id}/photo",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadPhoto(@PathVariable Long id, @RequestParam("file") MultipartFile photo) throws IOException {
-        photoService.uploadPhoto(id,photo);
+    @Operation(summary = "Загрузка фото животного", tags = "Animals")
+    @PostMapping(value = "/{id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> photoUpload(@PathVariable("id") Long id,
+                                              @RequestParam("photo") MultipartFile file) throws IOException {
+        animalService.photoUpload(id, file);
         return ResponseEntity.ok().build();
     }
 
-
+    @Operation(summary = "Выгрузка фото животного", tags = "Animals")
+    @GetMapping("/{id}/photo")
+    public ResponseEntity<byte[]> photoDownload(@PathVariable("id") Long id) {
+        var photo = animalService.photoDownload(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentLength(photo.length);
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(photo);
+    }
 }
