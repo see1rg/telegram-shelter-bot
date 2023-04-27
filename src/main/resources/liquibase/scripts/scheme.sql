@@ -193,3 +193,6 @@ ALTER TABLE users
     DROP COLUMN days_for_test,
 ADD COLUMN days_for_test BIGINT;
 
+-- changSet slyubimov:13
+DROP TABLE photo;
+
