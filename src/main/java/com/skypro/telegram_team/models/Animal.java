@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Arrays;
@@ -36,6 +37,7 @@ public class Animal {
 
     @Lob
     @JsonIgnore
+    @Type(type = "org.hibernate.type.ImageType")
     private byte[] photo;
 
     @Enumerated(EnumType.STRING)

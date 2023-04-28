@@ -196,3 +196,17 @@ ADD COLUMN days_for_test BIGINT;
 -- changSet slyubimov:13
 DROP TABLE photo;
 
+-- changeSet 11th:8
+ALTER TABLE animals
+    DROP COLUMN photo;
+
+ALTER TABLE animals
+    ADD COLUMN photo BYTEA;
+
+-- changeSet 11th:9
+ALTER TABLE reports
+    DROP COLUMN photo;
+
+ALTER TABLE reports
+    ADD COLUMN photo BYTEA;
+

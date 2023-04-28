@@ -2,8 +2,11 @@ package com.skypro.telegram_team.keyboards;
 
 import com.pengrad.telegrambot.BotUtils;
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.File;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.GetFileResponse;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.keyboards.buffers.Question;
@@ -36,11 +39,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class KeyboardServiceExtTest {
@@ -254,6 +257,43 @@ class KeyboardServiceExtTest {
     }
 
     @Test
+    void processUpdateReportSavePhoto() throws Exception {
+        //Given
+        Update update = generateUpdateWithPhoto();
+        Request request = new Request(update.message().chat().id());
+        request.setReportPhotoRequested(true);
+        User user = new User();
+        user.setTelegramId(update.message().chat().id());
+        user.setId(1L);
+        Report report = new Report();
+        report.setId(1L);
+        //When
+        when(requestsBuffer.getRequest(any())).thenReturn(Optional.of(request));
+        when(userService.findByTelegramId(any())).thenReturn(user);
+        when(reportService.findFirstByUserIdAndDate(any(), any())).thenReturn(report);
+        when(reportService.update(any(), any())).thenReturn(report);
+
+        GetFileResponse getFileResponse = mock(GetFileResponse.class);
+        File file = mock(File.class);
+        when(getFileResponse.file()).thenReturn(file);
+        AtomicReference<SendMessage> atomicReference = new AtomicReference<>();
+        when(telegramBot.execute(any())).thenAnswer(invocationOnMock -> {
+           Object sendRequest = invocationOnMock.getArgument(0);
+           if (sendRequest instanceof GetFile){
+                return getFileResponse;
+           } else if (sendRequest instanceof SendMessage){
+               atomicReference.set((SendMessage) sendRequest);
+               return null;
+           }
+           return null;
+        });
+
+        out.processUpdate(update);
+        //Then
+        Assertions.assertThat(atomicReference.get().getParameters().get("text")).isEqualTo("Данные отчета записаны");
+    }
+
+    @Test
     void processUpdateReportSaveWithException() throws Exception {
         //Given
         Update update = generateUpdate("ok");
@@ -336,6 +376,14 @@ class KeyboardServiceExtTest {
         String absolutePath = resourceDirectory.toFile().getAbsolutePath();
         String json = Files.readString(Path.of(absolutePath));
         json = json.replace("%replyText%", replyText).replace("%text%", "ответ");
+        return BotUtils.fromJson(json, Update.class);
+    }
+
+    private Update generateUpdateWithPhoto() throws IOException {
+        Path resourceDirectory = Paths.get("src", "test", "resources",
+                "com.skypro.telegram_team.keyboards", "updateWithPhoto.json");
+        String absolutePath = resourceDirectory.toFile().getAbsolutePath();
+        String json = Files.readString(Path.of(absolutePath));
         return BotUtils.fromJson(json, Update.class);
     }
 

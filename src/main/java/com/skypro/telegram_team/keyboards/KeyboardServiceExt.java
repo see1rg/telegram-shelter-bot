@@ -3,9 +3,12 @@ package com.skypro.telegram_team.keyboards;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.*;
+import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.GetFileResponse;
 import com.skypro.telegram_team.keyboards.buffers.Question;
 import com.skypro.telegram_team.keyboards.buffers.QuestionsBuffer;
 import com.skypro.telegram_team.keyboards.buffers.Request;
@@ -21,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -540,7 +544,7 @@ public class KeyboardServiceExt {
             }
             if (request.isReportPhotoRequested()) {
                 if (message.photo() != null) {
-                    report.setPhoto(message.photo()[0].fileId().getBytes());
+                    report.setPhoto(getPhotoContent(message.photo()));
                 } else {
                     return new SendMessage(userChatId, "Пришлите фото");
                 }
@@ -613,5 +617,22 @@ public class KeyboardServiceExt {
                 .collect(Collectors.toMap(
                         shelter -> Long.toString(shelter.getId()),
                         Shelter::getName));
+    }
+
+    /**
+     * Контент фото, максимальный размер фото
+     *
+     * @param photoSize размеры фото
+     * @return контент
+     */
+    public byte[] getPhotoContent(PhotoSize[] photoSize) {
+        logger.info("upload report photo");
+        try {
+            GetFileResponse getFileResponse = telegramBot.execute(new GetFile(photoSize[photoSize.length - 1].fileId()));
+            return telegramBot.getFileContent(getFileResponse.file());
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+        return null;
     }
 }

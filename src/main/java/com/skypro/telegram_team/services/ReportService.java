@@ -149,10 +149,26 @@ public class ReportService {
     }
 
     /**
-     * Проверить данные отчета, если данные некорректны то выбросить исключение {@link InvalidDataException}
+     * Выгрузка фото животного
      *
-     * @param report
+     * @param id идентификатор животного
+     * @return данные
      */
+    public byte[] photoDownload(Long id) {
+        log.info("Was invoked method to download photo from report {}", id);
+        var report = reportRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Report not found"));
+        if (report.getPhoto() == null) {
+            throw new EntityNotFoundException("Report photo not found");
+        }
+        return report.getPhoto();
+    }
+
+//    /**
+//     * Проверить данные отчета, если данные некорректны то выбросить исключение {@link InvalidDataException}
+//     *
+//     * @param report
+//     */
 //    private void validate(Report report) {
 //        if (report.getUser() == null) {
 //            throw new InvalidDataException("Отчет без пользователя");
