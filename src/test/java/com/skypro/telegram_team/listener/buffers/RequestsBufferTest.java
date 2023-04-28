@@ -1,5 +1,7 @@
-package com.skypro.telegram_team.keyboards.buffers;
+package com.skypro.telegram_team.listener.buffers;
 
+import com.skypro.telegram_team.listener.buffers.Request;
+import com.skypro.telegram_team.listener.buffers.RequestsBuffer;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
