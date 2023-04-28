@@ -17,10 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -28,8 +31,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
 public class ReportControllerTest {
@@ -178,5 +180,21 @@ public class ReportControllerTest {
                 .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
                 .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
                 .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
+    }
+
+    @Test
+    public void photoDownload() throws Exception {
+        //Given
+        Resource resource = new ClassPathResource("photo/cat.jpeg");
+        byte[] photo = Files.readAllBytes(resource.getFile().toPath());
+        Report expected = new Report();
+        expected.setId(1L);
+        expected.setPhoto(photo);
+        //When
+        when(reportRepository.findById(1L)).thenReturn(Optional.of(expected));
+        //Then
+        mockMvc.perform(MockMvcRequestBuilders.get("/reports/1/photo"))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expected.getPhoto()));
     }
 }

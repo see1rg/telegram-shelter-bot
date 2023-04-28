@@ -1,9 +1,11 @@
 package com.skypro.telegram_team.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -26,6 +28,8 @@ public class Report {
     private LocalDateTime date;
 
     @Lob
+    @Type(type = "org.hibernate.type.ImageType")
+    @JsonIgnore
     private byte[] photo;
 
     @OneToOne

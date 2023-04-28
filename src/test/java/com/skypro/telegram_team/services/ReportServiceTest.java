@@ -4,14 +4,19 @@ import com.skypro.telegram_team.models.Animal;
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.ReportRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
+import java.nio.file.Files;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -128,5 +133,20 @@ public class ReportServiceTest {
                 expectedReport.getDate());
         assertEquals(expectedReports.get(0), actualReport);
         verify(reportRepository, times(1)).findAll();
+    }
+
+    @Test
+    public void photoDownload() throws Exception {
+        //Given
+        Resource resource = new ClassPathResource("photo/cat.jpeg");
+        Report expected = new Report();
+        expected.setId(1L);
+        expected.setPhoto(Files.readAllBytes(resource.getFile().toPath()));
+        //When
+        when(reportRepository.findById(any())).thenReturn(Optional.of(expected));
+        var actual = reportService.photoDownload(1L);
+        //Then
+        Assertions.assertThat(actual).isNotEmpty();
+        Assertions.assertThat(Arrays.toString(actual)).isEqualTo(Arrays.toString(expected.getPhoto()));
     }
 }

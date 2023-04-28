@@ -9,7 +9,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.*;
 
 @RestController
 @RequestMapping("/reports")
@@ -74,5 +80,15 @@ public class ReportController {
     @PutMapping("/{id}")
     public Report updateReport(@RequestBody Report report, @Parameter(description = "Id отчета") @PathVariable Long id) {
         return reportService.update(report, id);
+    }
+
+    @Operation(summary = "Выгрузка фото отчета", tags = "Reports")
+    @GetMapping("/{id}/photo")
+    public ResponseEntity<byte[]> photoDownload(@PathVariable("id") Long id) {
+        var photo = reportService.photoDownload(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentLength(photo.length);
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(photo);
     }
 }

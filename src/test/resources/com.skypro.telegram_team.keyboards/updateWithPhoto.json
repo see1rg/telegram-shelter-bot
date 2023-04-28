@@ -1,0 +1,17 @@
+{
+  "message": {
+    "message_id": 1,
+    "chat": {
+      "id": 11
+    },
+    "photo": [
+      {
+        "file_id": "XXX",
+        "file_unique_id": "YYY",
+        "width": 11,
+        "height": 11,
+        "file_size": 111
+      }
+    ]
+  }
+}

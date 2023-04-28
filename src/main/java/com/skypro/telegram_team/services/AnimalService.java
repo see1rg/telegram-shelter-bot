@@ -159,6 +159,7 @@ public class AnimalService {
      * @param id   идентификатор животного
      * @param file фото
      */
+    @Transactional
     public void photoUpload(Long id, MultipartFile file) throws IOException {
         log.info("Was invoked method to upload photo to animal {}", id);
         var fileExt = getFileExtensions(Objects.requireNonNull(file.getOriginalFilename()));
@@ -171,6 +172,12 @@ public class AnimalService {
         animalRepository.save(animal);
     }
 
+    /**
+     * Выгрузка фото животного
+     *
+     * @param id идентификатор животного
+     * @return данные
+     */
     public byte[] photoDownload(Long id) {
         log.info("Was invoked method to download photo from animal {}", id);
         var animal = animalRepository.findById(id)
