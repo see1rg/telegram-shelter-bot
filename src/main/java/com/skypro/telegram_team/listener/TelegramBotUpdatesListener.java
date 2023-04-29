@@ -4,10 +4,8 @@ package com.skypro.telegram_team.listener;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
-import com.skypro.telegram_team.keyboards.KeyboardServiceExt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -18,11 +16,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
     private final TelegramBot telegramBot;
-    private final ApplicationContext context;
+    private final TelegramBotUpdateListener updateListener;
 
-    public TelegramBotUpdatesListener(TelegramBot telegramBot, ApplicationContext context) {
+    public TelegramBotUpdatesListener(TelegramBot telegramBot, TelegramBotUpdateListener updateListener) {
         this.telegramBot = telegramBot;
-        this.context = context;
+        this.updateListener = updateListener;
     }
 
     /**
@@ -67,8 +65,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * @param update Обновление, которое необходимо обработать
      */
     private void processUpdate(Update update) {
-        KeyboardServiceExt keyboardService = context.getBean(KeyboardServiceExt.class);
-        keyboardService.processUpdate(update);
+        updateListener.processUpdate(update)
+                .forEach(telegramBot::execute);
     }
 }
 
