@@ -262,7 +262,7 @@ public class UserService {
      */
     @Transactional
     public User updateState(long userId, User.OwnerStateEnum state, Long daysForTest) {
-
+        log.info("Updating state of user with id: {}", userId);
         if (state == User.OwnerStateEnum.PROLONGED && (daysForTest == null || daysForTest <= 0)) {
             throw new IllegalArgumentException("To extend the adopter's trial period, you need to specify the number of days for the trial.");
         }

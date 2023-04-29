@@ -10,6 +10,7 @@ import com.skypro.telegram_team.services.AnimalService;
 import com.skypro.telegram_team.services.ReportService;
 import com.skypro.telegram_team.services.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Log4j2
 @Component
 @RequiredArgsConstructor
 @EnableScheduling
@@ -29,33 +31,34 @@ public class Timer {
     private final ReportService reportService;
     private final UserService userService;
     @Value("${telegram.bot.support.chat}")
-    private long supportChatId;
+    private Long supportChatId;
 
 
     /**
      * Проверка и изменение статуса пользователей. У пользователей есть следующие состояния:
      * SEARCH - ищет животное для усыновления.
-     * ACCEPTED - усыновление одобрено и при следующей проверке статус будет изменен на ADOPTED
-     * для хранения в БД информации о пользователе.
-     * REFUSE - в усыновлении отказано, при следующей проверке будет заносен
-     * в черный список (BLACKLIST) как плохой усыновитель.
-     * DECISION - волонтер принимает решение.
-     * PROLONGED - испытательный срок продлен.
+     * ACCEPTED - усыновление одобрено волонтером. Отправляется сообщение усыновителю и при следующей проверке,
+     * статус будет изменен на ADOPTED для хранения в БД информации о пользователе.
+     * REFUSE - в усыновлении отказано волонтером. Отправляется сообщение усыновителю и при следующей проверке,
+     * будет заносен в черный список (BLACKLIST) как плохой усыновитель и отправлено сообщение.
+     * DECISION - Отправляется сообщение усыновителю об окончании испытательного срока, волонтер принимает решение.
+     * PROLONGED - испытательный срок продлен и отправлено сообщение усыновителю о сроке продления.
      * PROBATION - испытательный срок 30 дней, устанавливается автоматически при связывании животного с пользователем,
      * а так же при продлении испытательного срока на срок указанный волонтером.
      */
+//    @Scheduled(cron = "0 16 05 * * *") // demo
     @Scheduled(cron = "0 0 9-18/3 * * *")
     void checkAndChangeUsersStatus() {
 
-        List<User> acceptedUsers = changeStateAcceptedToAdoptedAndCollect(); // изменяем статус на ADOPTED у user
-        List<Animal> acceptedAnimals = changeStateAcceptedToHappyEndAndCollect(); // изменяем статус на HAPPY_END у animal
+        List<User> acceptedUsers = changeStateAcceptedToAdoptedAndCollect();
+        List<Animal> acceptedAnimals = changeStateAcceptedToHappyEndAndCollect();
 
-        List<User> refusedUsers = changeStateRefusedToBlackListAndCollect(); // изменяем статус на BLACKLIST у user
-        List<Animal> backInShelterAnimals = changeStateRefusedToInShelterListAndCollect(); // изменяем статус на IN_SHELTER_LIST у animal
+        List<User> refusedUsers = changeStateRefusedToBlackListAndCollect();
+        List<Animal> backInShelterAnimals = changeStateRefusedToInShelterListAndCollect();
 
-        List<User> prolongedUsers = findStateProlongedAndCollect(); // изменяем статус на PROLONGED у user
+        List<User> prolongedUsers = findStateProlongedAndCollect();
 
-        List<User> decisionAboutUsers = decisionMakingOfVolunteersAboutUsers(); // изменяем статус на DECISION_ABOUT_USERS у user
+        List<User> decisionAboutUsers = decisionMakingOfVolunteersAboutUsers();
 
         List<User> saveChangesOfUsers = new ArrayList<>();
         saveChangesOfUsers.addAll(acceptedUsers);
@@ -73,6 +76,7 @@ public class Timer {
 
 
     List<User> changeStateAcceptedToAdoptedAndCollect() {
+        log.info("Проверяем и изменяем статус пользователей со статусом ACCEPTED на ADOPTED");
         List<User> sortUsersWithStateAccepted = userService.findByState(User.OwnerStateEnum.ACCEPTED).stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.ADOPTED)).toList();
 
@@ -89,6 +93,7 @@ public class Timer {
     }
 
     List<User> changeStateRefusedToBlackListAndCollect() {
+        log.info("Проверяем и изменяем статус пользователей со статусом REFUSE на BLACKLIST");
         List<User> sortUsersWithStateRefused = userService.findByState(User.OwnerStateEnum.REFUSE).stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.BLACKLIST)).toList();
 
@@ -106,6 +111,7 @@ public class Timer {
     }
 
     List<User> findStateProlongedAndCollect() {
+        log.info("Проверяем статус пользователей со статусом PROLONGED и сообщаем.");
         List<User> prolongedUsers = userService.findByState(User.OwnerStateEnum.PROLONGED).stream()
                 .toList();
 
@@ -125,9 +131,12 @@ public class Timer {
     }
 
     List<User> decisionMakingOfVolunteersAboutUsers() {
+        log.info("Проверяем статус пользователей со статусом PROBATION на DECISION");
         List<User> decisionAboutUsers = userService.findByState(User.OwnerStateEnum.PROBATION).stream()
-                .filter(user -> user.getEndTest().isAfter(LocalDateTime.now()))
+                .filter(user -> user.getEndTest().isBefore(LocalDateTime.now()))
                 .toList();
+
+        userService.findByState(User.OwnerStateEnum.DECISION).addAll(decisionAboutUsers);
 
         decisionAboutUsers.stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.DECISION))
@@ -137,8 +146,9 @@ public class Timer {
                                     " пожалуйста дождитесь принятия решения волонтером о вашем животном!",
                             user.getName(), user.getSurname()));
 
-                    sendMessage(getVolunteerChatIdOrSupportChatId(), String.format("Принять решение об усыновлении животного у %s %s.",
-                            user.getName(), user.getSurname()));
+                    userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getId(),
+                            String.format("Принять решение об усыновлении" +
+                                    " животного у %s %s.", user.getName(), user.getSurname())));
                 });
         return decisionAboutUsers;
     }
@@ -154,10 +164,11 @@ public class Timer {
                 peek(animal -> animal.setState(Animal.AnimalStateEnum.HAPPY_END)).toList();
     }
 
-
+//    @Scheduled(cron = "0 02 06 * * *") // demo
     @Scheduled(cron = "0 0 8-20/4 * * *")
-// every 4 hours from 8 to 20
+// every 4 hours from 8 to 20 (cron = "0 40 21 * * *")
     void checkingDailyAndTwoDaysReportFromUsers() {
+        log.info("Проверяем отчеты за день и за два дня от пользователей");
 
         LocalDateTime twoDaysAgo = LocalDateTime.now().minusDays(2).withHour(0);
         LocalDateTime yesterdayAt0AM = LocalDateTime.now().minusDays(1).withHour(0);
@@ -168,32 +179,29 @@ public class Timer {
 
         animals.forEach(animal -> {
             User user = animal.getUser();
-            List<Report> reports = reportService.findByAnimalId(animal.getId()); // todo нужно получить последний отчет
-            if (reports.get(reports.size() - 1).getDate().isBefore(twoDaysAgo)) {
+            int testDays = 30;
+            List<Report> reports = reportService.findByAnimalId(animal.getId());
+            if (reports.size() == 0 && user.getEndTest().minusDays(testDays-1).isBefore(LocalDateTime.now())) {
+                usersWithoutDailyReport.add(user);
+            }
+            if ((reports.size() == 0 && user.getEndTest().minusDays(testDays-2).isBefore(LocalDateTime.now())) ||
+                    (reports.size() != 0 && reports.get(reports.size() - 1).getDate().isBefore(twoDaysAgo))) {
                 usersWithoutReportForTwoDays.add(user);
-            } else if (!usersWithoutReportForTwoDays.contains(user) && reports.get(reports.size() - 1).getDate().isBefore(yesterdayAt0AM)) {
+            } else if (reports.size() != 0 && !usersWithoutReportForTwoDays.contains(user) &&
+                    reports.get(reports.size() - 1).getDate().isBefore(yesterdayAt0AM)) {
                 usersWithoutDailyReport.add(user);
             }
         });
 
-        long supportChatId = getVolunteerChatIdOrSupportChatId();
-        if (supportChatId != 0) {
-            usersWithoutReportForTwoDays.forEach(user -> {
-                sendMessage(supportChatId,
+        usersWithoutReportForTwoDays.forEach(user -> {
+                sendMessage(getVolunteerChatIdOrSupportChatId(),
                         String.format("Последний отчет был принят более двух дней у : %s %s.",
                                 user.getName(), user.getSurname()));
                 sendMessage(user.getTelegramId(),
-                        "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");
-            });
-        } else {
-            usersWithoutReportForTwoDays.forEach(user -> sendMessage(user.getTelegramId(),
-                    "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет."));
-        }
-
+                        "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");});
 
         usersWithoutDailyReport.forEach(user -> sendMessage(user.getTelegramId(),
                 "Здравствуйте, вчера от вас не поступал отчет о собаке. Пожалуйста, сдайте отчет."));
-
     }
 
     /**
@@ -202,8 +210,8 @@ public class Timer {
      * @param chatId идентификатор чата, куда нужно отправить сообщение
      * @param text   текст сообщения
      */
-
     private void sendMessage(long chatId, String text) {
+        log.info("Отправляем сообщение в чат {} сообщением {}", chatId, text);
         SendMessage request = new SendMessage(chatId, text)
                 .parseMode(ParseMode.HTML)
                 .disableWebPagePreview(true)
