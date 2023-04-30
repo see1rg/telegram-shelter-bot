@@ -1,8 +1,13 @@
 package com.skypro.telegram_team.listener;
 
+import com.pengrad.telegrambot.BotUtils;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.File;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.model.request.Keyboard;
+import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup;
 import com.pengrad.telegrambot.request.GetFile;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.GetFileResponse;
@@ -27,6 +32,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -83,6 +92,57 @@ class TelegramBotMessageListenerTest {
                 Arguments.of(Menu.SET_USER_DATA.getText(), "Какие данные записать?"),
                 Arguments.of(Menu.ASK_VOLUNTEER.getText(), "Кого спросить?")
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideKeyboardsForMenuTests")
+    void processMessage_Keyboards(String menuText, Keyboard expectedKeyboard) throws IOException {
+        //Given
+        Update update = TelegramBotListenerUtil.generateUpdate(menuText);
+        //When
+        var actual = out.processMessage(update.message());
+        var actualKeyboard = (Keyboard) actual.get(0).getParameters().get("reply_markup");
+        //Then
+        Assertions.assertThat(actualKeyboard).isNotNull();
+        Assertions.assertThat(actualKeyboard).isEqualTo(expectedKeyboard);
+    }
+
+    static Stream<Arguments> provideKeyboardsForMenuTests() {
+        return Stream.of(
+                Arguments.of(Menu.START.getText(), MenuKeyboard.START_KEYBOARD.getKeyboard()),
+                Arguments.of(Menu.GET_INFO.getText(), InlineKeyboard.SHELTER_INFO.getMarkup()),
+                Arguments.of(Menu.GET_ANIMAL.getText(), InlineKeyboard.ANIMAL_INFO.getMarkup()),
+                Arguments.of(Menu.SEND_REPORT.getText(), InlineKeyboard.REPORT_DATA.getMarkup()),
+                Arguments.of(Menu.SET_USER_DATA.getText(), InlineKeyboard.USER_DATA.getMarkup())
+        );
+    }
+
+    @Test
+    void processMessage_KeyboardShelter() throws IOException {
+        //Given
+        Update update = TelegramBotListenerUtil.generateUpdate(Menu.SET_SHELTER.getText());
+        //When
+        when(shelterService.findAll()).thenReturn(Collections.singletonList(TelegramBotListenerUtil.mockShelter()));
+        var actual = out.processMessage(update.message());
+        InlineKeyboardButton[][] buttons = ((InlineKeyboardMarkup) actual.get(0).getParameters().get("reply_markup")).inlineKeyboard();
+        //Then
+        Assertions.assertThat(buttons[0][0].callbackData()).isEqualTo("SAVE_SHELTER1");
+        Assertions.assertThat(buttons[0][0].text()).isEqualTo("Dogs");
+    }
+
+    @Test
+    void processMessage_KeyboardVolunteer() throws IOException {
+        //Given
+        Update update = TelegramBotListenerUtil.generateUpdate(Menu.ASK_VOLUNTEER.getText());
+        //When
+        when(userService.findVolunteers()).thenReturn(Collections.singletonList(TelegramBotListenerUtil.mockVolunteer()));
+        var actual = out.processMessage(update.message());
+        InlineKeyboardButton[][] buttons = ((InlineKeyboardMarkup) actual.get(0).getParameters().get("reply_markup")).inlineKeyboard();
+        //Then
+        Assertions.assertThat(buttons[0][0].callbackData()).isEqualTo("ASK_VOLUNTEER12");
+        Assertions.assertThat(buttons[0][0].text()).isEqualTo("name");
+        Assertions.assertThat(buttons[1][0].callbackData()).isEqualTo(Callback.ASK_ANY_VOLUNTEER.name());
+        Assertions.assertThat(buttons[1][0].text()).isEqualTo(Callback.ASK_ANY_VOLUNTEER.getText());
     }
 
     @Test
