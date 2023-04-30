@@ -46,8 +46,8 @@ public class Timer {
      * PROBATION - испытательный срок 30 дней, устанавливается автоматически при связывании животного с пользователем,
      * а так же при продлении испытательного срока на срок указанный волонтером.
      */
-//    @Scheduled(cron = "0 16 05 * * *") // demo
-    @Scheduled(cron = "0 0 9-18/3 * * *")
+    @Scheduled(cron = "0 30 07 * * *") // demo
+//    @Scheduled(cron = "0 0 9-18/3 * * *")
     void checkAndChangeUsersStatus() {
 
         List<User> acceptedUsers = changeStateAcceptedToAdoptedAndCollect();
@@ -84,7 +84,7 @@ public class Timer {
             sendMessage(user.getTelegramId(),
                     String.format("Уважаемый %s %s Поздравляем, вы прошли пробный период!",
                             user.getName(), user.getSurname()));
-            userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getId(),
+            userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getTelegramId(),
                     String.format("Одобрение на усыновление подтверждено у %s %s.",
                             user.getName(), user.getSurname())));
 
@@ -103,7 +103,7 @@ public class Timer {
                     sendMessage(user.getTelegramId(),
                             String.format("Уважаемый %s %s Вы НЕ прошли пробный период! " +
                                     "Пожалуйста сдайте собаку в приют!", user.getName(), user.getSurname()));
-                    userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getId(),
+                    userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getTelegramId(),
                             String.format("Отказ подтвержден у %s %s.",
                                     user.getName(), user.getSurname())));
                 });
@@ -122,7 +122,7 @@ public class Timer {
                             "Уважаемый %s %s, мы решили продлить пробный период на %s дней!",
                             user.getName(), user.getSurname(),
                             Duration.between(user.getEndTest(), LocalDateTime.now()).toDays()));
-                    userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getId(),
+                    userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getTelegramId(),
                             String.format("Подтверждено продление у %s %s на %s дней!",
                                     user.getName(), user.getSurname(),
                                     Duration.between(user.getEndTest(), LocalDateTime.now()).toDays())));
@@ -131,12 +131,12 @@ public class Timer {
     }
 
     List<User> decisionMakingOfVolunteersAboutUsers() {
-        log.info("Проверяем статус пользователей со статусом PROBATION на DECISION");
-        List<User> decisionAboutUsers = userService.findByState(User.OwnerStateEnum.PROBATION).stream()
+        log.info("Проверяем статус пользователей со статусом PROBATION и DECISION");
+        List<User> decisionAboutUsers = new ArrayList<>(userService.findByState(User.OwnerStateEnum.PROBATION).stream()
                 .filter(user -> user.getEndTest().isBefore(LocalDateTime.now()))
-                .toList();
+                .toList());
 
-        userService.findByState(User.OwnerStateEnum.DECISION).addAll(decisionAboutUsers);
+       decisionAboutUsers.addAll(userService.findByState(User.OwnerStateEnum.DECISION));
 
         decisionAboutUsers.stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.DECISION))
@@ -146,7 +146,7 @@ public class Timer {
                                     " пожалуйста дождитесь принятия решения волонтером о вашем животном!",
                             user.getName(), user.getSurname()));
 
-                    userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getId(),
+                    userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getTelegramId(),
                             String.format("Принять решение об усыновлении" +
                                     " животного у %s %s.", user.getName(), user.getSurname())));
                 });
@@ -164,9 +164,9 @@ public class Timer {
                 peek(animal -> animal.setState(Animal.AnimalStateEnum.HAPPY_END)).toList();
     }
 
-//    @Scheduled(cron = "0 02 06 * * *") // demo
-    @Scheduled(cron = "0 0 8-20/4 * * *")
-// every 4 hours from 8 to 20 (cron = "0 40 21 * * *")
+    @Scheduled(cron = "0 02 06 * * *") // demo
+//    @Scheduled(cron = "0 0 8-21/4 * * *")
+// every 4 hours from 8 to 21 (cron = "0 40 21 * * *")
     void checkingDailyAndTwoDaysReportFromUsers() {
         log.info("Проверяем отчеты за день и за два дня от пользователей");
 
