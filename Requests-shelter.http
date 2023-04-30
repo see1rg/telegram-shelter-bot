@@ -26,7 +26,7 @@ POST http://localhost:8080/shelters?type=DOG
 Content-Type: application/json
 
 {
-  "id": 1,
+  "id": 2,
   "name": "Приют для собак",
   "type": "DOG",
   "address": "Адрес...",
@@ -44,5 +44,8 @@ Content-Type: application/json
   "rejectReasons": "Причины отклонения..."
 }
 
-### Assign Animal to Shelter
+### Assign Cat to Shelter
 PUT http://localhost:8080/shelters?shelterId=1&animalId=1
+
+### Assign Dog to Shelter
+PUT http://localhost:8080/shelters?shelterId=2&animalId=2
