@@ -17,5 +17,5 @@ public interface AnimalRepository extends JpaRepository<Animal, Long> {
 
     List<Animal> findAllByUserIdNotNullAndState(Animal.AnimalStateEnum inTest);
 
-    List<Animal> findByUserContainsOrderByState(User.OwnerStateEnum ownerStateEnum);
+    List<Animal> findAnimalsByUserState(User.OwnerStateEnum ownerStateEnum);
 }

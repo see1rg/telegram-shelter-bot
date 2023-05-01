@@ -150,7 +150,7 @@ public class AnimalService {
      */
     public List<Animal> findByUserState(User.OwnerStateEnum ownerStateEnum) {
         log.info("Finding animals by user state - " + ownerStateEnum);
-        return animalRepository.findByUserContainsOrderByState(ownerStateEnum);
+        return animalRepository.findAnimalsByUserState(ownerStateEnum);
     }
 
     /**

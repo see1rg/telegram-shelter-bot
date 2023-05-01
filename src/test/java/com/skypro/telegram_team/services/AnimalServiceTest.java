@@ -15,11 +15,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
@@ -139,10 +135,10 @@ public class AnimalServiceTest {
     @Test
     public void findByUserState() {
         List<Animal> expectedAnimals = List.of(expectedAnimal);
-        when(animalRepository.findByUserContainsOrderByState(any())).thenReturn(expectedAnimals);
+        when(animalRepository.findAnimalsByUserState(any())).thenReturn(expectedAnimals);
         List<Animal> actualAnimals = animalService.findByUserState(expectedAnimal.getUser().getState());
         assertEquals(expectedAnimals, actualAnimals);
-        verify(animalRepository, times(1)).findByUserContainsOrderByState(any());
+        verify(animalRepository, times(1)).findAnimalsByUserState(any());
     }
 
     @Test
