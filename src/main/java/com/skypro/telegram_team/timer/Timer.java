@@ -11,7 +11,6 @@ import com.skypro.telegram_team.services.ReportService;
 import com.skypro.telegram_team.services.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -30,8 +29,6 @@ public class Timer {
     private final AnimalService animalService;
     private final ReportService reportService;
     private final UserService userService;
-    @Value("${telegram.bot.support.chat}")
-    private Long supportChatId;
 
 
     /**
@@ -46,7 +43,8 @@ public class Timer {
      * PROBATION - испытательный срок 30 дней, устанавливается автоматически при связывании животного с пользователем,
      * а так же при продлении испытательного срока на срок указанный волонтером.
      */
-    @Scheduled(cron = "0 30 07 * * *") // demo
+    @Scheduled(cron = "0 50 11 * * *")
+    // demo
 //    @Scheduled(cron = "0 0 9-18/3 * * *")
     void checkAndChangeUsersStatus() {
 
@@ -136,7 +134,7 @@ public class Timer {
                 .filter(user -> user.getEndTest().isBefore(LocalDateTime.now()))
                 .toList());
 
-       decisionAboutUsers.addAll(userService.findByState(User.OwnerStateEnum.DECISION));
+        decisionAboutUsers.addAll(userService.findByState(User.OwnerStateEnum.DECISION));
 
         decisionAboutUsers.stream()
                 .peek(user -> user.setState(User.OwnerStateEnum.DECISION))
@@ -153,7 +151,6 @@ public class Timer {
         return decisionAboutUsers;
     }
 
-
     List<Animal> changeStateRefusedToInShelterListAndCollect() {
         return animalService.findByUserState(User.OwnerStateEnum.BLACKLIST).stream().
                 peek(animal -> animal.setState(Animal.AnimalStateEnum.IN_SHELTER)).toList();
@@ -164,7 +161,8 @@ public class Timer {
                 peek(animal -> animal.setState(Animal.AnimalStateEnum.HAPPY_END)).toList();
     }
 
-    @Scheduled(cron = "0 02 06 * * *") // demo
+    @Scheduled(cron = "0 02 06 * * *")
+        // demo
 //    @Scheduled(cron = "0 0 8-21/4 * * *")
 // every 4 hours from 8 to 21 (cron = "0 40 21 * * *")
     void checkingDailyAndTwoDaysReportFromUsers() {
@@ -181,10 +179,10 @@ public class Timer {
             User user = animal.getUser();
             int testDays = 30;
             List<Report> reports = reportService.findByAnimalId(animal.getId());
-            if (reports.size() == 0 && user.getEndTest().minusDays(testDays-1).isBefore(LocalDateTime.now())) {
+            if (reports.size() == 0 && user.getEndTest().minusDays(testDays - 1).isBefore(LocalDateTime.now())) {
                 usersWithoutDailyReport.add(user);
             }
-            if ((reports.size() == 0 && user.getEndTest().minusDays(testDays-2).isBefore(LocalDateTime.now())) ||
+            if ((reports.size() == 0 && user.getEndTest().minusDays(testDays - 2).isBefore(LocalDateTime.now())) ||
                     (reports.size() != 0 && reports.get(reports.size() - 1).getDate().isBefore(twoDaysAgo))) {
                 usersWithoutReportForTwoDays.add(user);
             } else if (reports.size() != 0 && !usersWithoutReportForTwoDays.contains(user) &&
@@ -194,11 +192,12 @@ public class Timer {
         });
 
         usersWithoutReportForTwoDays.forEach(user -> {
-                sendMessage(getVolunteerChatIdOrSupportChatId(),
-                        String.format("Последний отчет был принят более двух дней у : %s %s.",
-                                user.getName(), user.getSurname()));
-                sendMessage(user.getTelegramId(),
-                        "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");});
+            userService.findVolunteers().forEach(volunteer -> sendMessage(volunteer.getTelegramId(),
+                    String.format("Последний отчет был принят более двух дней у : %s %s.",
+                            user.getName(), user.getSurname())));
+            sendMessage(user.getTelegramId(),
+                    "Последний отчет был принят более двух дней! Пожалуйста, сдайте отчет.");
+        });
 
         usersWithoutDailyReport.forEach(user -> sendMessage(user.getTelegramId(),
                 "Здравствуйте, вчера от вас не поступал отчет о собаке. Пожалуйста, сдайте отчет."));
@@ -218,16 +217,4 @@ public class Timer {
                 .disableNotification(true);
         telegramBot.execute(request);
     }
-
-    /**
-     * Ищет любого волонтера в БД
-     *
-     * @return chatId волонтера или, в случае отсутствия отправляет {@link #supportChatId} службы поддержки
-     */
-    private long getVolunteerChatIdOrSupportChatId() {
-        return userService.findAnyVolunteer()
-                .map(User::getTelegramId)
-                .orElse(supportChatId);
-    }
-
 }
