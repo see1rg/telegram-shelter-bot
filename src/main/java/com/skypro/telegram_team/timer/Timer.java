@@ -43,9 +43,8 @@ public class Timer {
      * PROBATION - испытательный срок 30 дней, устанавливается автоматически при связывании животного с пользователем,
      * а так же при продлении испытательного срока на срок указанный волонтером.
      */
-    @Scheduled(cron = "0 50 11 * * *")
-    // demo
-//    @Scheduled(cron = "0 0 9-18/3 * * *")
+//    @Scheduled(cron = "0 32 13 * * *")// demo
+    @Scheduled(cron = "0 0 9-18/3 * * *")
     void checkAndChangeUsersStatus() {
 
         List<User> acceptedUsers = changeStateAcceptedToAdoptedAndCollect();
@@ -161,9 +160,8 @@ public class Timer {
                 peek(animal -> animal.setState(Animal.AnimalStateEnum.HAPPY_END)).toList();
     }
 
-    @Scheduled(cron = "0 02 06 * * *")
-        // demo
-//    @Scheduled(cron = "0 0 8-21/4 * * *")
+//    @Scheduled(cron = "0 02 06 * * *")// demo
+    @Scheduled(cron = "0 0 8-21/4 * * *")
 // every 4 hours from 8 to 21 (cron = "0 40 21 * * *")
     void checkingDailyAndTwoDaysReportFromUsers() {
         log.info("Проверяем отчеты за день и за два дня от пользователей");
