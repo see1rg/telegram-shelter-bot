@@ -15,7 +15,7 @@ POST http://localhost:8080/animals?type=DOG
 Content-Type: application/json
 
 {
-  "id": 1,
+  "id": 2,
   "name": "Вайфай",
   "breed": "",
   "description": "",

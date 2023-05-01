@@ -64,10 +64,22 @@ public class TelegramBotListenerUtil {
         return user;
     }
 
+    public static User mockVolunteer() {
+        User user = new User();
+        user.setId(2L);
+        user.setTelegramId(12L);
+        user.setName("name");
+        user.setSurname("surname");
+        user.setShelter(mockShelter());
+        user.setVolunteer(true);
+        return user;
+    }
+
     public static Shelter mockShelter() {
         Shelter shelter = new Shelter();
         shelter.setId(1L);
         shelter.setType(Animal.TypeAnimal.DOG);
+        shelter.setName("Dogs");
         shelter.setAddress("address");
         shelter.setSchedule("schedule");
         shelter.setScheme("scheme");
