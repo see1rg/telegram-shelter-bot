@@ -26,13 +26,19 @@ public class User {
     private String surname;
     private String phone;
     private String email;
-    private int daysForTest;
+    @JsonIgnore
+    private Long daysForTest;
     private LocalDateTime endTest;
 
     @OneToOne
     @JoinColumn(name = "animal_id", referencedColumnName = "id")
     @JsonIgnore
     private Animal animal;
+
+    @OneToOne
+    @JoinColumn(name = "shelter_id", referencedColumnName = "id")
+    @JsonIgnore
+    private Shelter shelter;
 
     @Enumerated(EnumType.STRING)
     private OwnerStateEnum state;

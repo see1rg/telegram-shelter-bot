@@ -1,0 +1,51 @@
+### Create Cat Shelter
+POST http://localhost:8080/shelters?type=CAT
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Приют для кошек",
+  "type": "CAT",
+  "address": "Адрес...",
+  "schedule": "Режим работы...",
+  "scheme": "Схема проезда...",
+  "safety": "Будьте осторожны...",
+  "docs": "Документы...",
+  "rules": "Правила...",
+  "arrangements": "Рекомендации...",
+  "arrangementsForPuppy": "Рекомендации...",
+  "arrangementsForCripple": "Рекомендации...",
+  "movement": "Перевозка...",
+  "expertAdvicesFirst": "Советы эксперта...",
+  "expertAdvicesNext": "Советы эксперта...",
+  "rejectReasons": "Причины отклонения..."
+}
+
+### Create Dog Shelter
+POST http://localhost:8080/shelters?type=DOG
+Content-Type: application/json
+
+{
+  "id": 2,
+  "name": "Приют для собак",
+  "type": "DOG",
+  "address": "Адрес...",
+  "schedule": "Режим работы...",
+  "scheme": "Схема проезда...",
+  "safety": "Будьте осторожны...",
+  "docs": "Документы...",
+  "rules": "Правила...",
+  "arrangements": "Рекомендации...",
+  "arrangementsForPuppy": "Рекомендации...",
+  "arrangementsForCripple": "Рекомендации...",
+  "movement": "Перевозка...",
+  "expertAdvicesFirst": "Советы кинологов...",
+  "expertAdvicesNext": "Советы кинологов...",
+  "rejectReasons": "Причины отклонения..."
+}
+
+### Assign Cat to Shelter
+PUT http://localhost:8080/shelters?shelterId=1&animalId=1
+
+### Assign Dog to Shelter
+PUT http://localhost:8080/shelters?shelterId=2&animalId=2

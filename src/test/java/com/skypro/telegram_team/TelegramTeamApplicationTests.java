@@ -1,6 +1,5 @@
 package com.skypro.telegram_team;
 
-import org.apache.catalina.core.ApplicationContext;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

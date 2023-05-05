@@ -1,0 +1,2 @@
+### Assign Cat to User
+POST http://localhost:8080/users/join?animalId=1&userId=1

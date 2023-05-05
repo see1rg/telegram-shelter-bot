@@ -1,16 +1,14 @@
-package com.skypro.telegram_team;
+package com.skypro.telegram_team.controllers;
 
-import com.skypro.telegram_team.controllers.AnimalController;
-import com.skypro.telegram_team.controllers.ReportController;
-import com.skypro.telegram_team.controllers.UserController;
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Dog;
 import com.skypro.telegram_team.models.Report;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.repositories.ReportRepository;
+import com.skypro.telegram_team.repositories.ShelterRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
 import com.skypro.telegram_team.services.ReportService;
+import com.skypro.telegram_team.services.ShelterService;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,10 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -30,8 +31,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest
 public class ReportControllerTest {
@@ -43,20 +43,26 @@ public class ReportControllerTest {
     private AnimalController animalController;
     @MockBean
     private UserController userController;
+    @MockBean
+    private ShelterController shelterController;
     @SpyBean
     private ReportService reportService;
+    @SpyBean
+    private ShelterService shelterService;
     @MockBean
     private ReportRepository reportRepository;
     @MockBean
     private UserRepository userRepository;
     @MockBean
     private AnimalRepository animalRepository;
+    @MockBean
+    private ShelterRepository shelterRepository;
     private final Report report = new Report();
     private final JSONObject jsonReport = new JSONObject();
     private final JSONObject jsonAnimal = new JSONObject();
     private final JSONObject jsonUser = new JSONObject();
     private final User user = new User();
-    private final Animal animal = new Dog();
+    private final Animal animal = new Animal();
 
     @BeforeEach
     public void setup() throws Exception {
@@ -98,22 +104,22 @@ public class ReportControllerTest {
         when(reportRepository.save(any())).thenReturn(report);
     }
 
-//    @Test
-//    public void findReportById() throws Exception {
-//        mockMvc.perform(MockMvcRequestBuilders.get("/reports/" + report.getId()))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.diet").value(report.getDiet()))
-//                .andExpect(jsonPath("$.id").value(report.getId()))
-//                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
-//                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
-//                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
-//                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
-//                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
-//                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
-//                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
-//                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
-//                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
-//    }
+    @Test
+    public void findReportById() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/reports/" + report.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.diet").value(report.getDiet()))
+                .andExpect(jsonPath("$.id").value(report.getId()))
+                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
+                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
+                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
+                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
+                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
+                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
+                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
+                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
+                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
+    }
 
     @Test
     public void deleteById() throws Exception {
@@ -138,42 +144,57 @@ public class ReportControllerTest {
                 .andExpect(jsonPath("$[0].animal.state").value(report.getAnimal().getState().toString()));
     }
 
-//    @Test
-//    public void createReport() throws Exception {
-//        mockMvc.perform(MockMvcRequestBuilders.post("/reports")
-//                        .content(jsonReport.toString())
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.diet").value(report.getDiet()))
-//                .andExpect(jsonPath("$.id").value(report.getId()))
-//                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
-//                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
-//                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
-//                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
-//                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
-//                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
-//                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
-//                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
-//                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
-//    }
+    @Test
+    public void createReport() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/reports")
+                        .content(jsonReport.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.diet").value(report.getDiet()))
+                .andExpect(jsonPath("$.id").value(report.getId()))
+                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
+                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
+                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
+                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
+                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
+                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
+                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
+                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
+                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
+    }
 
-//    @Test
-//    public void updateReport() throws Exception {
-//        mockMvc.perform(MockMvcRequestBuilders.put("/reports/" + report.getId())
-//                        .content(jsonReport.toString())
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.diet").value(report.getDiet()))
-//                .andExpect(jsonPath("$.id").value(report.getId()))
-//                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
-//                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
-//                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
-//                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
-//                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
-//                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
-//                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
-//                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
-//                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
-//    }
+    @Test
+    public void updateReport() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.put("/reports/" + report.getId())
+                        .content(jsonReport.toString())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.diet").value(report.getDiet()))
+                .andExpect(jsonPath("$.id").value(report.getId()))
+                .andExpect(jsonPath("$.wellBeing").value(report.getWellBeing()))
+                .andExpect(jsonPath("$.date").value(report.getDate().toString()))
+                .andExpect(jsonPath("$.changeBehavior").value(report.getChangeBehavior()))
+                .andExpect(jsonPath("$.user.id").value(report.getUser().getId()))
+                .andExpect(jsonPath("$.user.telegramId").value(report.getUser().getTelegramId()))
+                .andExpect(jsonPath("$.user.state").value(report.getUser().getState().toString()))
+                .andExpect(jsonPath("$.animal.id").value(report.getAnimal().getId()))
+                .andExpect(jsonPath("$.animal.name").value(report.getAnimal().getName()))
+                .andExpect(jsonPath("$.animal.state").value(report.getAnimal().getState().toString()));
+    }
+
+    @Test
+    public void photoDownload() throws Exception {
+        //Given
+        Resource resource = new ClassPathResource("photo/cat.jpeg");
+        byte[] photo = Files.readAllBytes(resource.getFile().toPath());
+        Report expected = new Report();
+        expected.setId(1L);
+        expected.setPhoto(photo);
+        //When
+        when(reportRepository.findById(1L)).thenReturn(Optional.of(expected));
+        //Then
+        mockMvc.perform(MockMvcRequestBuilders.get("/reports/1/photo"))
+                .andExpect(status().isOk())
+                .andExpect(content().bytes(expected.getPhoto()));
+    }
 }

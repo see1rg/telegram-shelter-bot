@@ -136,4 +136,77 @@ ALTER TABLE reports
     ADD COLUMN cat_id BIGINT REFERENCES cats(id),
     ADD COLUMN dog_id BIGINT REFERENCES dogs(id);
 
+-- changeSet 11th:7
+CREATE TABLE IF NOT EXISTS shelters
+(
+    id                       BIGSERIAL PRIMARY KEY NOT NULL,
+    name                     VARCHAR(50)           NOT NULL,
+    type                     VARCHAR(10),
+    address                  VARCHAR(100),
+    schedule                 VARCHAR(100),
+    scheme                   VARCHAR(100),
+    safety                   TEXT,
+    docs                     TEXT,
+    rules                    TEXT,
+    arrangements             TEXT,
+    arrangements_for_puppy   TEXT,
+    arrangements_for_cripple TEXT,
+    movement                 TEXT,
+    expert_advices_first     TEXT,
+    expert_advices_next      TEXT,
+    reject_reasons           TEXT
+);
+
+ALTER TABLE users
+    ADD COLUMN shelter_id BIGINT REFERENCES shelters(id);
+
+ALTER TABLE animals
+    ADD COLUMN shelter_id BIGINT REFERENCES shelters(id);
+
+-- changeSet slyubimov:8
+ALTER TABLE reports
+    DROP COLUMN dog_id,
+    DROP COLUMN cat_id;
+
+-- changSet slyubimov:9
+ALTER TABLE animals
+    ADD COLUMN type VARCHAR(10);
+
+-- changSet slyubimov:10
+DROP TABLE dogs;
+DROP TABLE cats;
+DROP TABLE hibernate_sequences;
+
+-- changSet slyubimov:11
+CREATE TABLE IF NOT EXISTS photo
+(
+    id                       BIGSERIAL PRIMARY KEY NOT NULL,
+    file_path VARCHAR(30),
+    file_size BIGINT,
+    media_type TEXT,
+    preview OID,
+    animal_id BIGINT REFERENCES animals(id)
+);
+
+-- changSet slyubimov:12
+ALTER TABLE users
+    DROP COLUMN days_for_test,
+ADD COLUMN days_for_test BIGINT;
+
+-- changSet slyubimov:13
+DROP TABLE photo;
+
+-- changeSet 11th:8
+ALTER TABLE animals
+    DROP COLUMN photo;
+
+ALTER TABLE animals
+    ADD COLUMN photo BYTEA;
+
+-- changeSet 11th:9
+ALTER TABLE reports
+    DROP COLUMN photo;
+
+ALTER TABLE reports
+    ADD COLUMN photo BYTEA;
 

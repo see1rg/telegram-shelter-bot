@@ -1,9 +1,11 @@
 package com.skypro.telegram_team.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -26,6 +28,8 @@ public class Report {
     private LocalDateTime date;
 
     @Lob
+    @Type(type = "org.hibernate.type.ImageType")
+    @JsonIgnore
     private byte[] photo;
 
     @OneToOne
@@ -35,14 +39,6 @@ public class Report {
     @ManyToOne
     @PrimaryKeyJoinColumn(name = "animal_id", referencedColumnName = "id")
     private Animal animal;
-
-    @ManyToOne
-    @JoinColumn(name = "cat_id")
-    private Cat cat;
-
-    @ManyToOne
-    @JoinColumn(name = "dog_id")
-    private Dog dog;
 
     @Override
     public boolean equals(Object o) {

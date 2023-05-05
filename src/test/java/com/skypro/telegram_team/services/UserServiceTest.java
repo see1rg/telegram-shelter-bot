@@ -2,8 +2,7 @@ package com.skypro.telegram_team.services;
 
 import com.skypro.telegram_team.exceptions.InvalidDataException;
 import com.skypro.telegram_team.models.Animal;
-import com.skypro.telegram_team.models.Cat;
-import com.skypro.telegram_team.models.Dog;
+import com.skypro.telegram_team.models.Shelter;
 import com.skypro.telegram_team.models.User;
 import com.skypro.telegram_team.repositories.AnimalRepository;
 import com.skypro.telegram_team.repositories.UserRepository;
@@ -15,13 +14,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -40,6 +41,7 @@ public class UserServiceTest {
         expectedUser.setTelegramId(111L);
         expectedUser.setName("dima");
         expectedUser.setState(User.OwnerStateEnum.PROBATION);
+        expectedUser.setEndTest(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
     }
 
     @Test
@@ -47,6 +49,7 @@ public class UserServiceTest {
         when(userRepository.save(any())).thenReturn(expectedUser);
         User actualUser = userService.create(expectedUser);
         assertEquals(expectedUser, actualUser);
+        verify(userRepository, times(1)).save(any());
     }
 
     @Test
@@ -54,6 +57,7 @@ public class UserServiceTest {
         when(userRepository.findById(any())).thenReturn(Optional.ofNullable(expectedUser));
         User actualUser = userService.findById(expectedUser.getId());
         assertEquals(expectedUser, actualUser);
+        verify(userRepository, times(1)).findById(any());
     }
 
     @Test
@@ -61,6 +65,7 @@ public class UserServiceTest {
         when(userRepository.findById(any())).thenReturn(Optional.ofNullable(expectedUser));
         User actualUser = userService.deleteById(expectedUser.getId());
         assertEquals(expectedUser, actualUser);
+        verify(userRepository, times(1)).findById(any());
     }
 
     @Test
@@ -78,6 +83,8 @@ public class UserServiceTest {
         assertEquals(actualUser.getId(), userInDB.getId());
         assertEquals(actualUser.getName(), updatedUser.getName());
         assertEquals(actualUser.getTelegramId(), updatedUser.getTelegramId());
+        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).findById(any());
     }
 
     @Test
@@ -88,6 +95,7 @@ public class UserServiceTest {
         when(userRepository.findAll()).thenReturn(List.of(user1, user2, user3));
         List<User> allUsers = userService.findAll();
         assertTrue(allUsers.size() != 0);
+        verify(userRepository, times(1)).findAll();
     }
 
     @Test
@@ -96,6 +104,8 @@ public class UserServiceTest {
         when(userRepository.save(any())).thenReturn(expectedUser);
         User actualUser = userService.userIsVolunteer(expectedUser.getId(), true);
         assertTrue(actualUser.isVolunteer());
+        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(2)).findById(any());
     }
 
     @Test
@@ -104,18 +114,18 @@ public class UserServiceTest {
         when(userRepository.findByState(any())).thenReturn(expectedUsers);
         List<User> actualUsers = userService.findByState(expectedUser.getState());
         assertEquals(expectedUsers, actualUsers);
+        verify(userRepository, times(1)).findByState(any());
     }
 
-    //нужны еще тесты
     @Test
     public void findVolunteers() {
         List<User> expectedUsers = List.of(expectedUser);
         when(userRepository.findByVolunteerTrue()).thenReturn(expectedUsers);
         Collection<User> actualUsers = userService.findVolunteers();
         assertEquals(expectedUsers, actualUsers);
+        verify(userRepository, times(1)).findByVolunteerTrue();
     }
 
-    //нужны еще тесты
     @Test
     public void findAnyVolunteer() {
         List<User> expectedUsers = List.of(expectedUser);
@@ -123,6 +133,7 @@ public class UserServiceTest {
         Optional<User> anyVolunteer = userService.findAnyVolunteer();
         assertTrue(anyVolunteer.isPresent());
         assertEquals(anyVolunteer.get().getId(), expectedUser.getId());
+        verify(userRepository, times(1)).findByVolunteerTrue();
     }
 
     @Test
@@ -131,12 +142,15 @@ public class UserServiceTest {
         when(userRepository.findByTelegramId(any())).thenReturn(expectedUsers);
         User actualUser = userService.findByTelegramId(expectedUser.getTelegramId());
         assertEquals(expectedUsers.get(0), actualUser);
+        verify(userRepository, times(1)).findByTelegramId(any());
     }
 
     @Test
     public void joinAnimalAndUser() {
-        Animal animal = new Dog();
+        Animal animal = new Animal();
         animal.setId(1L);
+        Shelter shelter = new Shelter();
+        animal.setShelter(shelter);
         when(userRepository.findById(any())).thenReturn(Optional.ofNullable(expectedUser));
         when(userRepository.save(any())).thenReturn(expectedUser);
         when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
@@ -144,6 +158,24 @@ public class UserServiceTest {
         userService.joinAnimalAndUser(animal.getId(), expectedUser.getId());
         assertEquals(expectedUser.getAnimal().getId(), animal.getId());
         assertEquals(animal.getUser().getId(), expectedUser.getId());
+        verify(userRepository, times(1)).save(any());
+        verify(animalRepository, times(1)).save(any());
+        verify(userRepository, times(2)).findById(any());
+        verify(animalRepository, times(2)).findById(any());
+    }
+
+    @Test
+    public void updateState() {
+        when(userRepository.findById(any())).thenReturn(Optional.ofNullable(expectedUser));
+        when(userRepository.save(any())).thenReturn(expectedUser);
+        User.OwnerStateEnum newState = User.OwnerStateEnum.BLACKLIST;
+        Long newDaysForTest = 10L;
+        LocalDateTime localDateTime = expectedUser.getEndTest().plusDays(newDaysForTest);
+        User actualUser = userService.updateState(expectedUser.getId(), newState, newDaysForTest);
+        assertEquals(newState, actualUser.getState());
+        assertEquals(localDateTime, actualUser.getEndTest().truncatedTo(ChronoUnit.MINUTES));
+        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(2)).findById(any());
     }
 
     @Test
@@ -201,10 +233,31 @@ public class UserServiceTest {
 
     @Test
     public void shouldThrowsEntityNotFoundExceptionWhenRunMethodJoinAnimalAndUser() {
-        Animal animal = new Cat();
+        Animal animal = new Animal();
         when(animalRepository.findById(any())).thenReturn(Optional.of(animal));
         when(userRepository.findById(any())).thenReturn(Optional.empty());
         assertThrows(EntityNotFoundException.class,
                 () -> userService.joinAnimalAndUser(animal.getId(), expectedUser.getId()));
+    }
+
+    @Test
+    public void shouldThrowsIllegalArgumentExceptionWhenRunMethodSetUpdate() {
+        User userForTest = new User();
+        userForTest.setState(User.OwnerStateEnum.PROLONGED);
+        userForTest.setId(100L);
+        assertThrows(IllegalArgumentException.class,
+                () -> userService.updateState(userForTest.getId(), userForTest.getState(), null));
+    }
+
+    @Test
+    public void shouldThrowsIllegalArgumentExceptionWhenMethodUpdateStateRunsWhereDaysForTestIsZero() {
+        User updatedUser = new User();
+        updatedUser.setId(1L);
+        updatedUser.setName("dima");
+        updatedUser.setTelegramId(100L);
+        updatedUser.setState(User.OwnerStateEnum.PROLONGED);
+        Long daysForTest = 0L;
+        assertThrows(IllegalArgumentException.class, () -> userService
+                .updateState(updatedUser.getId(), updatedUser.getState(), daysForTest));
     }
 }

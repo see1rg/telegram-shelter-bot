@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Arrays;
@@ -14,10 +15,9 @@ import java.util.Objects;
 @Setter
 @Table(name = "animals")
 @Entity
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
-public abstract class Animal {
+public class Animal {
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private long id;
     @Column(nullable = false)
@@ -25,19 +25,31 @@ public abstract class Animal {
     private String breed;
     private String description;
 
-
-
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @JsonIgnore
     private User user;
 
+    @OneToOne
+    @JoinColumn(name = "shelter_id", referencedColumnName = "id")
+    @JsonIgnore
+    private Shelter shelter;
+
     @Lob
     @JsonIgnore
+    @Type(type = "org.hibernate.type.ImageType")
     private byte[] photo;
 
     @Enumerated(EnumType.STRING)
     private AnimalStateEnum state;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TypeAnimal type;
+
+    public enum TypeAnimal {
+        DOG, CAT
+    }
 
     public enum AnimalStateEnum {
         IN_SHELTER, IN_TEST, HAPPY_END
